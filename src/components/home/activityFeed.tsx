@@ -86,7 +86,7 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   };
 
   return (
-    <div className="flex items-start space-x-3 mb-4 p-3 bg-white rounded-lg shadow-sm">
+    <div className="flex items-start space-x-3 p-3 bg-white border-b">
       <img
         src="/temp/profile.webp"
         alt={activity.offerFrom}
@@ -121,13 +121,13 @@ const ActivityFeed: React.FC = () => {
 
   return (
     <div
-      className={`border-l border-gray-200 hidden md:flex flex-col ${
+      className={`border-l border-gray-200 hidden lg:flex flex-col ${
         feedCollapsed ? "w-12" : "w-[400px]"
       } bg-gray-100 transition-all duration-300 ease-in-out shrink-0`}
     >
       <div className="flex-grow overflow-hidden">
         {!feedCollapsed && (
-          <div className="p-4">
+          <div className="">
             <div className="text-xl font-bold mb-4 text-center">
               🤝 Latest Offers
             </div>

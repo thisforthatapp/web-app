@@ -30,7 +30,7 @@ const Grid: FC<PinterestGridProps> = ({ items }) => {
 
   return (
     <>
-      <div className="p-5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+      <div className="p-5 grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
         {items.map((item) => (
           <Link
             href="/nft/1/1/1"
