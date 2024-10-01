@@ -28,7 +28,7 @@ export const usePinnedImages = () => {
   return context;
 };
 
-export const PinBarProvider: React.FC<{ children: ReactNode }> = ({
+export const PinbarProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);

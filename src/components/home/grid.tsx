@@ -2,22 +2,13 @@ import { FC, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePinnedImages } from "@/providers/pinbar";
-import { Options, VerifiedBadge } from "@/components";
+import { Pinbar, Filter, Options, VerifiedBadge } from "@/components";
 import { Offer } from "@/components/modals";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Pin, Verified } from "@/icons";
+import { Pin } from "@/icons";
 
-interface GridItem {
-  id: number;
-  imageUrl: string;
-  title: string;
-}
+import tempGridData from "@/temp/homeGrid.json";
 
-interface PinterestGridProps {
-  items: GridItem[];
-}
-
-const Grid: FC<PinterestGridProps> = ({ items }) => {
+const Grid: FC = () => {
   const router = useRouter();
   const { pinImage } = usePinnedImages();
   const [dealModalOpen, setDealModalOpen] = useState(false);
@@ -29,9 +20,15 @@ const Grid: FC<PinterestGridProps> = ({ items }) => {
   };
 
   return (
-    <>
-      <div className="p-5 grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-        {items.map((item) => (
+    <div className="w-full overflow-y-auto hide-scrollbar">
+      <div className="flex items-center px-6 pt-4 gap-x-3 w-full">
+        <Pinbar />
+        <div className="ml-auto">
+          <Filter onFilterChange={() => {}} />
+        </div>
+      </div>
+      <div className="p-5 grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
+        {tempGridData.gridItems.map((item) => (
           <Link
             href="/nft/1/1/1"
             key={item.id}
@@ -115,7 +112,7 @@ const Grid: FC<PinterestGridProps> = ({ items }) => {
           )}
         </>
       )}
-    </>
+    </div>
   );
 };
 

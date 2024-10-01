@@ -143,6 +143,12 @@ const Wallet: React.FC<Props> = ({ closeModal }) => {
             >
               Verify my NFTs
             </button>
+            <button
+              onClick={() => handleActionSelect("verify")}
+              className="w-full py-2 px-4 bg-purple-500 text-white rounded hover:bg-green-600 transition duration-200"
+            >
+              Make An Offer
+            </button>
           </div>
         );
       case 1:

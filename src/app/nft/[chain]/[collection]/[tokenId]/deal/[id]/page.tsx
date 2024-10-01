@@ -2,7 +2,6 @@
 
 import { FC } from "react";
 import { useRouter } from "next/navigation";
-import { Navbar } from "@/components";
 import NFTComponent from "@/components/nft";
 import { Deal } from "@/components/modals";
 
@@ -17,8 +16,7 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
   console.log(params);
 
   return (
-    <div className="h-screen flex items-center justify-center flex-col">
-      <Navbar />
+    <>
       <NFTComponent />
       <Deal
         itemId={""}
@@ -26,7 +24,7 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
           router.push("/nft/1/1/1");
         }}
       />
-    </div>
+    </>
   );
 };
 

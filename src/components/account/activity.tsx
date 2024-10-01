@@ -3,6 +3,7 @@
 import { FC, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuthState } from "@/hooks";
 import { AccountSidebar } from "@/components/shared";
 import { Options, VerifiedBadge } from "@/components";
 import { Pin } from "@/icons";
@@ -23,8 +24,9 @@ interface InterestedNFT {
 type ActivityType = "deals" | "interested";
 
 const AccountActivityPage: FC = () => {
-  const [activeTab, setActiveTab] = useState<ActivityType>("deals");
+  const { user, loading } = useAuthState();
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<ActivityType>("deals");
 
   // Mock data - replace with actual data fetching in production
   const deals: Deal[] = [
@@ -184,6 +186,10 @@ const AccountActivityPage: FC = () => {
         );
     }
   };
+
+  if (!user && !loading) {
+    router.push("/");
+  }
 
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex">

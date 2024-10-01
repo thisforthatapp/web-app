@@ -1,6 +1,7 @@
 import { FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { supabase } from "@/utils/supabaseClient";
 
 const AccountSidebar: FC = () => {
   const pathname = usePathname();
@@ -34,8 +35,13 @@ const AccountSidebar: FC = () => {
       >
         View My Public Profile
       </Link>
-      <button className="mt-4 w-full bg-red-500 text-white p-2 rounded">
-        Sign Out
+      <button
+        className="mt-4 w-full bg-red-500 text-white p-2 rounded"
+        onClick={async () => {
+          await supabase.auth.signOut();
+        }}
+      >
+        Logout
       </button>
     </div>
   );

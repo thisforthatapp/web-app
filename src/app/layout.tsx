@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { PinBarProvider } from "@/providers/pinbar";
+import { PinbarProvider } from "@/providers/pinbar";
+import { Navbar } from "@/components";
 
 export const metadata: Metadata = {
   title: "TFT - Swap NFTS for NFTs",
@@ -16,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <PinBarProvider>{children}</PinBarProvider>
+        <PinbarProvider>
+          <div className="h-screen flex items-center justify-center flex-col">
+            <Navbar />
+            {children}
+          </div>
+        </PinbarProvider>
       </body>
     </html>
   );

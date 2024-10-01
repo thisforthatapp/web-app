@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Pin } from "@/icons";
 import { usePinnedImages } from "@/providers/pinbar";
 
-const PinBar: React.FC = () => {
+const Pinbar: React.FC = () => {
   const { pinnedIds, unpinImage } = usePinnedImages();
 
   console.log("pinnedIds", pinnedIds);
@@ -35,4 +35,4 @@ const PinBar: React.FC = () => {
   );
 };
 
-export default PinBar;
+export default Pinbar;

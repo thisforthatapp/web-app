@@ -103,11 +103,11 @@ const NotificationDropdown = () => {
         className="h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center"
       >
         <Notifications className="w-[22px] h-[22px]" />
-        {notifications.length > 0 && (
+        {/* {notifications.length > 0 && (
           <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
             {notifications.length}
           </span>
-        )}
+        )} */}
       </button>
 
       {isOpen && (
