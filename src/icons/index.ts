@@ -12,3 +12,5 @@ export { default as Notifications } from "./notifications";
 export { default as Back } from "./back";
 export { default as Checkmark } from "./checkmark";
 export { default as Login } from "./login";
+export { default as Search } from "./search";
+export { default as Hamburger } from "./hamburger";

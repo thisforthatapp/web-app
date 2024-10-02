@@ -14,6 +14,10 @@ export const getModalStyles = (isMobile: boolean) => ({
     borderRadius: isMobile ? "0" : "15px",
     transform: isMobile ? "none" : "translate(-50%, -50%)",
     border: "none",
+    padding: 0,
+    display: "flex",
+    flexDirection: "column",
+    maxHeight: isMobile ? "100%" : "90%",
   },
   overlay: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",

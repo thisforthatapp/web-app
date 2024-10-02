@@ -1,56 +1,89 @@
 import { useState, useEffect } from "react";
-import { User, AuthError, AuthChangeEvent } from "@supabase/supabase-js";
+import { User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabaseClient";
+
+interface UserProfile {
+  id: string;
+  // Add other profile fields here
+}
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   error: AuthError | null;
+  hasProfile: boolean | null;
+  profile: UserProfile | null;
 }
 
-const useAuthState = (): AuthState => {
+interface UseAuthStateOptions {
+  checkProfile?: boolean;
+}
+
+const useAuthState = (options: UseAuthStateOptions = {}): AuthState => {
   const [state, setState] = useState<AuthState>({
     user: null,
     loading: true,
     error: null,
+    hasProfile: null,
+    profile: null,
   });
 
   useEffect(() => {
-    const getCurrentUser = async () => {
+    const checkUserProfile = async (user: User) => {
       try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
+        const { data, error, count } = await supabase
+          .from("user_profile")
+          .select("*", { count: "exact" })
+          .eq("id", user.id)
+          .single();
+
         if (error) throw error;
-        setState((prev) => ({ ...prev, user, loading: false }));
-      } catch (error) {
+
         setState((prev) => ({
           ...prev,
-          error: error as AuthError,
+          hasProfile: count !== 0,
+          profile: count !== 0 ? (data as UserProfile) : null,
           loading: false,
+        }));
+      } catch (error) {
+        console.error("Error checking user profile:", error);
+        setState((prev) => ({
+          ...prev,
+          hasProfile: false,
+          profile: null,
+          loading: false,
+          error: error as AuthError,
         }));
       }
     };
 
-    getCurrentUser();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user || null;
+      setState((prev) => ({
+        ...prev,
+        user,
+        loading: !!user && !!options.checkProfile,
+      }));
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session) => {
+      if (user && options.checkProfile) {
+        checkUserProfile(user);
+      } else {
         setState((prev) => ({
           ...prev,
-          user: session?.user ?? null,
+          user,
+          hasProfile: null,
+          profile: null,
           loading: false,
         }));
       }
-    );
+    });
 
     return () => {
-      if (authListener && authListener.subscription) {
-        authListener.subscription.unsubscribe();
-      }
+      subscription.unsubscribe();
     };
-  }, []);
+  }, [options.checkProfile]);
 
   return state;
 };

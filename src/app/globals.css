@@ -20,3 +20,11 @@ body {
   -ms-overflow-style: none; /* for Internet Explorer and Edge */
   scrollbar-width: none; /* for Firefox */
 }
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2; /* Limit text to 2 lines */
+}

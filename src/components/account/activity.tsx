@@ -24,7 +24,7 @@ interface InterestedNFT {
 type ActivityType = "deals" | "interested";
 
 const AccountActivityPage: FC = () => {
-  const { user, loading } = useAuthState();
+  const { user, loading } = useAuthState({ checkProfile: false });
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActivityType>("deals");
 

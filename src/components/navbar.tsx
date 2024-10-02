@@ -1,24 +1,35 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuthState, useIsMobile } from "@/hooks";
 import { NotificationDropdown } from "@/components";
 import {
   Wallet as WalletModal,
   Login as LoginModal,
+  Onboard as OnboardModal,
 } from "@/components/modals";
-import { Wallet, User, Login } from "@/icons";
+import { Wallet, User, Login, Search, Hamburger } from "@/icons";
 
 const Navbar: FC = () => {
-  const { user, loading } = useAuthState();
-  const [modal, setModal] = useState<boolean | "login" | "wallet" | "add">(
-    false
-  );
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, hasProfile, loading } = useAuthState();
   const isMobile = useIsMobile();
+  const [modal, setModal] = useState<
+    boolean | "login" | "onboard" | "wallet" | "add"
+  >(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  useEffect(() => {
+    if (user && !hasProfile) {
+      setModal("onboard");
+    }
+  }, [user, hasProfile]);
+
+  console.log("user", user);
+  console.log("loading", loading);
+  console.log("hasProfile", hasProfile);
 
   const renderButtons = () => (
     <>
@@ -66,39 +77,13 @@ const Navbar: FC = () => {
               className="w-full px-4 h-[44px] pl-10 pr-4 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <Search />
             </div>
           </div>
         </div>
         {isMobile ? (
           <button onClick={toggleMenu} className="p-2">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16m-7 6h7"
-              />
-            </svg>
+            <Hamburger className="w-8" />
           </button>
         ) : (
           <div className="flex gap-x-2 h-[44px] relative mr-2">
@@ -113,6 +98,9 @@ const Navbar: FC = () => {
       )}
       {modal === "wallet" && <WalletModal closeModal={() => setModal(false)} />}
       {modal === "login" && <LoginModal closeModal={() => setModal(false)} />}
+      {modal === "onboard" && (
+        <OnboardModal closeModal={() => setModal(false)} />
+      )}
     </>
   );
 };
