@@ -214,9 +214,9 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
             <div className="uppercase tracking-wide text-sm text-indigo-500 font-bold mb-1">
               Step {step} of 2
             </div>
-            <h2 className="mt-1 leading-tight text-black">
+            <div className="mt-1 leading-tight text-black">
               {step === 1 ? "Create Your Profile" : "Add Your NFTs"}
-            </h2>
+            </div>
           </div>
 
           {step === 1 && (

@@ -123,7 +123,7 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
   const toggleFeed = () => setFeedCollapsed(!feedCollapsed);
 
   const desktopStyle = `border-l border-gray-200 hidden lg:flex flex-col ${
-    feedCollapsed ? "w-12" : "w-[400px]"
+    feedCollapsed ? "w-12" : "w-[460px]"
   } bg-gray-100 transition-all duration-300 ease-in-out shrink-0`;
   const mobileStyle = `h-full`;
 

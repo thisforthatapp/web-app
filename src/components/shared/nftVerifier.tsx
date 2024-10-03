@@ -1,10 +1,10 @@
 // TODO: Continue from here
 
 import React, { useState, useEffect } from "react";
-import { useAccount, useSignMessage, useNetwork } from "wagmi";
+import { useAccount, useSignMessage /*useChains*/ } from "wagmi";
 import { verifyMessage } from "viem";
-import { supabase } from "@/lib/supabaseClient"; // Adjust import path as needed
-import { Verified, ArrowLeft, ChevronRight } from "@/icons"; // Adjust import path as needed
+import { supabase } from "@/utils/supabaseClient";
+// import { Verified, ArrowLeft, ChevronRight } from "@/icons";
 
 interface NFT {
   id: number;
@@ -26,9 +26,10 @@ interface VerifyNFTProps {
   onComplete: () => void;
 }
 
-const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
+const NftVerifier: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
   const { address } = useAccount();
-  const { chain } = useNetwork();
+  // const { chain } = useChains();
+
   const { signMessageAsync } = useSignMessage();
 
   const [walletGroups, setWalletGroups] = useState<WalletGroup[]>([]);
@@ -42,6 +43,7 @@ const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
   }, [address]);
 
   const fetchNFTs = async () => {
+    return;
     if (!address) return;
     setLoading(true);
     try {
@@ -81,6 +83,7 @@ const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
   };
 
   const handleVerify = async (walletGroup: WalletGroup) => {
+    return;
     if (!address || !chain) return;
     setVerifying(true);
     try {
@@ -140,7 +143,7 @@ const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
         onClick={onBack}
         className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" />
+        {/* <ArrowLeft className="w-4 h-4 mr-2" /> */}
         Back
       </button>
       <h2 className="text-2xl font-bold mb-6">Verify your NFTs</h2>
@@ -163,7 +166,7 @@ const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
             ) : (
               <>
                 Verify
-                <ChevronRight className="w-4 h-4 ml-2" />
+                {/* <ChevronRight className="w-4 h-4 ml-2" /> */}
               </>
             )}
           </button>
@@ -176,4 +179,4 @@ const VerifyNFT: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
   );
 };
 
-export default VerifyNFT;
+export default NftVerifier;
