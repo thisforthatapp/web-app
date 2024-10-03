@@ -130,7 +130,7 @@ function convertCryptoPunkToNFT(
     collection_name: punk.name,
     token_type: "CryptoPunk",
     token_id: punk.token_id,
-    token_uri: punk.metadata,
+    token_uri: null,
     image: metadata.image,
     thumbnail: metadata.image,
     possible_spam: false,

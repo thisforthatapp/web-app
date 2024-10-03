@@ -20,7 +20,7 @@ export interface NFT {
   collection_name: string;
   token_type: string;
   token_id: string;
-  token_uri: JSON;
+  token_uri: string | null;
   created_at: string;
   updated_at: string;
   wallet_address: string;

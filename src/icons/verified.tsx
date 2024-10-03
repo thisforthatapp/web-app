@@ -2,13 +2,15 @@ import { type SVGProps } from "react";
 
 interface VerifiedProps extends SVGProps<SVGSVGElement> {
   isVerified?: boolean;
+  useAsIcon?: boolean;
 }
 
 export default function Verified({
   isVerified = true,
+  useAsIcon = false,
   ...props
 }: VerifiedProps) {
-  const color = isVerified ? "#004aff" : "#A0AEC0";
+  const color = useAsIcon ? "#000" : isVerified ? "#004aff" : "#A0AEC0";
 
   return (
     <svg
