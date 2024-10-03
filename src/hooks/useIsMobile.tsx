@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
-const useIsMobile = (breakpoint = 640) => {
+const useIsMobile = (breakpoint = 1024) => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -9,7 +9,7 @@ const useIsMobile = (breakpoint = 640) => {
     }
 
     window.addEventListener("resize", handleResize);
-    handleResize(); // Call once to set initial state
+    handleResize();
     return () => window.removeEventListener("resize", handleResize);
   }, [breakpoint]);
 

@@ -1,3 +1,4 @@
+import { Handshake } from "@/icons";
 import React, { useState } from "react";
 
 // Custom collapsible icon component
@@ -115,31 +116,36 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   );
 };
 
-const ActivityFeed: React.FC = () => {
+const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
+  showCollapsibleTab = true,
+}) => {
   const [feedCollapsed, setFeedCollapsed] = useState(false);
   const toggleFeed = () => setFeedCollapsed(!feedCollapsed);
 
+  const desktopStyle = `border-l border-gray-200 hidden lg:flex flex-col ${
+    feedCollapsed ? "w-12" : "w-[400px]"
+  } bg-gray-100 transition-all duration-300 ease-in-out shrink-0`;
+  const mobileStyle = `h-full`;
+
   return (
-    <div
-      className={`border-l border-gray-200 hidden lg:flex flex-col ${
-        feedCollapsed ? "w-12" : "w-[400px]"
-      } bg-gray-100 transition-all duration-300 ease-in-out shrink-0`}
-    >
+    <div className={`${showCollapsibleTab ? desktopStyle : mobileStyle}`}>
       <div className="flex-grow overflow-hidden">
         {!feedCollapsed && (
-          <div className="">
-            <div className="text-xl font-bold mb-4 text-center">
-              🤝 Latest Offers
+          <>
+            <div className="flex items-center justify-center text-xl font-semibold my-3 text-center">
+              <Handshake className="w-6 h-6" />
+              <div className="ml-2">Latest Offers</div>
             </div>
             {activityData.map((activity) => (
               <ActivityItem key={activity.id} activity={activity} />
             ))}
-          </div>
+          </>
         )}
       </div>
-      <button
-        onClick={toggleFeed}
-        className={`
+      {showCollapsibleTab && (
+        <button
+          onClick={toggleFeed}
+          className={`
         flex items-center justify-center p-2 w-full
         text-gray-500 hover:text-gray-700 focus:outline-none
         transition-all duration-300 ease-in-out
@@ -149,9 +155,10 @@ const ActivityFeed: React.FC = () => {
             : "bg-gray-100 hover:bg-gray-200"
         }
       `}
-      >
-        <CollapsibleIcon collapsed={feedCollapsed} />
-      </button>
+        >
+          <CollapsibleIcon collapsed={feedCollapsed} />
+        </button>
+      )}
     </div>
   );
 };

@@ -14,3 +14,5 @@ export { default as Checkmark } from "./checkmark";
 export { default as Login } from "./login";
 export { default as Search } from "./search";
 export { default as Hamburger } from "./hamburger";
+export { default as Image } from "./image";
+export { default as Handshake } from "./handshake";

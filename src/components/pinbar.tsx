@@ -28,7 +28,7 @@ const Pinbar: React.FC = () => {
           </button>
         </Link>
       ))}
-      <div className="bg-gray-100 w-12 h-12 rounded-full shrink-0 border-dashed	border-gray-300 border-2 flex items-center justify-center cursor-pointer">
+      <div className="bg-gray-100 w-12 h-12 rounded-full shrink-0	border-gray-300 border-2 flex items-center justify-center cursor-pointer">
         <Pin className="h-5 w-5 text-gray-300" />
       </div>
     </>

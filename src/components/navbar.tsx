@@ -9,7 +9,15 @@ import {
   Login as LoginModal,
   Onboard as OnboardModal,
 } from "@/components/modals";
-import { Wallet, User, Login, Search, Hamburger } from "@/icons";
+import {
+  Wallet,
+  User,
+  Login,
+  Search,
+  Hamburger,
+  Close,
+  Notifications,
+} from "@/icons";
 
 const Navbar: FC = () => {
   const { user, hasProfile, loading } = useAuthState({ checkProfile: true });
@@ -27,36 +35,68 @@ const Navbar: FC = () => {
     }
   }, [user, loading, hasProfile]);
 
-  console.log("user", user);
-  console.log("loading", loading);
-  console.log("hasProfile", hasProfile);
-
-  const renderButtons = () => (
+  const renderButtons = (isMobileMenu = false) => (
     <>
       {(user || loading) && (
         <>
           <button
-            className="h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center"
+            className={`flex items-center ${
+              isMobileMenu
+                ? "text-xl mb-4"
+                : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
+            }`}
             onClick={() => setModal("wallet")}
           >
-            <Wallet className="w-[22px] h-[22px] text-black" />
+            {isMobileMenu && "Manage NFTs & Offers"}
+            <Wallet
+              className={`${
+                isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
+              } text-black`}
+            />
           </button>
-          <NotificationDropdown />
+          {isMobileMenu ? (
+            <button
+              className="flex items-center text-xl mb-4"
+              onClick={() => {}}
+            >
+              Notifications
+              <Notifications className="w-6 h-6 ml-4 text-black" />
+            </button>
+          ) : (
+            <NotificationDropdown />
+          )}
           <Link
             href="/account"
-            className="h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center"
+            className={`flex items-center ${
+              isMobileMenu
+                ? "text-xl mb-4"
+                : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
+            }`}
           >
-            <User className="w-[22px] h-[22px] text-black" />
+            {isMobileMenu && "Account"}
+            <User
+              className={`${
+                isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
+              } text-black`}
+            />
           </Link>
         </>
       )}
       {!user && !loading && (
         <button
-          className="bg-black text-white rounded-md px-4 py-2 cursor-pointer font-semibold h-[44px] flex items-center"
+          className={`flex items-center ${
+            isMobileMenu
+              ? "text-xl mb-4"
+              : "bg-black text-white rounded-md px-4 py-2 cursor-pointer font-semibold h-[44px]"
+          }`}
           onClick={() => setModal("login")}
         >
-          <Login className="w-6 h-6 text-white" />
-          <div className="ml-1">Login</div>
+          <Login
+            className={`${isMobileMenu ? "w-6 h-6 mr-2" : "w-6 h-6"} ${
+              isMobileMenu ? "text-black" : "text-white"
+            }`}
+          />
+          <div className={isMobileMenu ? "" : "ml-1"}>Login</div>
         </button>
       )}
     </>
@@ -66,7 +106,6 @@ const Navbar: FC = () => {
     <>
       <nav className="z-[10] top-0 fixed w-full bg-white flex justify-between items-center px-2 h-[75px] border-b border-gray-200">
         <Link href="/">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" className="w-[70px] h-[70px] p-2" alt="Logo" />
         </Link>
         <div className="flex-1 max-w-xl mx-4">
@@ -92,8 +131,24 @@ const Navbar: FC = () => {
         )}
       </nav>
       {isMobile && isMenuOpen && (
-        <div className="fixed top-[0px] right-0 bg-white w-64 h-screen shadow-lg z-20 p-4">
-          <div className="flex flex-col gap-y-4">{renderButtons()}</div>
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          <div className="flex justify-end p-4">
+            <button onClick={toggleMenu} className="p-2">
+              <Close className="w-8 h-8" />
+            </button>
+          </div>
+          <div className="flex-1 flex flex-col px-7 items-end">
+            {renderButtons(true)}
+          </div>
+          <div className="p-4 text-center text-sm text-gray-500">
+            <p>© TFT Labs</p>
+            <div className="mt-2 space-x-2">
+              <Link href="/about">About</Link>
+              <Link href="/terms">Terms</Link>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/contact">Contact</Link>
+            </div>
+          </div>
         </div>
       )}
       {modal === "wallet" && <WalletModal closeModal={() => setModal(false)} />}
