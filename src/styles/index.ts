@@ -16,7 +16,7 @@ export const getModalStyles = (isMobile: boolean) => ({
     border: "none",
     padding: 0,
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "column" as const,
     maxHeight: isMobile ? "100%" : "90%",
   },
   overlay: {

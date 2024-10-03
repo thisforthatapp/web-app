@@ -12,7 +12,7 @@ import {
 import { Wallet, User, Login, Search, Hamburger } from "@/icons";
 
 const Navbar: FC = () => {
-  const { user, hasProfile, loading } = useAuthState();
+  const { user, hasProfile, loading } = useAuthState({ checkProfile: true });
   const isMobile = useIsMobile();
   const [modal, setModal] = useState<
     boolean | "login" | "onboard" | "wallet" | "add"
@@ -22,10 +22,10 @@ const Navbar: FC = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   useEffect(() => {
-    if (user && !hasProfile) {
+    if (user && !loading && !hasProfile) {
       setModal("onboard");
     }
-  }, [user, hasProfile]);
+  }, [user, loading, hasProfile]);
 
   console.log("user", user);
   console.log("loading", loading);
