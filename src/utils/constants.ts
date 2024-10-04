@@ -27,6 +27,15 @@ export const CHAIND_TO_CHAIN_IDS = {
   zksync: 324,
 };
 
+export const CHAIN_IDS_TO_CHAINS = {
+  1: "Ethereum",
+  8453: "Base",
+  42161: "Arbitrum",
+  10: "Optimism",
+  137: "Polygon",
+  324: "Zksync",
+};
+
 export const ALCHEMY_CHAIN_SLUGS = {
   ethereum: "eth-mainnet",
   base: "base-mainnet",
@@ -35,3 +44,14 @@ export const ALCHEMY_CHAIN_SLUGS = {
   polygon: "polygon-mainnet",
   zksync: "zksync-mainnet",
 };
+
+export const ALCHEMY_CHAIN_ID_SLUGS = {
+  1: "eth-mainnet",
+  8453: "base-mainnet",
+  42161: "arb-mainnet",
+  10: "opt-mainnet",
+  137: "polygon-mainnet",
+  324: "zksync-mainnet",
+};
+
+export const NFT_VERIFY_LIMIT = 50;

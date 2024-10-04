@@ -40,3 +40,44 @@ export async function uploadFile(
     return null;
   }
 }
+
+export async function verifyNFTs(
+  address: string,
+  chain: number,
+  signature: string,
+  token: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<any> {
+  try {
+    const response = await fetch("/api/verify", {
+      method: "POST",
+      body: JSON.stringify({ address, chain, signature }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      if (errorText === "Verification failed") {
+        return {
+          error: errorText,
+          validVerifications: 0,
+        };
+      }
+    }
+
+    const { validVerifications } = await response.json();
+
+    console.log("validVerifications", validVerifications);
+
+    return { error: null, validVerifications };
+  } catch (error) {
+    return {
+      error,
+      validVerifications: 0,
+    };
+  }
+}

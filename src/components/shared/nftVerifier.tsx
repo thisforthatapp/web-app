@@ -1,80 +1,140 @@
 // TODO: Continue from here
 
 import React, { useState, useEffect } from "react";
-import { useAccount, useSignMessage /*useChains*/ } from "wagmi";
-import { verifyMessage } from "viem";
+import { /*useAccount*/ useSignMessage /*useChains*/ } from "wagmi";
+// import { verifyMessage } from "viem";
 import { supabase } from "@/utils/supabaseClient";
 // import { Verified, ArrowLeft, ChevronRight } from "@/icons";
-
-interface NFT {
-  id: number;
-  name: string;
-  image: string;
-  is_verified: boolean;
-  wallet_address: string;
-  chain: string;
-}
-
-interface WalletGroup {
-  chain: string;
-  wallet: string;
-  nfts: NFT[];
-}
+import { CHAIN_IDS_TO_CHAINS } from "@/utils/constants";
+import { verifyNFTs } from "@/utils/helpers";
 
 interface VerifyNFTProps {
-  onBack: () => void;
   onComplete: () => void;
 }
 
-const NftVerifier: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
-  const { address } = useAccount();
-  // const { chain } = useChains();
+const ChevronRightIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 18l6-6-6-6" />
+  </svg>
+);
 
+const ExternalLinkIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </svg>
+);
+
+const NFTVerificationRow = ({ group, nftCount, onVerify }) => {
+  const [chain, wallet] = group.split("-");
+
+  return (
+    <div className="p-4 flex justify-between items-center border-b border-gray-200">
+      <div className="flex flex-col">
+        <div className="flex mb-1">
+          <div className="font-semibold">Chain: </div>
+          <div className="ml-2">{CHAIN_IDS_TO_CHAINS[chain]}</div>
+        </div>
+        <div className="flex mb-1">
+          <div className="font-semibold">Wallet: </div>
+          <div className="flex items-center ml-2">
+            <div className="mr-2">
+              {wallet.slice(0, 8)}...{wallet.slice(-6)}
+            </div>{" "}
+            <button className="mb-1">
+              <ExternalLinkIcon />
+            </button>
+          </div>
+        </div>
+        <div className="flex mb-1">
+          <div className="font-semibold">NFTs to verify: </div>
+          <div className="ml-2">{nftCount}</div>
+        </div>
+      </div>
+      <button
+        onClick={() => onVerify(group)}
+        className={`px-4 py-2 rounded-lg text-white font-medium flex items-center transition-colors duration-200 bg-blue-600 hover:bg-blue-700`}
+      >
+        <>
+          Verify
+          <span className="ml-1">
+            <ChevronRightIcon />
+          </span>
+        </>
+      </button>
+    </div>
+  );
+};
+
+const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
   const { signMessageAsync } = useSignMessage();
 
-  const [walletGroups, setWalletGroups] = useState<WalletGroup[]>([]);
+  const [walletGroups, setWalletGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [displayMaxWarning, setDisplayMaxWarning] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [verifyError, setVerrifyError] = useState<string | null>(null);
+  const [verifiedWalletGroups, setVerifiedWalletGroups] = useState<any[]>([]);
 
   useEffect(() => {
-    if (address) {
-      fetchNFTs();
-    }
-  }, [address]);
+    fetchNFTs();
+  }, []);
 
   const fetchNFTs = async () => {
-    return;
-    if (!address) return;
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("nfts")
-        .select("*")
-        .or(
-          `is_verified.eq.false,and(is_verified.eq.true,wallet_address.neq.${address})`
-        );
 
+    try {
+      const userId = (await supabase.auth.getSession()).data.session?.user.id;
+      if (!userId) throw new Error("User session not found");
+
+      const { data, error } = await supabase
+        .from("user_nfts")
+        .select(`id, user_id, nft_id, nfts!inner (*)`)
+        .eq("user_id", userId)
+        .eq("nfts.is_verified", false);
+
+      console.log("data", data);
       if (error) throw error;
 
-      // Group NFTs by wallet and chain
-      const groupedNFTs = data.reduce((acc: WalletGroup[], nft: NFT) => {
-        const existingGroup = acc.find(
-          (group) =>
-            group.chain === nft.chain && group.wallet === nft.wallet_address
-        );
-        if (existingGroup) {
-          existingGroup.nfts.push(nft);
-        } else {
-          acc.push({
-            chain: nft.chain,
-            wallet: nft.wallet_address,
-            nfts: [nft],
-          });
+      // Group the NFTs by chain_id and wallet_address
+      const groupedNfts = data.reduce((acc, item) => {
+        const key = `${item.nfts.chain_id}-${item.nfts.wallet_address}`;
+        if (!acc[key]) {
+          acc[key] = [];
         }
-        return acc;
-      }, []);
+        acc[key].push(item.nfts);
 
-      setWalletGroups(groupedNFTs);
+        if (acc[key].length > 50) {
+          setDisplayMaxWarning(true);
+        }
+
+        return acc;
+      }, {});
+
+      console.log("groupedNfts", groupedNfts);
+
+      setWalletGroups(groupedNfts);
     } catch (error) {
       console.error("Error fetching NFTs:", error);
     } finally {
@@ -82,100 +142,106 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onBack, onComplete }) => {
     }
   };
 
-  const handleVerify = async (walletGroup: WalletGroup) => {
-    return;
-    if (!address || !chain) return;
+  const handleVerify = async (walletGroup: any) => {
     setVerifying(true);
+
     try {
       // Request wallet signature
-      const message = `Verify ownership of ${walletGroup.nfts.length} NFTs on ${walletGroup.chain}`;
+      const [chain, wallet] = walletGroup.split("-");
+
+      const message = `Verify ownership of NFTs for wallet ${wallet} on ${CHAIN_IDS_TO_CHAINS[chain]}`;
       const signature = await signMessageAsync({ message });
+      const token = (await supabase.auth.getSession()).data.session
+        ?.access_token;
+      const response = await verifyNFTs(wallet, chain, signature, token);
 
-      // Verify signature (this should be done on the backend for security)
-      const recoveredAddress = await verifyMessage({
-        address: walletGroup.wallet,
-        message,
-        signature,
-      });
-
-      if (recoveredAddress.toLowerCase() !== walletGroup.wallet.toLowerCase()) {
-        throw new Error("Signature verification failed");
+      // if response.error is not null, set verify error, else, set the walletgroup as done verifying
+      if (response.error) {
+        setVerrifyError(response.error);
+      } else {
+        setVerifiedWalletGroups((prev) => [...prev, walletGroup]);
       }
-
-      // Update NFTs in the backend
-      const { data, error } = await supabase.from("nfts").upsert(
-        walletGroup.nfts.map((nft) => ({
-          id: nft.id,
-          is_verified: true,
-          wallet_address: address,
-        }))
-      );
-
-      if (error) throw error;
-
-      // Update local state
-      setWalletGroups((prev) =>
-        prev.map((group) =>
-          group.chain === walletGroup.chain &&
-          group.wallet === walletGroup.wallet
-            ? {
-                ...group,
-                nfts: group.nfts.map((nft) => ({ ...nft, is_verified: true })),
-              }
-            : group
-        )
-      );
     } catch (error) {
-      console.error("Verification failed:", error);
-      // Handle error (e.g., show error message to user)
+      setVerrifyError(error);
     } finally {
       setVerifying(false);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-[350px] flex flex-col items-center justify-center">
+        <div className="loader-large" />
+        <div className="mt-4">Loading NFTs from your account...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-6">
-      <button
-        onClick={onBack}
-        className="mb-4 flex items-center text-blue-600 hover:text-blue-800"
+    <>
+      <div
+        className={`min-h-[350px] flex flex-col w-full h-full overflow-hidden ${
+          verifying ? "items-center justify-center" : ""
+        }`}
       >
-        {/* <ArrowLeft className="w-4 h-4 mr-2" /> */}
-        Back
-      </button>
-      <h2 className="text-2xl font-bold mb-6">Verify your NFTs</h2>
-      {walletGroups.map((group, index) => (
-        <div key={index} className="mb-4 p-4 border rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <div>
-              <p className="font-semibold">{group.chain}</p>
-              <p className="text-sm text-gray-600">{group.wallet}</p>
-            </div>
-            <p className="text-sm">{group.nfts.length} NFTs</p>
-          </div>
-          <button
-            onClick={() => handleVerify(group)}
-            disabled={verifying}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex justify-center items-center"
-          >
-            {verifying ? (
-              "Verifying..."
+        {verifyError && (
+          <>
+            {verifyError === "Verification failed" ? (
+              <div className="text-red-600">
+                Verification failed. Please make sure your chain and wallet
+                match the one indicated and try again.
+              </div>
             ) : (
+              <div className="text-red-600">
+                Error verifying NFTs. Please try again.
+              </div>
+            )}
+            <button
+              onClick={() => setVerrifyError(null)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+            >
+              Go back
+            </button>
+          </>
+        )}
+        {!verifyError && (
+          <>
+            {verifying && (
               <>
-                Verify
-                {/* <ChevronRight className="w-4 h-4 ml-2" /> */}
+                <div className="loader-large" />
+                <div className="mt-4">Verifying NFTs</div>
               </>
             )}
-          </button>
-        </div>
-      ))}
-      {walletGroups.length === 0 && (
-        <p className="text-center text-gray-600">No NFTs to verify</p>
-      )}
-    </div>
+            {!verifying && (
+              <>
+                {Object.keys(walletGroups).length === 0 && (
+                  <div>No NFTS to verify</div>
+                )}
+                {Object.keys(walletGroups).length > 0 && (
+                  <div>
+                    {displayMaxWarning && (
+                      <div className="py-2 bg-yellow-100 text-yellow-800 text-center">
+                        <p className="text-sm">
+                          Max 50 NFTs will be verified per signature.
+                        </p>
+                      </div>
+                    )}
+                    {Object.keys(walletGroups).map((group, index) => (
+                      <NFTVerificationRow
+                        key={group}
+                        group={group}
+                        nftCount={walletGroups[group].length}
+                        onVerify={handleVerify}
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 

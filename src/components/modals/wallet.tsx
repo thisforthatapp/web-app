@@ -85,36 +85,29 @@ const Wallet: React.FC<Props> = ({ closeModal }) => {
         {action !== null && (
           <>
             {action === "add" && (
-              <div>
+              <>
                 <div className="p-5 border-b border-gray-200 flex justify-between items-center">
                   <div className="text-xl font-semibold">Add Your NFTs</div>
                   <div className="cursor-pointer" onClick={closeModal}>
                     <Close className="w-8 h-8" />
                   </div>
                 </div>
-                <NftSelector onBack={() => setAction(null)} />
-                <div className="flex items-center justify-end mt-auto px-6 py-4 gap-x-4">
-                  <button
-                    className={`h-[45px] bg-black text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
-                    // disabled={selectedNfts.length === 0 || uploadingNfts}
-                    type="submit"
-                    onClick={async () => {
-                      // await uploadNFTs();
-                      // setCompleteScreen(true);
-                    }}
-                  >
-                    Done
-                    {/* {uploadingNfts ? (
-                      <div className="loader"></div>
-                    ) : (
-                      `Done (${selectedNfts.length})`
-                    )} */}
-                  </button>
-                </div>
-              </div>
+                <NftSelector
+                  displaySkipOption={false}
+                  onComplete={closeModal}
+                />
+              </>
             )}
             {action === "verify" && (
-              <NftVerifier onBack={() => setAction(null)} />
+              <>
+                <div className="p-5 border-b border-gray-200 flex justify-between items-center">
+                  <div className="text-xl font-semibold">Verify NFTs</div>
+                  <div className="cursor-pointer" onClick={closeModal}>
+                    <Close className="w-8 h-8" />
+                  </div>
+                </div>
+                <NftVerifier onComplete={closeModal} />
+              </>
             )}
             {action === "offer" && <></>}
           </>

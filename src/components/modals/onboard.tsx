@@ -123,57 +123,6 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
     maxFiles: 1,
   });
 
-  // step 2 - nfts
-  const [selectedNfts, setSelectedNfts] = useState<NFT[]>([]);
-  const [uploadingNfts, setIsUploadingNfts] = useState<boolean>(false);
-
-  async function uploadNFTs() {
-    try {
-      setIsUploadingNfts(true);
-
-      const nftsToUpload = selectedNfts.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({ id, possible_spam, ...rest }) => rest
-      );
-
-      // Bulk upsert NFTs into the `nfts` table
-      const { data: upsertedNfts, error: nftError } = await supabase
-        .from("nfts")
-        .upsert(nftsToUpload, {
-          onConflict: "chain_id,collection_contract,token_id",
-          ignoreDuplicates: true,
-        })
-        .select();
-
-      if (nftError) throw nftError;
-
-      // Retrieve the user ID from the current session
-      const userId = (await supabase.auth.getSession()).data.session?.user.id;
-      if (!userId) throw new Error("User session not found");
-
-      // Map upserted NFTs to user-specific data for `user_nfts` table
-      const userNftUpsertData = upsertedNfts.map((nft) => ({
-        user_id: userId,
-        nft_id: nft.id,
-      }));
-
-      // Bulk upsert user-specific NFT data
-      const { error: userNftError } = await supabase
-        .from("user_nfts")
-        .upsert(userNftUpsertData, {
-          onConflict: "user_id,nft_id",
-          ignoreDuplicates: true,
-        });
-
-      if (userNftError) throw userNftError;
-    } catch (error) {
-      console.error("Error uploading NFTs:", error);
-      throw error;
-    } finally {
-      setIsUploadingNfts(false);
-    }
-  }
-
   return (
     <Modal
       id="react-modal"
@@ -366,34 +315,12 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
           {step === 2 && (
             <>
               <NftSelector
-                selectedNfts={selectedNfts}
-                setSelectedNfts={setSelectedNfts}
+                // selectedNfts={selectedNfts}
+                // setSelectedNfts={setSelectedNfts}
+                onComplete={() => {
+                  setCompleteScreen(true);
+                }}
               />
-              <div className="flex items-center justify-end mt-auto px-6 py-4 gap-x-4">
-                <button
-                  className={`h-[45px] bg-gray-200 text-black font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
-                  onClick={() => {
-                    setCompleteScreen(true);
-                  }}
-                >
-                  Skip For Later
-                </button>
-                <button
-                  className={`h-[45px] bg-black text-white font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
-                  disabled={selectedNfts.length === 0 || uploadingNfts}
-                  type="submit"
-                  onClick={async () => {
-                    await uploadNFTs();
-                    setCompleteScreen(true);
-                  }}
-                >
-                  {uploadingNfts ? (
-                    <div className="loader"></div>
-                  ) : (
-                    `Done (${selectedNfts.length})`
-                  )}
-                </button>
-              </div>
             </>
           )}
         </>

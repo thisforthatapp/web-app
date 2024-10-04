@@ -105,13 +105,13 @@ function sortAndFilterNfts(
     chain_id: chainId,
     collection_contract: nft.contract.address,
     collection_name: nft.contract.name,
-    token_type: nft.tokenType,
+    token_type: nft.tokenType.toUpperCase(),
     token_id: nft.tokenId,
     token_uri: nft.tokenUri,
     image: nft.image.cachedUrl,
     thumbnail: nft.image.thumbnailUrl,
     possible_spam: getFloorPrice(nft) === -Infinity,
-    wallet_address: walletAddress,
+    wallet_address: walletAddress.toLowerCase(),
   }));
 }
 
@@ -128,12 +128,12 @@ function convertCryptoPunkToNFT(
     chain_id: chainId,
     collection_contract: punk.token_address,
     collection_name: punk.name,
-    token_type: "CryptoPunk",
+    token_type: "CRYPTOPUNK",
     token_id: punk.token_id,
     token_uri: null,
     image: metadata.image,
     thumbnail: metadata.image,
     possible_spam: false,
-    wallet_address: walletAddress,
+    wallet_address: walletAddress.toLowerCase(),
   };
 }
