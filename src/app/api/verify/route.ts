@@ -1,3 +1,6 @@
+// TODO: add fallback of quicknode / moralis if fail with too many requests
+// if valid verifications > 0 but hits error, return the valid verifications
+
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { createPublicClient, http } from "viem";
@@ -156,6 +159,7 @@ export async function POST(req: any) {
             .update({
               is_verified: true,
               verified_at: new Date().toISOString(),
+              user: data.user.id,
             })
             .eq("id", userNft.nfts.id);
 

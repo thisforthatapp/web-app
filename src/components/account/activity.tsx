@@ -3,7 +3,7 @@
 import { FC, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuthState } from "@/hooks";
+import { useAuth } from "@/providers/authProvider";
 import { AccountSidebar } from "@/components/shared";
 import { Options, VerifiedBadge } from "@/components";
 import { Pin } from "@/icons";
@@ -24,7 +24,7 @@ interface InterestedNFT {
 type ActivityType = "deals" | "interested";
 
 const AccountActivityPage: FC = () => {
-  const { user, loading } = useAuthState({ checkProfile: false });
+  const { user, loading } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActivityType>("deals");
 

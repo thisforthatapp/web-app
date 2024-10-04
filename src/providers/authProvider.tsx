@@ -1,25 +1,31 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import React, {
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import { User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabaseClient";
-
-interface UserProfile {
-  id: string;
-  // Add other profile fields here
-}
+import { Profile } from "@/types/supabase";
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   error: AuthError | null;
   hasProfile: boolean | null;
-  profile: UserProfile | null;
+  profile: Profile | null;
 }
 
-interface UseAuthStateOptions {
-  checkProfile?: boolean;
+interface AuthProviderProps {
+  children: ReactNode;
 }
 
-const useAuthState = (options: UseAuthStateOptions = {}): AuthState => {
+const AuthContext = createContext<AuthState | undefined>(undefined);
+
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [state, setState] = useState<AuthState>({
     user: null,
     loading: true,
@@ -31,39 +37,34 @@ const useAuthState = (options: UseAuthStateOptions = {}): AuthState => {
   useEffect(() => {
     const checkUserProfile = async (user: User) => {
       try {
-        // Retrieve user profile and exact count
         const { data, error, count } = await supabase
           .from("user_profile")
           .select("*", { count: "exact" })
           .eq("id", user.id)
           .maybeSingle();
 
-        // If there is an error, but not a "No data found" error, assume profile exists
         if (error) {
           console.error("Error checking user profile:", error);
-
           setState((prev) => ({
             ...prev,
-            hasProfile: true, // Default to true unless we are sure profile does not exist
+            hasProfile: true,
             profile: null,
             loading: false,
           }));
           return;
         }
 
-        // When no error and count is explicitly zero, set hasProfile to false
         setState((prev) => ({
           ...prev,
           hasProfile: count === 0 ? false : true,
-          profile: count !== 0 ? (data as UserProfile) : null,
+          profile: count !== 0 ? (data as Profile) : null,
           loading: false,
         }));
       } catch (error) {
-        // Handle any unexpected errors (network issues, etc.)
         console.error("Unexpected error checking user profile:", error);
         setState((prev) => ({
           ...prev,
-          hasProfile: true, // Assume true unless we confirm the absence of a profile
+          hasProfile: true,
           profile: null,
           loading: false,
           error: error as AuthError,
@@ -75,18 +76,19 @@ const useAuthState = (options: UseAuthStateOptions = {}): AuthState => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       const user = session?.user || null;
+
       setState((prev) => ({
         ...prev,
         user,
-        loading: !!user && !!options.checkProfile,
+        loading: !!user,
       }));
 
-      if (user && options.checkProfile) {
-        checkUserProfile(user);
+      if (user) {
+        await checkUserProfile(user);
       } else {
         setState((prev) => ({
           ...prev,
-          user,
+          user: null,
           hasProfile: null,
           profile: null,
           loading: false,
@@ -97,9 +99,15 @@ const useAuthState = (options: UseAuthStateOptions = {}): AuthState => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [options.checkProfile]);
+  }, []);
 
-  return state;
+  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 };
 
-export default useAuthState;
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

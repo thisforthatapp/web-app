@@ -87,7 +87,7 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   };
 
   return (
-    <div className="flex items-start space-x-3 p-3 bg-white border-b">
+    <div className="flex items-start space-x-3 p-3 bg-blue-50 border-b">
       <img
         src="/temp/profile.webp"
         alt={activity.offerFrom}
@@ -124,7 +124,7 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
 
   const desktopStyle = `border-l border-gray-200 hidden lg:flex flex-col ${
     feedCollapsed ? "w-12" : "w-[460px]"
-  } bg-gray-100 transition-all duration-300 ease-in-out shrink-0`;
+  } bg-blue-50 transition-all duration-300 ease-in-out shrink-0`;
   const mobileStyle = `h-full`;
 
   return (
@@ -151,8 +151,8 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
         transition-all duration-300 ease-in-out
         ${
           feedCollapsed
-            ? "bg-gray-200 hover:bg-gray-300"
-            : "bg-gray-100 hover:bg-gray-200"
+            ? "bg-blue-100 hover:bg-blue-200"
+            : "bg-blue-50 hover:bg-blue-100"
         }
       `}
         >

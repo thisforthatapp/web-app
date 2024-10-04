@@ -19,7 +19,8 @@ const BubbleFilter: React.FC<BubbleFilterProps> = ({ onFilterChange }) => {
     { value: "mostRecent", label: "Most Recent" },
     { value: "mostOffers", label: "Most Offers" },
     { value: "mostWanted", label: "Most Wanted" },
-    { value: "followers", label: "My Followers" },
+    // TODO: add this filter option later
+    // { value: "followers", label: "My Followers" },
   ];
 
   const handleFilterClick = (filter: FilterOption) => {

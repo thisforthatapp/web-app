@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Pin } from "@/icons";
-import { usePinnedImages } from "@/providers/pinbar";
+import { usePinnedImages } from "@/providers/pinbarProvider";
 
 const Pinbar: React.FC = () => {
   const { pinnedIds, unpinImage } = usePinnedImages();

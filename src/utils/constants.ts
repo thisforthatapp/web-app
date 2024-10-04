@@ -55,3 +55,4 @@ export const ALCHEMY_CHAIN_ID_SLUGS = {
 };
 
 export const NFT_VERIFY_LIMIT = 50;
+export const GRID_ITEMS_PER_PAGE = 25;

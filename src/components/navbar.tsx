@@ -2,7 +2,8 @@
 
 import { FC, useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuthState, useIsMobile } from "@/hooks";
+import { useAuth } from "@/providers/authProvider";
+import { useIsMobile } from "@/hooks";
 import { NotificationDropdown } from "@/components";
 import {
   Wallet as WalletModal,
@@ -20,7 +21,7 @@ import {
 } from "@/icons";
 
 const Navbar: FC = () => {
-  const { user, hasProfile, loading } = useAuthState({ checkProfile: true });
+  const { user, loading, hasProfile } = useAuth();
   const isMobile = useIsMobile();
   const [modal, setModal] = useState<
     boolean | "login" | "onboard" | "wallet" | "add"
