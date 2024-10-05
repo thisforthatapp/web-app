@@ -1,3 +1,4 @@
+/*
 import { FC } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -9,7 +10,6 @@ const AccountSidebar: FC = () => {
   const tabs = [
     { name: "Activity", href: "/account/activity" },
     { name: "My NFTs", href: "/account/nfts" },
-    { name: "DMs", href: "/account/messages" },
     { name: "Followers", href: "/account/followers" },
     { name: "Edit Profile", href: "/account/profile" },
   ];
@@ -48,3 +48,4 @@ const AccountSidebar: FC = () => {
 };
 
 export default AccountSidebar;
+*/

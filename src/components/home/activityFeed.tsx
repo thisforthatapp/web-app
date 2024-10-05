@@ -1,5 +1,4 @@
-import { Handshake } from "@/icons";
-import React, { useState } from "react";
+import { FC, useState } from "react";
 
 // Custom collapsible icon component
 const CollapsibleIcon = ({ collapsed }: { collapsed: boolean }) => (
@@ -87,7 +86,7 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   };
 
   return (
-    <div className="flex items-start space-x-3 p-3 bg-gray-50 border-b">
+    <div className="flex items-start space-x-3 p-3 bg-white border-b border-gray-100">
       <img
         src="/temp/profile.webp"
         alt={activity.offerFrom}
@@ -116,47 +115,70 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   );
 };
 
-const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
+const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
   showCollapsibleTab = true,
 }) => {
   const [feedCollapsed, setFeedCollapsed] = useState(false);
+  const [message, setMessage] = useState("");
   const toggleFeed = () => setFeedCollapsed(!feedCollapsed);
 
-  const desktopStyle = `border-l border-gray-200 hidden lg:flex flex-col ${
+  const desktopStyle = `shadow-[0_0_3px_#bbbbbb] hidden lg:flex flex-col h-full ${
     feedCollapsed ? "w-12" : "w-[460px]"
-  } bg-gray-50 transition-all duration-300 ease-in-out shrink-0`;
-  const mobileStyle = `h-full`;
+  } bg-white transition-all duration-300 ease-in-out shrink-0`;
+  const mobileStyle = `h-full w-full`;
 
   return (
     <div className={`${showCollapsibleTab ? desktopStyle : mobileStyle}`}>
-      <div className="flex-grow overflow-hidden">
-        {!feedCollapsed && (
-          <>
-            <div className="bg-gray-200 flex items-center justify-center text-lg font-semibold py-2 text-center border-b border-gray-100">
-              Activity
-            </div>
-            {activityData.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
-            ))}
-          </>
-        )}
-      </div>
       {showCollapsibleTab && (
         <button
           onClick={toggleFeed}
-          className={`
-        flex items-center justify-center p-2 w-full
-        text-gray-500 hover:text-gray-700 focus:outline-none
-        transition-all duration-300 ease-in-out
-        ${
-          feedCollapsed
-            ? "bg-gray-100 hover:bg-gray-200"
-            : "bg-gray-50 hover:bg-gray-100"
-        }
-      `}
+          className={`relative bg-white flex items-center justify-center text-lg font-semibold py-2 border-b border-gray-100 w-full ${
+            feedCollapsed ? "h-full" : "px-4"
+          }`}
         >
-          <CollapsibleIcon collapsed={feedCollapsed} />
+          {feedCollapsed ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <CollapsibleIcon collapsed={feedCollapsed} />
+            </div>
+          ) : (
+            <>
+              <div className="absolute left-4">
+                <CollapsibleIcon collapsed={feedCollapsed} />
+              </div>
+              <span className="flex-grow text-center">Activity</span>
+            </>
+          )}
         </button>
+      )}
+      {!feedCollapsed && (
+        <>
+          <div className="flex-grow overflow-auto">
+            {/* {activityData.map((activity) => (
+              <ActivityItem key={activity.id} activity={activity} />
+            ))} */}
+          </div>
+          <div className="p-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Send a message..."
+                className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => {
+                  // Handle sending message
+                  console.log("Sending message:", message);
+                  setMessage("");
+                }}
+                className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

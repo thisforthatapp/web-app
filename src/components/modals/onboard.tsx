@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { FC, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import Modal from "react-modal";
 import { useIsMobile } from "@/hooks";
@@ -10,7 +10,6 @@ import { supabase } from "@/utils/supabaseClient";
 import { getModalStyles } from "@/styles";
 import { NftSelector } from "@/components/shared";
 import { User } from "@/icons";
-import { NFT } from "@/types/supabase";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2mb max upload size
 
@@ -18,7 +17,7 @@ interface Props {
   closeModal: () => void;
 }
 
-const Onboard: React.FC<Props> = ({ closeModal }) => {
+const Onboard: FC<Props> = ({ closeModal }) => {
   const isMobile = useIsMobile();
   const customStyles = getModalStyles(isMobile);
 
@@ -238,7 +237,7 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
                         .replace(/[^a-z0-9]/g, "");
                       setUsername(normalizedUsername);
                     }}
-                    className="ml-4 w-full h-[38px] rounded-md bg-[rgba(22,24,35,0.06)] caret-[#8d00ff] outline-none border-none p-[7px_12px] box-border"
+                    className="ml-4 w-full h-[38px] rounded-md bg-gray-100 caret-[#8d00ff] outline-none border-none p-[7px_12px] box-border"
                   />
                 </div>
                 {formErrors.username && (
@@ -259,7 +258,7 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
                     onChange={(e) => {
                       setName(e.target.value);
                     }}
-                    className="ml-4 w-full h-[38px] rounded-md bg-[rgba(22,24,35,0.06)] caret-[#8d00ff] outline-none border-none p-[7px_12px] box-border"
+                    className="ml-4 w-full h-[38px] rounded-md bg-gray-100 caret-[#8d00ff] outline-none border-none p-[7px_12px] box-border"
                   />
                 </div>
                 {formErrors.username && (
@@ -277,7 +276,7 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
                     id="bio"
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    className="ml-4 w-full rounded-md bg-[rgba(22,24,35,0.06)] caret-[#8d00ff] outline-none border-none box-border h-[100px] p-[12px] resize-none"
+                    className="ml-4 w-full rounded-md bg-gray-100 caret-[#8d00ff] outline-none border-none box-border h-[100px] p-[12px] resize-none"
                   />
                 </div>
                 {formErrors.bio && (
@@ -313,15 +312,11 @@ const Onboard: React.FC<Props> = ({ closeModal }) => {
           )}
 
           {step === 2 && (
-            <>
-              <NftSelector
-                // selectedNfts={selectedNfts}
-                // setSelectedNfts={setSelectedNfts}
-                onComplete={() => {
-                  setCompleteScreen(true);
-                }}
-              />
-            </>
+            <NftSelector
+              onComplete={() => {
+                setCompleteScreen(true);
+              }}
+            />
           )}
         </>
       )}

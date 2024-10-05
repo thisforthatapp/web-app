@@ -5,7 +5,7 @@
 
 import React, { FC, useState } from "react";
 import Link from "next/link";
-import { Options, Pinbar, VerifiedBadge } from "@/components";
+import { Options, VerifiedBadge } from "@/components/shared";
 import { Pin } from "@/icons";
 
 interface ActivityItem {
@@ -127,9 +127,6 @@ const NFTComponent: FC = () => {
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex">
       <div className="w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar">
-        <div className="flex items-center px-6 pt-4 gap-x-3 w-full">
-          <Pinbar />
-        </div>
         <div className="flex justify-center mt-6 gap-x-8">
           <div className="relative w-[400px]">
             <div

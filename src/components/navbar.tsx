@@ -35,27 +35,30 @@ const Navbar: FC = () => {
           {isMobileMenu ? (
             <>
               <button
+                onClick={() => {}}
+                className="flex items-center text-xl mb-4"
+              >
+                My NFTs
+              </button>
+              <button
+                className="flex items-center text-xl mb-4"
+                onClick={() => {}}
+              >
+                Edit Profile
+              </button>
+              <button
+                className="flex items-center text-xl mb-4"
+                onClick={() => {}}
+              >
+                View Profile
+              </button>
+              <button
                 className="flex items-center text-xl mb-4"
                 onClick={() => {}}
               >
                 Notifications
-                <Notifications className="w-6 h-6 ml-4 text-black" />
               </button>
-              <Link
-                href="/account"
-                className={`flex items-center ${
-                  isMobileMenu
-                    ? "text-xl mb-4"
-                    : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
-                }`}
-              >
-                {isMobileMenu && "Account"}
-                <User
-                  className={`${
-                    isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
-                  } text-black`}
-                />
-              </Link>
+              <button className="flex items-center text-xl mb-4">Logout</button>
             </>
           ) : (
             <>
@@ -87,7 +90,7 @@ const Navbar: FC = () => {
 
   return (
     <>
-      <nav className="z-[10] top-0 fixed w-full bg-white flex justify-between items-center px-2 h-[75px] border-b border-gray-200">
+      <nav className="z-[20] top-0 fixed w-full bg-white flex justify-between items-center px-2 h-[75px] border-b border-gray-200">
         <Link href="/">
           <img src="/logo.png" className="w-[70px] h-[70px] p-2" alt="Logo" />
         </Link>

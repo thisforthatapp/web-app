@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import VerifiedBadge from "../verifiedBadge";
-import Options from "../options";
-import { NFT } from "@/types/supabase";
+import VerifiedBadge from "./verifiedBadge";
+import Options from "./options";
+import { NFT, Profile } from "@/types/supabase";
 
 interface ActionButtonProps {
   icon: string;
@@ -19,16 +19,16 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
 }) => (
   <button
-    className="w-full flex justify-between items-center bg-blue-50 px-3 py-2 rounded-md border border-blue-200 hover:bg-blue-100 transition-colors duration-200 group"
+    className="w-full flex justify-between items-center bg-blue-50 px-3 py-2 rounded-md border border-blue-100 hover:bg-blue-100 transition-colors duration-200 group"
     onClick={onClick}
   >
     <span className="flex items-center">
-      <span className="text-base mr-2">{icon}</span>
+      <span className="mr-1.5">{icon}</span>
       <span className="text-sm text-gray-600 group-hover:text-gray-800">
         {label}
       </span>
     </span>
-    <span className="text-lg font-semibold text-gray-800">{count}</span>
+    <span className="text-base font-semibold text-gray-800">{count}</span>
   </button>
 );
 
@@ -62,26 +62,30 @@ const NFTImage: React.FC<NFTImageProps> = ({ src, alt, fallback }) => {
   );
 };
 
-interface NFTGridItemProps {
+interface NFTItemProps {
   item: NFT;
+  userProfile?: Profile;
   handleDealModalOpen: (id: string) => void;
 }
 
-const NFTGridItem: React.FC<NFTGridItemProps> = ({
+const NFTItem: React.FC<NFTItemProps> = ({
   item,
+  userProfile,
   handleDealModalOpen,
 }) => {
   const router = useRouter();
+  const nftUser = userProfile || item.user_profile;
 
   const navigateToUser = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
-    router.push(`/${item.user_profile.username}`);
+    router.push(`/${nftUser?.username}`);
   };
+
+  console.log("nftUser", nftUser);
 
   return (
     <Link
       href={`/nft/${item.chain_id}/${item.collection_contract}/${item.token_id}`}
-      className="block"
     >
       <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
         <div className="absolute top-1 right-1 z-10">
@@ -99,13 +103,13 @@ const NFTGridItem: React.FC<NFTGridItemProps> = ({
         />
 
         <div className="p-3">
-          <h3 className="font-semibold text-sm text-center mb-3">
+          <div className="font-semibold text-sm text-center mb-3">
             {item.name}
-          </h3>
+          </div>
           <div className="space-y-2">
             <ActionButton
               icon="🤝"
-              label="Make Offer"
+              label="Swap"
               count={item.offers}
               onClick={(e) => {
                 e.preventDefault();
@@ -114,7 +118,7 @@ const NFTGridItem: React.FC<NFTGridItemProps> = ({
             />
             <ActionButton
               icon="📌"
-              label="Pin It"
+              label="Pin"
               count={item.interests}
               onClick={(e) => e.preventDefault()}
             />
@@ -127,17 +131,15 @@ const NFTGridItem: React.FC<NFTGridItemProps> = ({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${item.user_profile.profile_pic_url}`}
-            alt={item.user_profile.username}
+            src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${nftUser?.profile_pic_url}`}
+            alt={nftUser?.username}
             className="w-6 h-6 rounded-full"
           />
-          <span className="ml-2 font-semibold">
-            {item.user_profile.username}
-          </span>
+          <span className="ml-2 font-semibold">{nftUser?.username}</span>
         </div>
       </div>
     </Link>
   );
 };
 
-export default NFTGridItem;
+export default NFTItem;

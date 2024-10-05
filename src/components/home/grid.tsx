@@ -1,19 +1,14 @@
 import { FC, useEffect, useState } from "react";
-import Link from "next/link";
-import { usePinnedImages } from "@/providers/pinbarProvider";
 import { supabase } from "@/utils/supabaseClient";
-import { Pinbar, Filter, Options, VerifiedBadge } from "@/components";
 import { Offer } from "@/components/modals";
-import { Pin } from "@/icons";
 import { GridSortOption } from "@/types/main";
 import { NFT } from "@/types/supabase";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 
-import tempGridData from "@/temp/homeGrid.json";
-import { NFTGridItem } from "../shared";
+import { NftItem } from "../shared";
+import GridNavigation from "./gridNavigation";
 
 const Grid: FC = () => {
-  const { pinImage } = usePinnedImages();
   const [dealModalOpen, setDealModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
 
@@ -53,6 +48,8 @@ const Grid: FC = () => {
 
     const { data, error } = await query;
 
+    console.log("query", query, data, error);
+
     if (error) {
       console.error("Error fetching songs:", error);
       return;
@@ -73,29 +70,25 @@ const Grid: FC = () => {
   };
 
   useEffect(() => {
+    console.log("does this fire");
     if (sortOption) {
+      console.log("sortOption fetchNfts", sortOption);
       fetchNfts(sortOption, 1);
       setPage(1);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortOption]);
 
+  console.log("sortOption", sortOption);
   console.log("nfts", nfts);
 
   return (
     <div className="w-full overflow-y-auto hide-scrollbar">
-      <div className="flex items-center px-6 pt-4 gap-x-3 w-full">
-        <Pinbar />
-        <div className="ml-auto">
-          <Filter onFilterChange={() => {}} />
-        </div>
-      </div>
-      <div className="p-5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+      <GridNavigation onNavigationChange={() => {}} />
+      <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
         {nfts.map((item) => (
-          <NFTGridItem
+          <NftItem
             key={item.id}
             item={item}
-            pinImage={pinImage}
             handleDealModalOpen={() => setDealModalOpen(true)}
           />
         ))}

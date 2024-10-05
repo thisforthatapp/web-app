@@ -1,146 +1,137 @@
+// TODO: Add wallets to profile
+// TODO: Add NFTs as choice for profile pic
+
 "use client";
 
-import { FC, useState } from "react";
-import { AccountSidebar } from "@/components/shared";
+import { FC, useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useAuth } from "@/providers/authProvider";
+import { uploadFile } from "@/utils/helpers";
+import { BLOCKED_USERNAMES } from "@/utils/constants";
+import { supabase } from "@/utils/supabaseClient";
+import { Profile } from "@/types/supabase";
 
-interface Wallet {
-  address: string;
-  isVerified: boolean;
-}
-
-interface SocialLink {
-  platform: string;
-  url: string;
-}
-
-interface UserProfile {
-  username: string;
-  bio: string;
-  profilePicture: string;
-  isProfilePictureNFT: boolean;
-  wallets: Wallet[];
-  socialLinks: SocialLink[];
-}
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2mb max upload size
 
 const AccountProfilePage: FC = () => {
-  const [profile, setProfile] = useState<UserProfile>({
-    username: "CryptoUser123",
-    bio: "NFT enthusiast and blockchain developer",
-    profilePicture: "/temp/profile.webp",
-    isProfilePictureNFT: false,
-    wallets: [
-      { address: "0x1234...5678", isVerified: true },
-      { address: "0xabcd...efgh", isVerified: false },
-    ],
-    socialLinks: [
-      { platform: "Twitter", url: "https://twitter.com/cryptouser123" },
-      { platform: "Instagram", url: "https://instagram.com/cryptouser123" },
-    ],
+  const { user, profile: initialProfile } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loadingFileUpload, setLoadingFileUpload] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialProfile) {
+      setProfile(initialProfile);
+    }
+  }, [initialProfile]);
+
+  const handleSaveProfile = async () => {
+    if (!profile) return;
+
+    if (profile.username && BLOCKED_USERNAMES.includes(profile.username)) {
+      alert(
+        `${profile.username} is not a valid username. Please pick another one.`
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    const updatedProfile = { ...initialProfile, ...profile };
+
+    const { error } = await supabase
+      .from("user_profile")
+      .upsert({
+        id: user?.id,
+        username: updatedProfile.username,
+        bio: updatedProfile.bio,
+        profile_pic_url: updatedProfile.profile_pic_url,
+      })
+      .select();
+
+    setLoading(false);
+
+    if (error) {
+      alert(
+        "Update profile failed. Username might be taken. Please try another."
+      );
+    }
+  };
+
+  const onDrop = async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      setFormErrors({ file: "File size exceeds 2MB." });
+      return;
+    }
+
+    setLoadingFileUpload(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    const token = (await supabase.auth.getSession()).data.session?.access_token;
+
+    if (!token) {
+      setLoadingFileUpload(false);
+      alert("Unexpected error. Please try again.");
+      return;
+    }
+
+    const response = await uploadFile(formData, token);
+    setLoadingFileUpload(false);
+
+    if (response && response.key) {
+      setProfile((prevProfile) =>
+        prevProfile
+          ? { ...prevProfile, profile_pic_url: response.key }
+          : prevProfile
+      );
+    }
+  };
+
+  const { getRootProps, getInputProps, open } = useDropzone({
+    onDrop,
+    accept: { "image/*": [] },
+    maxFiles: 1,
   });
 
-  const [isNFTModalOpen, setIsNFTModalOpen] = useState(false);
-  const [newWallet, setNewWallet] = useState("");
-  const [newSocialPlatform, setNewSocialPlatform] = useState("");
-  const [newSocialUrl, setNewSocialUrl] = useState("");
-
-  const handleProfilePictureChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Here you would typically upload the file to your server and get a URL back
-      // For this example, we'll just use a fake URL
-      setProfile({
-        ...profile,
-        profilePicture: URL.createObjectURL(file),
-        isProfilePictureNFT: false,
-      });
-    }
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleNFTSelection = (nftImageUrl: string) => {
-    setProfile({
-      ...profile,
-      profilePicture: nftImageUrl,
-      isProfilePictureNFT: true,
-    });
-    setIsNFTModalOpen(false);
-    // Here you would typically verify the NFT ownership
-  };
-
-  const handleWalletAdd = () => {
-    if (newWallet) {
-      setProfile({
-        ...profile,
-        wallets: [
-          ...profile.wallets,
-          { address: newWallet, isVerified: false },
-        ],
-      });
-      setNewWallet("");
-    }
-  };
-
-  const handleWalletVerify = (address: string) => {
-    // Here you would typically initiate the wallet verification process
-    setProfile({
-      ...profile,
-      wallets: profile.wallets.map((wallet) =>
-        wallet.address === address ? { ...wallet, isVerified: true } : wallet
-      ),
-    });
-  };
-
-  const handleSocialLinkAdd = () => {
-    if (newSocialPlatform && newSocialUrl) {
-      setProfile({
-        ...profile,
-        socialLinks: [
-          ...profile.socialLinks,
-          { platform: newSocialPlatform, url: newSocialUrl },
-        ],
-      });
-      setNewSocialPlatform("");
-      setNewSocialUrl("");
-    }
-  };
+  if (!profile) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex">
-      <AccountSidebar />
-      <div className="flex-1 p-8 bg-gray-100 overflow-y-auto hide-scrollbar">
+      <div className="flex flex-col flex-1 p-4 lg:p-8 bg-gray-100 overflow-y-auto hide-scrollbar">
         <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Profile Picture</h2>
-          <div className="flex items-center space-x-4">
-            <img
-              src={profile.profilePicture}
-              alt="Profile"
-              className="w-24 h-24 rounded-full object-cover"
-            />
-            <div>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePictureChange}
-                className="mb-2"
+          <div className="text-xl font-semibold mb-4">Profile Picture</div>
+          <div className="flex items-center">
+            <div
+              {...getRootProps()}
+              className="w-[80px] h-[80px] shrink-0 bg-[#7e7e7e] rounded-full text-white items-center justify-center flex cursor-pointer dropzone"
+            >
+              <input {...getInputProps()} />
+              <img
+                src={
+                  profile.profile_pic_url
+                    ? process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+                      profile.profile_pic_url
+                    : process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+                      profile.profile_pic_url
+                }
+                alt="Profile Picture"
+                className="w-full h-full bg-white object-cover rounded-full"
               />
-              <button
-                onClick={() => setIsNFTModalOpen(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Select NFT
-              </button>
-              {profile.isProfilePictureNFT && (
-                <button
-                  onClick={() => {
-                    /* Implement NFT verification logic */
-                  }}
-                  className="ml-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            </div>
+            <div className="ml-4 flex flex-col gap-y-1">
+              <div className="flex">
+                <div
+                  className="cursor-pointer lg:hover:underline"
+                  onClick={open}
                 >
-                  Verify NFT
-                </button>
-              )}
+                  Upload a file
+                </div>
+                {loadingFileUpload && <div className="ml-1.5 loader" />}
+              </div>
             </div>
           </div>
         </div>
@@ -159,10 +150,15 @@ const AccountProfilePage: FC = () => {
                 type="text"
                 id="username"
                 value={profile.username}
-                onChange={(e) =>
-                  setProfile({ ...profile, username: e.target.value })
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                onChange={(e) => {
+                  const rawValue = e.target.value;
+                  const normalizedUsername = rawValue
+                    .trim()
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, "");
+                  setProfile({ ...profile, username: normalizedUsername });
+                }}
+                className="mt-1 h-[45px] bg-gray-100 w-full rounded-md px-[12px]"
               />
             </div>
             <div>
@@ -179,106 +175,18 @@ const AccountProfilePage: FC = () => {
                   setProfile({ ...profile, bio: e.target.value })
                 }
                 rows={3}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                className="mt-1 h-[100px] bg-gray-100 w-full rounded-md p-[12px] resize-none"
               ></textarea>
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Wallets</h2>
-          <div className="space-y-4">
-            {profile.wallets.map((wallet, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span>{wallet.address}</span>
-                {wallet.isVerified ? (
-                  <span className="text-green-500">Verified</span>
-                ) : (
-                  <button
-                    onClick={() => handleWalletVerify(wallet.address)}
-                    className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Verify
-                  </button>
-                )}
-              </div>
-            ))}
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={newWallet}
-                onChange={(e) => setNewWallet(e.target.value)}
-                placeholder="Enter wallet address"
-                className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-              />
-              <button
-                onClick={handleWalletAdd}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Social Links</h2>
-          <div className="space-y-4">
-            {profile.socialLinks.map((link, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span>{link.platform}</span>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
-                >
-                  {link.url}
-                </a>
-              </div>
-            ))}
-            <div className="flex space-x-2">
-              <input
-                type="text"
-                value={newSocialPlatform}
-                onChange={(e) => setNewSocialPlatform(e.target.value)}
-                placeholder="Platform (e.g., Twitter)"
-                className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-              />
-              <input
-                type="text"
-                value={newSocialUrl}
-                onChange={(e) => setNewSocialUrl(e.target.value)}
-                placeholder="URL"
-                className="flex-grow rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-              />
-              <button
-                onClick={handleSocialLinkAdd}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* NFT Selection Modal */}
-        {isNFTModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-96">
-              <h3 className="text-lg font-semibold mb-4">
-                Select NFT as Profile Picture
-              </h3>
-              {/* Implement NFT selection logic here */}
-              <button
-                onClick={() => setIsNFTModalOpen(false)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={handleSaveProfile}
+          className="h-[50px] flex items-center justify-center shrink-0 w-full mt-auto text-lg bg-gray-800 text-white font-semibold rounded-md"
+          disabled={loading}
+        >
+          {loading ? <div className="loader"></div> : "Save Changes"}
+        </button>
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { FC, useState } from "react";
-import { AccountSidebar } from "@/components/shared";
 
 interface User {
   id: string;
@@ -108,7 +107,6 @@ const AccountFollowersPage: FC = () => {
 
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex">
-      <AccountSidebar />
       <div className="flex-1 p-8 bg-gray-100">
         <div className="flex mb-6">
           <button

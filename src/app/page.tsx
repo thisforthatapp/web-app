@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Footer } from "@/components";
 import { Grid, ActivityFeed } from "@/components/home";
 import { useIsMobile } from "@/hooks";
-import { Image as ImageIcon, Handshake } from "@/icons";
+import { Image as ImageIcon, Activity } from "@/icons";
 
 export default function Home() {
   const isMobile = useIsMobile();
@@ -20,8 +20,8 @@ export default function Home() {
         }`}
         onClick={() => setActiveTab("grid")}
       >
-        <ImageIcon className="w-6 h-6" />
-        <span className="text-xs font-medium">Browse NFTs</span>
+        <ImageIcon className="w-5 h-5" />
+        <span className="text-sm font-medium">Browse NFTs</span>
       </button>
       <button
         className={`flex-1 h-full flex flex-col items-center justify-center space-y-1 ${
@@ -31,8 +31,8 @@ export default function Home() {
         }`}
         onClick={() => setActiveTab("feed")}
       >
-        <Handshake className="w-6 h-6" />
-        <span className="text-xs font-medium">Latest Offers</span>
+        <Activity className="w-5 h-5" />
+        <span className="text-sm font-medium">Latest Activity</span>
       </button>
     </div>
   );
