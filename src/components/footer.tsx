@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 const Footer: React.FC = () => {
@@ -5,21 +6,13 @@ const Footer: React.FC = () => {
     <footer className="fixed bottom-0 flex h-[50px] w-full items-center i justify-between bg-gray-100 border-t border-gray-200 px-6">
       <div>© TFT Labs</div>
       <nav className="text-sm sm:text-base">
-        <a href="https://github.com" target="_blank">
-          About
-        </a>
+        <Link href="/about">About</Link>
         <span className="mx-2 text-gray-400">·</span>
-        <a href="https://github.com" target="_blank">
-          Terms
-        </a>
+        <Link href="/legal/terms">Terms</Link>
         <span className="mx-2 text-gray-400">·</span>
-        <a href="https://github.com" target="_blank">
-          Privacy
-        </a>
+        <Link href="/legal/privacy">Privacy</Link>
         <span className="mx-2 text-gray-400">·</span>
-        <a href="https://github.com" target="_blank">
-          Contact
-        </a>
+        <Link href="/contact">Contact</Link>
       </nav>
     </footer>
   );

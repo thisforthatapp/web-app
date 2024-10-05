@@ -70,16 +70,11 @@ const Grid: FC = () => {
   };
 
   useEffect(() => {
-    console.log("does this fire");
     if (sortOption) {
-      console.log("sortOption fetchNfts", sortOption);
       fetchNfts(sortOption, 1);
       setPage(1);
     }
   }, [sortOption]);
-
-  console.log("sortOption", sortOption);
-  console.log("nfts", nfts);
 
   return (
     <div className="w-full overflow-y-auto hide-scrollbar">

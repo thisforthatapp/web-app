@@ -4,16 +4,17 @@ import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/authProvider";
 import { useIsMobile } from "@/hooks";
+import { supabase } from "@/utils/supabaseClient";
 import { AccountDropdown, NotificationDropdown } from "@/components";
 import {
   Wallet as WalletModal,
   Login as LoginModal,
   Onboard as OnboardModal,
 } from "@/components/modals";
-import { User, Login, Search, Hamburger, Close, Notifications } from "@/icons";
+import { Login, Search, Hamburger, Close } from "@/icons";
 
 const Navbar: FC = () => {
-  const { user, loading, hasProfile } = useAuth();
+  const { user, loading, profile, hasProfile } = useAuth();
   const isMobile = useIsMobile();
   const [modal, setModal] = useState<
     boolean | "login" | "onboard" | "wallet" | "add"
@@ -34,36 +35,48 @@ const Navbar: FC = () => {
         <>
           {isMobileMenu ? (
             <>
-              <button
-                onClick={() => {}}
+              <Link
+                href="/account/nfts"
+                onClick={toggleMenu}
                 className="flex items-center text-xl mb-4"
               >
                 My NFTs
-              </button>
-              <button
+              </Link>
+              <Link
                 className="flex items-center text-xl mb-4"
-                onClick={() => {}}
+                href="/account/profile"
+                onClick={toggleMenu}
               >
                 Edit Profile
-              </button>
-              <button
+              </Link>
+              <Link
                 className="flex items-center text-xl mb-4"
-                onClick={() => {}}
+                href={`/${profile?.username}`}
+                onClick={toggleMenu}
               >
                 View Profile
-              </button>
-              <button
+              </Link>
+              <Link
                 className="flex items-center text-xl mb-4"
-                onClick={() => {}}
+                href="/notifications"
+                onClick={toggleMenu}
               >
                 Notifications
+              </Link>
+              <button
+                className="flex items-center text-xl mb-4"
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  toggleMenu();
+                }}
+              >
+                Logout
               </button>
-              <button className="flex items-center text-xl mb-4">Logout</button>
             </>
           ) : (
             <>
               <NotificationDropdown />
-              <AccountDropdown />
+              <AccountDropdown username={profile?.username || ""} />
             </>
           )}
         </>
@@ -130,8 +143,8 @@ const Navbar: FC = () => {
             <p>© TFT Labs</p>
             <div className="mt-2 space-x-2">
               <Link href="/about">About</Link>
-              <Link href="/terms">Terms</Link>
-              <Link href="/privacy">Privacy</Link>
+              <Link href="/legal/terms">Terms</Link>
+              <Link href="/legal/privacy">Privacy</Link>
               <Link href="/contact">Contact</Link>
             </div>
           </div>

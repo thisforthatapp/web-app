@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import { FC, useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { supabase } from "@/utils/supabaseClient";
 import { User } from "@/icons";
 
-const AccountDropdown: React.FC = () => {
+const AccountDropdown: FC<{ username: string }> = ({ username }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -35,35 +37,33 @@ const AccountDropdown: React.FC = () => {
       </button>
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-          <div
-            className="py-1"
-            role="menu"
-            aria-orientation="vertical"
-            aria-labelledby="options-menu"
-          >
-            <button
-              onClick={() => {}}
+          <div className="py-1">
+            <Link
+              href="/account/nfts"
+              onClick={toggleDropdown}
               className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              role="menuitem"
             >
               My NFTs
-            </button>
-            <button
-              onClick={() => {}}
+            </Link>
+            <Link
+              href="/account/profile"
+              onClick={toggleDropdown}
               className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              role="menuitem"
             >
               Edit Profile
-            </button>
-            <button
-              onClick={() => {}}
+            </Link>
+            <Link
+              href={`/${username}`}
+              onClick={toggleDropdown}
               className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-              role="menuitem"
             >
               View Profile
-            </button>
+            </Link>
             <button
-              onClick={() => {}}
+              onClick={async () => {
+                await supabase.auth.signOut();
+                toggleDropdown();
+              }}
               className="flex items-center w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
               role="menuitem"
             >

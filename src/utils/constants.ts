@@ -1,4 +1,11 @@
-export const BLOCKED_USERNAMES = ["api", "account", "nft"];
+export const BLOCKED_USERNAMES = [
+  "about",
+  "account",
+  "api",
+  "contact",
+  "legal",
+  "nft",
+];
 
 export const SUPPORTED_CHAINS = [
   "ethereum",
