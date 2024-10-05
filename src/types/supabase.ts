@@ -24,5 +24,10 @@ export interface NFT {
   created_at: string;
   updated_at: string;
   wallet_address: string;
+  interests: number;
+  offers: number;
+  is_verified: boolean;
+  verified_at: string;
   possible_spam?: boolean;
+  user_profile: Profile;
 }

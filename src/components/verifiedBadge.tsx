@@ -16,19 +16,16 @@ const VerifiedBadge: React.FC<VerifiedProps> = ({
   className,
 }) => (
   <div className={className}>
-    {isVerified && (
-      <>
-        <Verified
-          className="w-full h-full"
-          data-tooltip-id={`verified-tooltip-${verifiedDate}`}
-        />
-        <Tooltip
-          id={`verified-tooltip-${verifiedDate}`}
-          place="bottom"
-          content="ownership verified 12 days ago"
-        />
-      </>
-    )}
+    <Verified
+      isVerified={isVerified}
+      className="w-full h-full"
+      data-tooltip-id={`verified-tooltip-${verifiedDate}`}
+    />
+    <Tooltip
+      id={`verified-tooltip-${verifiedDate}`}
+      place="bottom"
+      content={isVerified ? "ownership verified" : "ownership not verified"}
+    />
   </div>
 );
 

@@ -4,21 +4,13 @@ import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/providers/authProvider";
 import { useIsMobile } from "@/hooks";
-import { NotificationDropdown } from "@/components";
+import { AccountDropdown, NotificationDropdown } from "@/components";
 import {
   Wallet as WalletModal,
   Login as LoginModal,
   Onboard as OnboardModal,
 } from "@/components/modals";
-import {
-  Wallet,
-  User,
-  Login,
-  Search,
-  Hamburger,
-  Close,
-  Notifications,
-} from "@/icons";
+import { User, Login, Search, Hamburger, Close, Notifications } from "@/icons";
 
 const Navbar: FC = () => {
   const { user, loading, hasProfile } = useAuth();
@@ -40,47 +32,37 @@ const Navbar: FC = () => {
     <>
       {(user || loading) && (
         <>
-          <button
-            className={`flex items-center ${
-              isMobileMenu
-                ? "text-xl mb-4"
-                : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
-            }`}
-            onClick={() => setModal("wallet")}
-          >
-            {isMobileMenu && "Manage NFTs & Offers"}
-            <Wallet
-              className={`${
-                isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
-              } text-black`}
-            />
-          </button>
           {isMobileMenu ? (
-            <button
-              className="flex items-center text-xl mb-4"
-              onClick={() => {}}
-            >
-              Notifications
-              <Notifications className="w-6 h-6 ml-4 text-black" />
-            </button>
+            <>
+              <button
+                className="flex items-center text-xl mb-4"
+                onClick={() => {}}
+              >
+                Notifications
+                <Notifications className="w-6 h-6 ml-4 text-black" />
+              </button>
+              <Link
+                href="/account"
+                className={`flex items-center ${
+                  isMobileMenu
+                    ? "text-xl mb-4"
+                    : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
+                }`}
+              >
+                {isMobileMenu && "Account"}
+                <User
+                  className={`${
+                    isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
+                  } text-black`}
+                />
+              </Link>
+            </>
           ) : (
-            <NotificationDropdown />
+            <>
+              <NotificationDropdown />
+              <AccountDropdown />
+            </>
           )}
-          <Link
-            href="/account"
-            className={`flex items-center ${
-              isMobileMenu
-                ? "text-xl mb-4"
-                : "h-full w-[45px] rounded-md bg-gray-100 justify-center"
-            }`}
-          >
-            {isMobileMenu && "Account"}
-            <User
-              className={`${
-                isMobileMenu ? "w-6 h-6 ml-4" : "w-[22px] h-[22px]"
-              } text-black`}
-            />
-          </Link>
         </>
       )}
       {!user && !loading && (
@@ -113,7 +95,7 @@ const Navbar: FC = () => {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search by NFT or User"
               className="w-full px-4 h-[44px] pl-10 pr-4 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

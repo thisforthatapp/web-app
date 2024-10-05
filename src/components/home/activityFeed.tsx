@@ -87,7 +87,7 @@ const ActivityItem = ({ activity }: { activity: Activity }) => {
   };
 
   return (
-    <div className="flex items-start space-x-3 p-3 bg-blue-50 border-b">
+    <div className="flex items-start space-x-3 p-3 bg-gray-50 border-b">
       <img
         src="/temp/profile.webp"
         alt={activity.offerFrom}
@@ -124,7 +124,7 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
 
   const desktopStyle = `border-l border-gray-200 hidden lg:flex flex-col ${
     feedCollapsed ? "w-12" : "w-[460px]"
-  } bg-blue-50 transition-all duration-300 ease-in-out shrink-0`;
+  } bg-gray-50 transition-all duration-300 ease-in-out shrink-0`;
   const mobileStyle = `h-full`;
 
   return (
@@ -132,9 +132,8 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
       <div className="flex-grow overflow-hidden">
         {!feedCollapsed && (
           <>
-            <div className="flex items-center justify-center text-xl font-semibold my-3 text-center">
-              <Handshake className="w-6 h-6" />
-              <div className="ml-2">Latest Offers</div>
+            <div className="bg-gray-200 flex items-center justify-center text-lg font-semibold py-2 text-center border-b border-gray-100">
+              Activity
             </div>
             {activityData.map((activity) => (
               <ActivityItem key={activity.id} activity={activity} />
@@ -151,8 +150,8 @@ const ActivityFeed: React.FC<{ showCollapsibleTab: boolean }> = ({
         transition-all duration-300 ease-in-out
         ${
           feedCollapsed
-            ? "bg-blue-100 hover:bg-blue-200"
-            : "bg-blue-50 hover:bg-blue-100"
+            ? "bg-gray-100 hover:bg-gray-200"
+            : "bg-gray-50 hover:bg-gray-100"
         }
       `}
         >

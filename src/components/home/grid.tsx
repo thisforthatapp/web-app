@@ -73,8 +73,10 @@ const Grid: FC = () => {
   };
 
   useEffect(() => {
-    fetchNfts(sortOption, 1);
-    setPage(1);
+    if (sortOption) {
+      fetchNfts(sortOption, 1);
+      setPage(1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortOption]);
 
