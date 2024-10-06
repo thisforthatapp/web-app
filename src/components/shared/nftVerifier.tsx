@@ -1,3 +1,6 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+// remove const userId = (await supabase.auth.getSession()).data.session?.user.id; -> useAuth()
+
 import React, { useState, useEffect } from "react";
 import { useSignMessage } from "wagmi";
 import { supabase } from "@/utils/supabaseClient";
@@ -42,7 +45,17 @@ const ExternalLinkIcon = () => (
   </svg>
 );
 
-const NFTVerificationRow = ({ group, nftCount, onVerify }) => {
+interface NFTVerificationRowProps {
+  group: string;
+  nftCount: number;
+  onVerify: (group: string) => void;
+}
+
+const NFTVerificationRow: React.FC<NFTVerificationRowProps> = ({
+  group,
+  nftCount,
+  onVerify,
+}) => {
   const [chain, wallet] = group.split("-");
 
   return (
@@ -50,7 +63,13 @@ const NFTVerificationRow = ({ group, nftCount, onVerify }) => {
       <div className="flex flex-col">
         <div className="flex mb-1">
           <div className="font-semibold">Chain: </div>
-          <div className="ml-2">{CHAIN_IDS_TO_CHAINS[chain]}</div>
+          <div className="ml-2">
+            {
+              CHAIN_IDS_TO_CHAINS[
+                chain as unknown as keyof typeof CHAIN_IDS_TO_CHAINS
+              ]
+            }
+          </div>
         </div>
         <div className="flex mb-1">
           <div className="font-semibold">Wallet: </div>
@@ -83,15 +102,17 @@ const NFTVerificationRow = ({ group, nftCount, onVerify }) => {
   );
 };
 
-const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
+const NftVerifier: React.FC<VerifyNFTProps> = ({}) => {
   const { signMessageAsync } = useSignMessage();
 
-  const [walletGroups, setWalletGroups] = useState<any[]>([]);
+  const [walletGroups, setWalletGroups] = useState<{ [key: string]: any[] }>(
+    {}
+  );
   const [loading, setLoading] = useState(true);
   const [displayMaxWarning, setDisplayMaxWarning] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerrifyError] = useState<string | null>(null);
-  const [verifiedWalletGroups, setVerifiedWalletGroups] = useState<any[]>([]);
+  const [, setVerifiedWalletGroups] = useState<any[]>([]);
 
   useEffect(() => {
     fetchNFTs();
@@ -106,7 +127,9 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
 
       const { data, error } = await supabase
         .from("user_nfts")
-        .select(`id, user_id, nft_id, nfts!inner (*)`)
+        .select(
+          `id, user_id, nft_id, nfts: nfts!inner (chain_id, wallet_address)`
+        )
         .eq("user_id", userId)
         .eq("nfts.is_verified", false);
 
@@ -114,7 +137,7 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
       if (error) throw error;
 
       // Group the NFTs by chain_id and wallet_address
-      const groupedNfts = data.reduce((acc, item) => {
+      const groupedNfts = data.reduce((acc: any, item: any) => {
         const key = `${item.nfts.chain_id}-${item.nfts.wallet_address}`;
         if (!acc[key]) {
           acc[key] = [];
@@ -145,10 +168,13 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
       // Request wallet signature
       const [chain, wallet] = walletGroup.split("-");
 
-      const message = `Verify ownership of NFTs for wallet ${wallet} on ${CHAIN_IDS_TO_CHAINS[chain]}`;
+      const message = `Verify ownership of NFTs for wallet ${wallet} on ${
+        CHAIN_IDS_TO_CHAINS[chain as keyof typeof CHAIN_IDS_TO_CHAINS]
+      }`;
       const signature = await signMessageAsync({ message });
       const token = (await supabase.auth.getSession()).data.session
         ?.access_token;
+      if (!token) throw new Error("User token not found");
       const response = await verifyNFTs(wallet, chain, signature, token);
 
       // if response.error is not null, set verify error, else, set the walletgroup as done verifying
@@ -158,7 +184,7 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
         setVerifiedWalletGroups((prev) => [...prev, walletGroup]);
       }
     } catch (error) {
-      setVerrifyError(error);
+      setVerrifyError(error instanceof Error ? error.message : String(error));
     } finally {
       setVerifying(false);
     }
@@ -222,7 +248,7 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({ onComplete }) => {
                         </p>
                       </div>
                     )}
-                    {Object.keys(walletGroups).map((group, index) => (
+                    {Object.keys(walletGroups).map((group) => (
                       <NFTVerificationRow
                         key={group}
                         group={group}

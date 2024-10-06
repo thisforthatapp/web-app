@@ -1,30 +1,30 @@
-import React, { useState } from "react";
+import { FC } from "react";
+import { GridTabOption } from "@/types/main";
 
-interface NavItem {
+interface GridNavItem {
   id: string;
   label: string;
   emoji: string;
 }
 
 interface GridNavigationProps {
-  onNavigationChange: (id: string) => void;
+  tabOption: string;
+  onNavigationChange: (tabOption: GridTabOption) => void;
 }
 
-const navItems: NavItem[] = [
+const navItems: GridNavItem[] = [
   { id: "home", label: "Home", emoji: "🏠" },
   { id: "followers", label: "Following", emoji: "👥" },
   { id: "swaps", label: "My Swaps", emoji: "🤝" },
   { id: "pinned", label: "Pinned", emoji: "📌" },
 ];
 
-const GridNavigation: React.FC<GridNavigationProps> = ({
+const GridNavigation: FC<GridNavigationProps> = ({
+  tabOption,
   onNavigationChange,
 }) => {
-  const [activeItem, setActiveItem] = useState<string>("home");
-
   const handleItemClick = (id: string) => {
-    setActiveItem(id);
-    onNavigationChange(id);
+    onNavigationChange(id as GridTabOption);
   };
 
   return (
@@ -36,7 +36,7 @@ const GridNavigation: React.FC<GridNavigationProps> = ({
             className={`
                 flex items-center px-4 py-2 rounded-full transition-all duration-300 ease-in-out border borer-gray-200
                 ${
-                  activeItem === item.id
+                  tabOption === item.id
                     ? "bg-gray-800 text-white shadow-lg transform scale-105"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }

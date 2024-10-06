@@ -57,7 +57,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatFeedRef = useRef<HTMLDivElement | null>(null);
+  // const chatFeedRef = useRef<HTMLDivElement | null>(null);
   const [page, setPage] = useState<number>(1);
 
   useEffect(() => {

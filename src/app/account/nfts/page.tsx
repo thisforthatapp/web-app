@@ -6,11 +6,7 @@ import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 import { supabase } from "@/utils/supabaseClient";
 import { NFTItemMove } from "@/components/shared";
 import { ResizableDivider } from "@/components";
-
-interface NFT {
-  id: string;
-  // Add other properties of NFT
-}
+import { NFT, Profile } from "@/types/supabase";
 
 interface UserNFT {
   id: string;
@@ -133,7 +129,8 @@ const AccountNFTSPage: React.FC = () => {
   const { nftsNotForSwap, hasMoreNotForSwap, setNftsNotForSwap } =
     useNFTsNotForSwap(user?.id, pageNotForSwap);
 
-  const handleMoveNFT = async (item: NFT) => {
+  /*
+  const handleMoveNFT = async (item: UserNFT) => {
     const newForSwapValue = !item.forSwap;
 
     const { error } = await supabase
@@ -161,6 +158,7 @@ const AccountNFTSPage: React.FC = () => {
       ]);
     }
   };
+  */
 
   const handleResize = useCallback((clientY: number) => {
     const containerRect = document
@@ -213,8 +211,8 @@ const AccountNFTSPage: React.FC = () => {
                 <SortableNFTItem
                   key={userNft.id}
                   item={userNft.nfts}
-                  userProfile={profile}
-                  handleMoveNFT={handleMoveNFT}
+                  userProfile={profile!}
+                  // handleMoveNFT={handleMoveNFT}
                 />
               ))}
             </div>
@@ -237,8 +235,8 @@ const AccountNFTSPage: React.FC = () => {
               <SortableNFTItem
                 key={nft.id}
                 item={nft.nfts}
-                userProfile={profile}
-                handleMoveNFT={handleMoveNFT}
+                userProfile={profile!}
+                // handleMoveNFT={handleMoveNFT}
               />
             ))}
           </div>

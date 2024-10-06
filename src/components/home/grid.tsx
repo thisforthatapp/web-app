@@ -1,19 +1,21 @@
 import { FC, useEffect, useState } from "react";
+import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { Offer } from "@/components/modals";
-import { GridSortOption } from "@/types/main";
+import { GridTabOption } from "@/types/main";
 import { NFT } from "@/types/supabase";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
+import { NftItem } from "@/components/shared";
 
-import { NftItem } from "../shared";
 import GridNavigation from "./gridNavigation";
 
 const Grid: FC = () => {
+  const { user } = useAuth();
   const [dealModalOpen, setDealModalOpen] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
+  const [selectedItemId] = useState<number | null>(null);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
-  const [sortOption] = useState<GridSortOption>("most_recent");
+  const [tabOption, setTabOption] = useState<GridTabOption>("home");
   const [, setPage] = useState(1);
   const [, setHasMore] = useState(true);
 
@@ -24,29 +26,38 @@ const Grid: FC = () => {
     };
   */
 
-  const fetchNfts = async (sortOption: GridSortOption, page: number) => {
+  const fetchNfts = async (tabOption: GridTabOption, page: number) => {
     let query;
 
-    query = supabase.from("nfts").select("*, user_profile!nfts_user_fkey1 (*)");
+    console.log("fetchNfts", tabOption);
 
-    switch (sortOption) {
-      case "most_recent":
-        query = query.order("updated_at", { ascending: false });
+    switch (tabOption) {
+      case "home":
+        query = supabase
+          .from("nfts")
+          .select("*, user_profile!nfts_user_fkey1 (*)")
+          .order("updated_at", { ascending: false })
+          .range(
+            (page - 1) * GRID_ITEMS_PER_PAGE,
+            page * GRID_ITEMS_PER_PAGE - 1
+          );
         break;
-      case "most_offers":
-        query = query.order("offers", { ascending: false });
+      case "followers":
+        query = await supabase.rpc("get_following_feed", {
+          current_user_id: user?.id,
+          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
+          range_end: page * GRID_ITEMS_PER_PAGE - 1,
+        });
         break;
-      case "most_interested":
-        query = query.order("interests", { ascending: false });
-        break;
+      // case "most_interested":
+      //   query = query.order("interests", { ascending: false });
+      //   break;
       default:
-        query = query.order("updated_at", { ascending: false });
+        query = supabase
+          .from("nfts")
+          .select("*, user_profile!nfts_user_fkey1 (*)")
+          .order("updated_at", { ascending: false });
     }
-
-    query = query.range(
-      (page - 1) * GRID_ITEMS_PER_PAGE,
-      page * GRID_ITEMS_PER_PAGE - 1
-    );
 
     const { data, error } = await query;
 
@@ -72,15 +83,20 @@ const Grid: FC = () => {
   };
 
   useEffect(() => {
-    if (sortOption) {
-      fetchNfts(sortOption, 1);
+    if (tabOption) {
+      fetchNfts(tabOption, 1);
       setPage(1);
     }
-  }, [sortOption]);
+  }, [tabOption]);
 
   return (
     <div className="w-full overflow-y-auto hide-scrollbar">
-      <GridNavigation onNavigationChange={() => {}} />
+      <GridNavigation
+        tabOption={tabOption}
+        onNavigationChange={(tabOption: GridTabOption) =>
+          setTabOption(tabOption)
+        }
+      />
       <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
         {nfts.map((item) => (
           <NftItem

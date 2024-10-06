@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useState } from "react";
 import Image from "next/image";
-// import { useAuth } from "@/providers/authProvider";
+import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { UserNavigation } from "@/components/user";
 import { Profile } from "@/types/supabase";
@@ -22,8 +22,9 @@ interface UserPageProps {
 }
 
 const UserPage: FC<UserPageProps> = ({ params }) => {
-  // query for user profile
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const { user, loading, profile } = useAuth();
+  const [userPageProfile, setUserPageProfile] = useState<Profile | null>(null);
+  const [isFollowing, setIsFollowing] = useState<boolean>(false);
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
@@ -37,14 +38,73 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
       return;
     }
 
-    setProfile(data);
+    setUserPageProfile(data);
+  };
+
+  const checkIfFollowing = async () => {
+    if (!profile) return;
+    const { data, error } = await supabase
+      .from("user_follows")
+      .select("*")
+      .eq("follower_id", user?.id)
+      .eq("followed_id", userPageProfile?.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      console.error("Error checking follow status:", error);
+      return;
+    }
+    setIsFollowing(!!data);
+  };
+
+  const handleFollow = async () => {
+    if (!profile) return;
+
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("user_follows")
+        .delete()
+        .eq("follower_id", user?.id)
+        .eq("followed_id", userPageProfile?.id);
+
+      if (error) {
+        console.error("Error unfollowing user:", error);
+        return;
+      }
+      setIsFollowing(false);
+    } else {
+      const { error } = await supabase.from("user_follows").insert([
+        {
+          follower_id: user?.id,
+          followed_id: userPageProfile?.id,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error following user:", error);
+        return;
+      }
+      setIsFollowing(true);
+    }
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (loading) return;
 
-  console.log("params", params);
+    if (params.id === profile?.username) {
+      setUserPageProfile(profile);
+    } else {
+      fetchProfile();
+    }
+  }, [loading, profile]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    if (userPageProfile?.id !== profile?.id) {
+      checkIfFollowing();
+    }
+  }, [userPageProfile]);
 
   const [selectedCategory] = useState<NFTCategory>("my-interests");
 
@@ -73,19 +133,28 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
               <div className="relative w-[150px] h-[150px]">
                 <img
                   src={
-                    process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
-                    profile?.profile_pic_url
+                    process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL! +
+                    userPageProfile?.profile_pic_url
                   }
                   alt="Profile Picture"
                   className="w-full h-full rounded-full mx-auto"
                 />
               </div>
               <div className="flex items-center mt-4">
-                <div className="text-3xl font-bold">{profile?.username}</div>
+                <div className="text-3xl font-bold">
+                  {userPageProfile?.username}
+                </div>
               </div>
-              <p className="text-gray-600 mt-2">{profile?.bio}</p>
-              <div className="flex items-center text-sm bg-gray-100 border border-gray-200 px-3 py-1 rounded-full mt-4 cursor-pointer">
-                <div className="ml-1">follow</div>
+              <p className="text-gray-600 mt-2">{userPageProfile?.bio}</p>
+              <div
+                className={`flex items-center border px-3 py-1 rounded-full mt-4 cursor-pointer ${
+                  isFollowing
+                    ? "bg-gray-800 text-white"
+                    : "bg-gray-100 border-gray-200"
+                }`}
+                onClick={handleFollow}
+              >
+                {isFollowing ? "Unfollow" : "Follow"}
               </div>
             </div>
           </div>

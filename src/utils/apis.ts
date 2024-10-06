@@ -1,3 +1,5 @@
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+
 import { Network, Alchemy } from "alchemy-sdk";
 import { NFT } from "@/types/supabase";
 import { ALCHEMY_CHAIN_SLUGS, CHAIND_TO_CHAIN_IDS } from "@/utils/constants";

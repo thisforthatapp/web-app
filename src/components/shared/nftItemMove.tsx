@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import VerifiedBadge from "./verifiedBadge";
 import Options from "./options";
 import { NFT, Profile } from "@/types/supabase";
@@ -41,9 +41,9 @@ interface NFTItemProps {
   handleDealModalOpen: (id: string) => void;
 }
 
-const NFTItemMove: React.FC<NFTItemProps> = ({ item, userProfile }) => {
-  const router = useRouter();
-  const nftUser = userProfile || item.user_profile;
+const NFTItemMove: React.FC<NFTItemProps> = ({ item }) => {
+  // const router = useRouter();
+  // const nftUser = userProfile || item.user_profile;
 
   /*
   const navigateToUser = (e: React.MouseEvent<HTMLDivElement>) => {
