@@ -11,8 +11,8 @@ interface UserNavigationProps {
 }
 
 const navItems: NavItem[] = [
-  { id: "nfts_ok", label: "NFTs I Will Trade", emoji: "✅" },
-  { id: "nfts_not_ok", label: "NFTS I Won't Trade", emoji: "❌" },
+  { id: "for_swap_yes", label: "Ok to Trade", emoji: "✅" },
+  { id: "for_swap_no", label: "Not Eager to Trade", emoji: "❌" },
   { id: "swaps", label: "Swaps", emoji: "🤝" },
   { id: "pinned", label: "Pinned", emoji: "📌" },
 ];

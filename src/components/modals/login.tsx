@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import React from "react";
 import Modal from "react-modal";
+import Image from "next/image";
 import { supabase } from "@/utils/supabaseClient";
 
 import { useIsMobile } from "@/hooks";

@@ -10,7 +10,6 @@ export interface Profile {
 }
 
 export interface NFT {
-  some(arg0: (item: NFT) => boolean): unknown; // what is this?
   id: string;
   name: string;
   image: string;

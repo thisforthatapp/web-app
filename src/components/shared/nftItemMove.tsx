@@ -73,7 +73,7 @@ const NFTItemMove: React.FC<NFTItemProps> = ({ item }) => {
 
         <div className="p-3 font-semibold text-sm text-center">{item.name}</div>
         <button className="bg-black w-full text-white p-3">
-          Move to {item.forSwap ? "Yes" : "No"}
+          Move to {item.for_swap ? "Yes" : "No"}
         </button>
       </div>
     </Link>

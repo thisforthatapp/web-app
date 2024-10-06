@@ -6,6 +6,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useCallback,
 } from "react";
 import { User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabaseClient";
@@ -34,57 +35,57 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     profile: null,
   });
 
-  useEffect(() => {
-    const checkUserProfile = async (user: User) => {
-      try {
-        const { data, error, count } = await supabase
-          .from("user_profile")
-          .select("*", { count: "exact" })
-          .eq("id", user.id)
-          .maybeSingle();
+  const checkUserProfile = useCallback(async (user: User) => {
+    try {
+      const { data, error, count } = await supabase
+        .from("user_profile")
+        .select("*", { count: "exact" })
+        .eq("id", user.id)
+        .maybeSingle();
 
-        if (error) {
-          console.error("Error checking user profile:", error);
-          setState((prev) => ({
-            ...prev,
-            hasProfile: true,
-            profile: null,
-            loading: false,
-          }));
-          return;
-        }
-
-        setState((prev) => ({
-          ...prev,
-          hasProfile: count === 0 ? false : true,
-          profile: count !== 0 ? (data as Profile) : null,
-          loading: false,
-        }));
-      } catch (error) {
-        console.error("Unexpected error checking user profile:", error);
+      if (error) {
+        console.error("Error checking user profile:", error);
         setState((prev) => ({
           ...prev,
           hasProfile: true,
           profile: null,
           loading: false,
-          error: error as AuthError,
         }));
+        return;
       }
-    };
 
+      setState((prev) => ({
+        ...prev,
+        hasProfile: count !== 0,
+        profile: count !== 0 ? (data as Profile) : null,
+        loading: false,
+      }));
+    } catch (error) {
+      console.error("Unexpected error checking user profile:", error);
+      setState((prev) => ({
+        ...prev,
+        hasProfile: true,
+        profile: null,
+        loading: false,
+        error: error as AuthError,
+      }));
+    }
+  }, []);
+
+  useEffect(() => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       const user = session?.user || null;
+      setState((prev) => ({ ...prev, user, loading: !!user }));
 
-      setState((prev) => ({
-        ...prev,
-        user,
-        loading: !!user,
-      }));
-
-      if (user) {
-        await checkUserProfile(user);
+      if (
+        user &&
+        (event === "INITIAL_SESSION" ||
+          event === "USER_UPDATED" ||
+          event === "SIGNED_IN")
+      ) {
+        checkUserProfile(user);
       } else {
         setState((prev) => ({
           ...prev,
@@ -99,7 +100,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [checkUserProfile]);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;
 };

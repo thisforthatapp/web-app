@@ -1,77 +1,21 @@
-import React from "react";
+import { FC, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import VerifiedBadge from "./verifiedBadge";
-import Options from "./options";
+import { NFTImage, VerifiedBadge, Options } from "@/components/shared";
 import { NFT, Profile } from "@/types/supabase";
-
-interface ActionButtonProps {
-  icon: string;
-  label: string;
-  count: number;
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
-}
-
-const ActionButton: React.FC<ActionButtonProps> = ({
-  icon,
-  label,
-  count,
-  onClick,
-}) => (
-  <button
-    className="w-full flex justify-between items-center bg-blue-50 px-3 py-2 rounded-md border border-blue-100 hover:bg-blue-100 transition-colors duration-200 group"
-    onClick={onClick}
-  >
-    <span className="flex items-center">
-      <span className="mr-1.5">{icon}</span>
-      <span className="text-sm text-gray-600 group-hover:text-gray-800">
-        {label}
-      </span>
-    </span>
-    <span className="text-base font-semibold text-gray-800">{count}</span>
-  </button>
-);
-
-interface NFTImageProps {
-  src: string;
-  alt: string;
-  fallback: string;
-}
-
-const NFTImage: React.FC<NFTImageProps> = ({ src, alt, fallback }) => {
-  const [error, setError] = React.useState<boolean>(false);
-
-  if (error) {
-    return (
-      <div className="aspect-square flex items-center justify-center text-center p-4 bg-gray-200">
-        <span className="text-gray-600 font-semibold break-words">
-          {fallback}
-        </span>
-      </div>
-    );
-  }
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      className="aspect-square object-cover w-full h-full"
-      onError={() => setError(true)}
-    />
-  );
-};
 
 interface NFTItemProps {
   item: NFT;
   userProfile?: Profile;
-  handleDealModalOpen: (id: string) => void;
+  makeOffer: (nft: NFT, user: Profile) => void;
+  pinItem: (nft: NFT) => void;
 }
 
-const NFTItem: React.FC<NFTItemProps> = ({
+const NFTItem: FC<NFTItemProps> = ({
   item,
   userProfile,
-  handleDealModalOpen,
+  makeOffer,
+  pinItem,
 }) => {
   const router = useRouter();
   const nftUser = userProfile || item.user_profile;
@@ -106,22 +50,32 @@ const NFTItem: React.FC<NFTItemProps> = ({
           <div className="font-semibold text-sm text-center mb-3">
             {item.name}
           </div>
-          <div className="space-y-2">
-            <ActionButton
-              icon="🤝"
-              label="Swap"
-              count={item.offers}
+          <div className="flex space-x-2">
+            <button
+              className="w-full flex justify-center items-center bg-blue-50 px-3 py-2 rounded-md border border-blue-100 hover:bg-blue-100 transition-colors duration-200 group"
               onClick={(e) => {
                 e.preventDefault();
-                handleDealModalOpen(item.id);
+                makeOffer(item, nftUser);
               }}
-            />
-            <ActionButton
-              icon="📌"
-              label="Pin"
-              count={item.interests}
-              onClick={(e) => e.preventDefault()}
-            />
+            >
+              <span className="flex items-center">
+                <span className="text-gray-600 group-hover:text-gray-800">
+                  🤝 Make Offer
+                </span>
+              </span>
+            </button>
+            <button
+              className="w-[75px] flex justify-between items-center bg-blue-50 px-3 py-2 rounded-md border border-blue-100 hover:bg-blue-100 transition-colors duration-200 group"
+              onClick={(e) => {
+                e.preventDefault();
+                pinItem(item.id);
+              }}
+            >
+              <span className="flex items-center">
+                <span className="mr-1.5">📌</span>
+              </span>
+              <span className="text-base font-semibold text-gray-800">1</span>
+            </button>
           </div>
         </div>
 

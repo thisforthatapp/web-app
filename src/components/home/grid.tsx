@@ -3,7 +3,7 @@ import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { Offer } from "@/components/modals";
 import { GridTabOption } from "@/types/main";
-import { NFT } from "@/types/supabase";
+import { NFT, Profile } from "@/types/supabase";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 import { NftItem } from "@/components/shared";
 
@@ -11,8 +11,10 @@ import GridNavigation from "./gridNavigation";
 
 const Grid: FC = () => {
   const { user } = useAuth();
-  const [dealModalOpen, setDealModalOpen] = useState(false);
-  const [selectedItemId] = useState<number | null>(null);
+  const [makeOfferInfo, setMakeOfferInfo] = useState<{
+    nft: NFT;
+    user: Profile;
+  } | null>(null);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
   const [tabOption, setTabOption] = useState<GridTabOption>("home");
@@ -29,13 +31,16 @@ const Grid: FC = () => {
   const fetchNfts = async (tabOption: GridTabOption, page: number) => {
     let query;
 
-    console.log("fetchNfts", tabOption);
+    // console.log("fetchNfts", tabOption);
 
     switch (tabOption) {
       case "home":
         query = supabase
           .from("nfts")
-          .select("*, user_profile!nfts_user_fkey1 (*)")
+          .select(
+            "*, user_pins!left(user_id), user_profile!nfts_user_id_fkey (*)"
+          )
+          // .eq("user_pins.user_id", user?.id)
           .order("updated_at", { ascending: false })
           .range(
             (page - 1) * GRID_ITEMS_PER_PAGE,
@@ -55,8 +60,13 @@ const Grid: FC = () => {
       default:
         query = supabase
           .from("nfts")
-          .select("*, user_profile!nfts_user_fkey1 (*)")
-          .order("updated_at", { ascending: false });
+          .select("*, user_profile!nfts_user_id_fkey (*)")
+          .order("updated_at", { ascending: false })
+          .range(
+            (page - 1) * GRID_ITEMS_PER_PAGE,
+            page * GRID_ITEMS_PER_PAGE - 1
+          );
+        break;
     }
 
     const { data, error } = await query;
@@ -82,6 +92,59 @@ const Grid: FC = () => {
     setHasMore(data.length === GRID_ITEMS_PER_PAGE);
   };
 
+  const makeOffer = async (nft: NFT, user: Profile) => {
+    setMakeOfferInfo({ nft, user });
+  };
+
+  const pinItem = async (nft: NFT) => {
+    console.log("pinItem", nft);
+
+    if (!user) return;
+
+    const { data, error } = await supabase.from("user_pins").insert([
+      {
+        user_id: user?.id,
+        nft_id: nft.id,
+      },
+    ]);
+
+    console.log("data", data);
+
+    if (error) {
+      console.error("Error following user:", error);
+      return;
+    }
+
+    /*
+    if (isFollowing) {
+      const { error } = await supabase
+        .from("user_follows")
+        .delete()
+        .eq("follower_id", user?.id)
+        .eq("followed_id", userPageProfile?.id);
+
+      if (error) {
+        console.error("Error unfollowing user:", error);
+        return;
+      }
+      // setIsFollowing(false);
+    } else {
+      const { error } = await supabase.from("user_pins").insert([
+        {
+          user_id: user?.id,
+          nft_id: itemId,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error following user:", error);
+        return;
+      }
+      // setIsFollowing(true);
+    }
+    */
+  };
+
   useEffect(() => {
     if (tabOption) {
       fetchNfts(tabOption, 1);
@@ -102,20 +165,14 @@ const Grid: FC = () => {
           <NftItem
             key={item.id}
             item={item}
-            handleDealModalOpen={() => setDealModalOpen(true)}
+            makeOffer={makeOffer}
+            pinItem={pinItem}
           />
         ))}
       </div>
       {/* has more button */}
-      {selectedItemId && (
-        <>
-          {dealModalOpen && (
-            <Offer
-              closeModal={() => setDealModalOpen(false)}
-              itemId={selectedItemId.toString()}
-            />
-          )}
-        </>
+      {makeOfferInfo && (
+        <Offer type="make_offer" closeModal={() => setMakeOfferInfo(null)} />
       )}
     </div>
   );

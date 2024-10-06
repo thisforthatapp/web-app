@@ -198,7 +198,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
             {activities.map((activity) => (
               <div
                 key={activity.id}
-                className="flex items-start border-b border-[#f7f7f7] px-4 pt-4 pb-2"
+                className="flex items-start border-b border-gray-200 px-4 pt-4 pb-2"
               >
                 <img
                   src={
