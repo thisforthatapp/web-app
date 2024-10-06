@@ -20,10 +20,6 @@ interface UserNFT {
   nfts: NFT;
 }
 
-interface Profile {
-  // Define properties of profile
-}
-
 const useNFTsForSwap = (userId: string | undefined, page: number) => {
   const [nftsForSwap, setNftsForSwap] = useState<UserNFT[]>([]);
   const [hasMoreForSwap, setHasMoreForSwap] = useState<boolean>(true);

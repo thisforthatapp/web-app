@@ -13,14 +13,16 @@ const Grid: FC = () => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
 
   const [nfts, setNfts] = useState<NFT[]>([]);
-  const [sortOption, setSortOption] = useState<GridSortOption>("most_recent");
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [sortOption] = useState<GridSortOption>("most_recent");
+  const [, setPage] = useState(1);
+  const [, setHasMore] = useState(true);
 
-  const handleDealModalOpen = (itemId: number) => {
-    setSelectedItemId(itemId);
-    setDealModalOpen(true);
-  };
+  /*
+    const handleDealModalOpen = (itemId: number) => {
+      setSelectedItemId(itemId);
+      setDealModalOpen(true);
+    };
+  */
 
   const fetchNfts = async (sortOption: GridSortOption, page: number) => {
     let query;

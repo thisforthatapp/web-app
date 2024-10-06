@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false, // Disable React strict mode, use only temporarily to disable multiple queries
   async redirects() {
     return [
       {

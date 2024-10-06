@@ -41,18 +41,16 @@ interface NFTItemProps {
   handleDealModalOpen: (id: string) => void;
 }
 
-const NFTItemMove: React.FC<NFTItemProps> = ({
-  item,
-  userProfile,
-  handleDealModalOpen,
-}) => {
+const NFTItemMove: React.FC<NFTItemProps> = ({ item, userProfile }) => {
   const router = useRouter();
   const nftUser = userProfile || item.user_profile;
 
+  /*
   const navigateToUser = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     router.push(`/${nftUser?.username}`);
   };
+  */
 
   return (
     <Link

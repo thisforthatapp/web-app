@@ -10,7 +10,7 @@ export interface Profile {
 }
 
 export interface NFT {
-  some(arg0: (item: NFT) => boolean): unknown;
+  some(arg0: (item: NFT) => boolean): unknown; // what is this?
   id: string;
   name: string;
   image: string;
@@ -30,4 +30,20 @@ export interface NFT {
   verified_at: string;
   possible_spam?: boolean;
   user_profile: Profile;
+}
+
+export interface Activity {
+  id: string;
+  user_id: string;
+  activity_type:
+    | "message"
+    | "offer_start"
+    | "offer_counter"
+    | "offer_accepted"
+    | "pin";
+  content: string | null;
+  metadata: JSON | null;
+  username: string;
+  profile_pic_url: string;
+  created_at: string;
 }

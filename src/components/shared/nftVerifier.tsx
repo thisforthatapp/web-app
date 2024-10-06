@@ -1,10 +1,6 @@
-// TODO: Continue from here
-
 import React, { useState, useEffect } from "react";
-import { /*useAccount*/ useSignMessage /*useChains*/ } from "wagmi";
-// import { verifyMessage } from "viem";
+import { useSignMessage } from "wagmi";
 import { supabase } from "@/utils/supabaseClient";
-// import { Verified, ArrowLeft, ChevronRight } from "@/icons";
 import { CHAIN_IDS_TO_CHAINS } from "@/utils/constants";
 import { verifyNFTs } from "@/utils/helpers";
 

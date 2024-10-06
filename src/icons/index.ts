@@ -17,3 +17,4 @@ export { default as Hamburger } from "./hamburger";
 export { default as Image } from "./image";
 export { default as Handshake } from "./handshake";
 export { default as Add } from "./add";
+export { default as CollapsibleIcon } from "./collapsibleIcon";

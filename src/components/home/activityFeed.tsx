@@ -1,126 +1,165 @@
-import { FC, useState } from "react";
+import { FC, useState, useRef, useEffect } from "react";
+import { useAuth } from "@/providers/authProvider";
+import { supabase } from "@/utils/supabaseClient";
+import { CollapsibleIcon } from "@/icons";
+import { Activity } from "@/types/supabase";
 
-// Custom collapsible icon component
-const CollapsibleIcon = ({ collapsed }: { collapsed: boolean }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`transition-transform duration-300 ${
-      collapsed ? "rotate-180" : ""
-    }`}
-  >
-    <polyline points={collapsed ? "9 18 15 12 9 6" : "15 18 9 12 15 6"} />
-  </svg>
-);
+function renderMessageText(text: string) {
+  // This regex matches most common URL formats
+  const urlRegex =
+    /(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
 
-const activityData: Activity[] = [
-  {
-    id: 1,
-    offerFrom: "Alice",
-    offerTo: "Bob",
-    offerNft: "CryptoPunk #3456",
-    forNft: "Bored Ape #7890",
-    status: "Negotiating",
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-  },
-  {
-    id: 2,
-    offerFrom: "Charlie",
-    offerTo: "David",
-    offerNft: "Azuki #1234",
-    forNft: "Doodle #5678",
-    status: "Agreed",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-  },
-  {
-    id: 3,
-    offerFrom: "Eve",
-    offerTo: "Frank",
-    offerNft: "Cool Cat #9012",
-    forNft: "Moonbird #3456",
-    status: "Negotiating",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-  },
-  {
-    id: 4,
-    offerFrom: "Grace",
-    offerTo: "Henry",
-    offerNft: "World of Women #7890",
-    forNft: "VeeFriends #1234",
-    status: "Declined",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5), // 5 hours ago
-  },
-  {
-    id: 5,
-    offerFrom: "Ivy",
-    offerTo: "Jack",
-    offerNft: "Pudgy Penguin #5678",
-    forNft: "CloneX #9012",
-    status: "Agreed",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-  },
-];
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  let match;
 
-interface Activity {
-  id: number;
-  offerFrom: string;
-  offerTo: string;
-  offerNft: string;
-  forNft: string;
-  status: "Negotiating" | "Agreed" | "Declined";
-  timestamp: Date;
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Add the text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    // Add the matched URL
+    const fullUrl = match[0];
+    parts.push(
+      <a
+        key={match.index}
+        href={fullUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+        className="underline"
+      >
+        {fullUrl}
+      </a>
+    );
+
+    lastIndex = urlRegex.lastIndex;
+  }
+
+  // Add any remaining text after the last match
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return <>{parts}</>;
 }
-
-const ActivityItem = ({ activity }: { activity: Activity }) => {
-  const statusColor: { [key in Activity["status"]]: string } = {
-    Negotiating: "text-yellow-600 bg-yellow-100",
-    Agreed: "text-green-600 bg-green-100",
-    Declined: "text-red-600 bg-red-100",
-  };
-
-  return (
-    <div className="flex items-start space-x-3 p-3 bg-white border-b border-gray-100">
-      <img
-        src="/temp/profile.webp"
-        alt={activity.offerFrom}
-        className="w-10 h-10 rounded-full"
-      />
-      <div className="flex-1">
-        <p className="text-sm">
-          <span className="font-semibold">{activity.offerFrom}</span> offered{" "}
-          <span className="font-semibold">{activity.offerNft}</span> to{" "}
-          <span className="font-semibold">{activity.offerTo}</span> for{" "}
-          <span className="font-semibold">{activity.forNft}</span>
-        </p>
-        <div className="flex items-center mt-1">
-          <span
-            className={`text-xs px-2 py-1 rounded-full ${
-              statusColor[activity.status]
-            }`}
-          >
-            {activity.status}
-          </span>
-          <span className="text-xs text-gray-500 ml-2">2m</span>
-        </div>
-      </div>
-      <img src="/temp/nft.png" alt="NFT" className="w-16 h-16 rounded-md" />
-    </div>
-  );
-};
 
 const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
   showCollapsibleTab = true,
 }) => {
+  const { profile, hasProfile } = useAuth();
   const [feedCollapsed, setFeedCollapsed] = useState(false);
-  const [message, setMessage] = useState("");
   const toggleFeed = () => setFeedCollapsed(!feedCollapsed);
+
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [newMessage, setNewMessage] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatFeedRef = useRef<HTMLDivElement | null>(null);
+  const [page, setPage] = useState<number>(1);
+
+  useEffect(() => {
+    // Subscribe to real-time updates
+    supabase
+      .channel("activities")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+        },
+        (payload) => {
+          setActivities((prevActivities) => [
+            payload.new as Activity,
+            ...prevActivities,
+          ]);
+        }
+      )
+      .subscribe();
+
+    // Fetch initial activities
+    fetchActivities(page);
+
+    return () => {
+      supabase.channel("activities").unsubscribe();
+    };
+  }, []);
+
+  const fetchActivities = async (page: number) => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from("activities")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range((page - 1) * 20, page * 20 - 1);
+
+      if (error) {
+        throw error;
+      }
+
+      if (data && data.length > 0) {
+        setActivities((prevActivities) => [...prevActivities, ...data]);
+        setPage(page + 1);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch activities", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitMessage = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!newMessage.trim()) return;
+    if (!profile) return;
+
+    try {
+      // if (profile?.banned) {
+      //   alert("You are banned from commenting.");
+      //   return;
+      // }
+
+      const optimisticId = Math.random();
+      const newMsg = {
+        user_id: profile.id,
+        activity_type: "message",
+        content: newMessage.trim(),
+        username: profile.username,
+        profile_pic_url: profile.profile_pic_url,
+      };
+
+      // optimistaclly update the UI
+      setActivities((prevActivities) => [
+        ...prevActivities,
+        {
+          ...newMsg,
+          id: optimisticId,
+          created_at: new Date().toISOString(),
+          metadata: null,
+        } as unknown as Activity,
+      ]);
+
+      const { error } = await supabase.from("activities").insert(newMsg);
+
+      if (error) {
+        console.error("Error submitting comment:", error);
+        setActivities(
+          activities.filter((activity) => Number(activity.id) !== optimisticId)
+        );
+      } else {
+        setNewMessage("");
+      }
+    } catch (error) {
+      console.error("Failed to send message", error);
+    }
+  };
 
   const desktopStyle = `shadow-[0_0_3px_#bbbbbb] hidden lg:flex flex-col h-full ${
     feedCollapsed ? "w-12" : "w-[460px]"
@@ -152,31 +191,53 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
       )}
       {!feedCollapsed && (
         <>
-          <div className="flex-grow overflow-auto">
-            {/* {activityData.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
-            ))} */}
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
+            {loading && (
+              <div className="text-center text-gray-500">Loading...</div>
+            )}
+            {activities.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-start border-b border-[#f7f7f7] px-4 pt-4 pb-2"
+              >
+                <img
+                  src={
+                    process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+                    activity.profile_pic_url
+                  }
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full mr-3"
+                />
+                <div>
+                  <p className="text-sm font-semibold">{activity.username}</p>
+                  <p className="text-sm text-gray-700">
+                    {renderMessageText(activity.content || "")}
+                  </p>
+                  <span className="text-xs text-gray-400">
+                    {new Date(activity.created_at).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef}></div>
           </div>
           <div className="p-3">
-            <div className="flex items-center space-x-2">
+            <form onSubmit={submitMessage} className="gap-x-2 flex">
               <input
                 type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Send a message..."
                 className="flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
-                onClick={() => {
-                  // Handle sending message
-                  console.log("Sending message:", message);
-                  setMessage("");
-                }}
+                type="submit"
                 className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={!newMessage.trim() || !hasProfile}
               >
                 Send
               </button>
-            </div>
+            </form>
           </div>
         </>
       )}

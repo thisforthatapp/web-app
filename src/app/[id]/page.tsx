@@ -2,7 +2,7 @@
 
 import { FC, useEffect, useState } from "react";
 import Image from "next/image";
-import { useAuth } from "@/providers/authProvider";
+// import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { UserNavigation } from "@/components/user";
 import { Profile } from "@/types/supabase";
@@ -46,8 +46,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
 
   console.log("params", params);
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<NFTCategory>("my-interests");
+  const [selectedCategory] = useState<NFTCategory>("my-interests");
 
   const nfts: { [key in NFTCategory]: NFT[] } = {
     "my-interests": [
