@@ -10,6 +10,14 @@ export interface Profile {
   banned: boolean;
 }
 
+export interface UserNFT {
+  id: string;
+  user_id: string;
+  nft_id: string;
+  for_swap: boolean;
+  nfts: NFT;
+}
+
 export interface NFT {
   id: string;
   name: string;
@@ -28,6 +36,7 @@ export interface NFT {
   offers: number;
   is_verified: boolean;
   verified_at: string;
+  user_id: string;
   possible_spam?: boolean;
   user_profile: Profile;
 }

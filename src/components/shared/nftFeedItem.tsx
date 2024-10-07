@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { NFTImage, VerifiedBadge, Options } from "@/components/shared";
@@ -38,23 +38,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           alt={item.nft_name}
           fallback={item.nft_name}
         />
-
-        <div className="p-3">
-          <div className="text-sm text-center mb-3">{item.nft_name}</div>
-          <div className="flex space-x-2">
-            <button
-              className="w-full flex justify-center items-center bg-gray-50 px-3 py-2 rounded-md border border-gray-200 hover:bg-gray-200 transition-colors duration-200"
-              onClick={(e) => {
-                e.preventDefault();
-                makeOffer(item);
-              }}
-            >
-              <span className="flex items-center mr-2.5 text-xl">🤝</span>
-              <span className="text-gray-800 font-semibold">Make Offer</span>
-            </button>
-          </div>
-        </div>
-
+        <div className="text-center my-4 font-semibold">{item.nft_name}</div>
         <div className="flex justify-between px-3 pb-3">
           <div className="pt-2 flex items-center" onClick={navigateToUser}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -68,7 +52,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             </span>
           </div>
           <button
-            className={`flex justify-between items-center px-2.5 py-1 rounded-md transition-colors duration-200 ${
+            className={`text-sm flex justify-between items-center px-2.5 py-1 rounded-md transition-colors duration-200 ${
               item.is_pinned
                 ? "bg-gray-700 text-white"
                 : "bg-gray-100 hover:bg-gray-200 text-gray-800"
@@ -82,6 +66,18 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             <span className="font-semibold">{item.nft_pins}</span>
           </button>
         </div>
+      </div>
+      <div className="mt-3">
+        <button
+          className="w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 border border-gray-200 shadow-sm"
+          onClick={(e) => {
+            e.preventDefault();
+            makeOffer(item);
+          }}
+        >
+          <span className="flex items-center mr-2.5 text-2xl">🤝</span>
+          <span className="text-gray-800 text-lg font-semibold">Trade</span>
+        </button>
       </div>
     </Link>
   );

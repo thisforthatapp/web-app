@@ -89,7 +89,7 @@ const NFTVerificationRow: React.FC<NFTVerificationRowProps> = ({
       </div>
       <button
         onClick={() => onVerify(group)}
-        className={`px-4 py-2 rounded-lg text-white font-medium flex items-center transition-colors duration-200 bg-blue-600 hover:bg-blue-700`}
+        className={`px-4 py-2 rounded-lg text-white font-medium flex items-center transition-colors duration-200 bg-green-600 hover:bg-green-700`}
       >
         <>
           Verify
@@ -220,7 +220,7 @@ const NftVerifier: React.FC<VerifyNFTProps> = ({}) => {
             )}
             <button
               onClick={() => setVerrifyError(null)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium"
+              className="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg font-medium"
             >
               Go back
             </button>

@@ -1,19 +1,14 @@
 "use client";
 
 import { FC, useEffect, useState } from "react";
-import Image from "next/image";
 import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
+import { Offer } from "@/components/modals";
 import { UserNavigation } from "@/components/user";
-import { Profile } from "@/types/supabase";
-
-type NFTCategory = "my-interests" | "not-for-swap" | "for-swap";
-
-interface NFT {
-  id: string;
-  imageUrl: string;
-  title: string;
-}
+import { NFTFeedItem } from "@/components/shared";
+import { UserTabOption } from "@/types/main";
+import { Profile, NFTFeedItem as NFTFeedItemType } from "@/types/supabase";
+import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 
 interface UserPageProps {
   params: {
@@ -23,8 +18,15 @@ interface UserPageProps {
 
 const UserPage: FC<UserPageProps> = ({ params }) => {
   const { user, loading, profile } = useAuth();
+  const [offerItem, setOfferItem] = useState<NFTFeedItemType | null>(null);
+
   const [userPageProfile, setUserPageProfile] = useState<Profile | null>(null);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
+
+  const [nfts, setNfts] = useState<NFTFeedItemType[]>([]);
+  const [tabOption, setTabOption] = useState<UserTabOption>("yes_for_swap");
+  const [, setPage] = useState(1);
+  const [, setHasMore] = useState(true);
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
@@ -106,31 +108,120 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     }
   }, [userPageProfile]);
 
-  const [selectedCategory] = useState<NFTCategory>("my-interests");
+  const fetchNfts = async (tabOption: UserTabOption, page: number) => {
+    let query;
 
-  const nfts: { [key in NFTCategory]: NFT[] } = {
-    "my-interests": [
-      { id: "5", imageUrl: "/temp/nft.png", title: "NFT 5" },
-      { id: "6", imageUrl: "/temp/nft.png", title: "NFT 6" },
-    ],
-    "not-for-swap": [
-      { id: "1", imageUrl: "/temp/nft.png", title: "NFT 1" },
-      { id: "2", imageUrl: "/temp/nft.png", title: "NFT 2" },
-    ],
-    "for-swap": [
-      { id: "3", imageUrl: "/temp/nft.png", title: "NFT 3" },
-      { id: "4", imageUrl: "/temp/nft.png", title: "NFT 4" },
-    ],
+    switch (tabOption) {
+      case "yes_for_swap":
+      case "no_for_swap":
+        query = await supabase.rpc("get_user_feed", {
+          page_user_id: userPageProfile?.id,
+          current_user_id: user?.id,
+          nft_for_swap: tabOption === "yes_for_swap",
+          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
+          range_end: page * GRID_ITEMS_PER_PAGE - 1,
+        });
+        break;
+      case "pinned":
+        query = await supabase.rpc("get_user_pinned_feed", {
+          page_user_id: userPageProfile?.id,
+          current_user_id: user?.id,
+          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
+          range_end: page * GRID_ITEMS_PER_PAGE - 1,
+        });
+        break;
+      default:
+        query = await supabase.rpc("get_user_feed", {
+          page_user_id: userPageProfile?.id,
+          current_user_id: user?.id,
+          nft_for_swap: true,
+          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
+          range_end: page * GRID_ITEMS_PER_PAGE - 1,
+        });
+        break;
+    }
+
+    const { data, error } = await query;
+
+    const dataUpdated = data.map((nft: NFTFeedItemType) => {
+      return {
+        ...nft,
+        nft_user_id_username: userPageProfile?.username,
+        nft_user_id_profile_pic_url: userPageProfile?.profile_pic_url,
+      };
+    });
+
+    if (error) {
+      console.error("Error fetching songs:", error);
+      return;
+    }
+
+    if (page === 1) {
+      setNfts(dataUpdated);
+    } else {
+      setNfts((prevNfts) => {
+        const newNfts = dataUpdated.filter(
+          (newNft: NFTFeedItemType) =>
+            !prevNfts.some((prevNft) => prevNft.nft_id === newNft.nft_id)
+        );
+        return [...prevNfts, ...newNfts];
+      });
+    }
+
+    setHasMore(dataUpdated.length === GRID_ITEMS_PER_PAGE);
   };
+
+  const makeOffer = async (nft: NFTFeedItemType) => {
+    setOfferItem(nft);
+  };
+
+  // TEMP: disable unpin to prevent spammy toggling and too many notifications
+  const pinItem = async (nft: NFTFeedItemType) => {
+    if (!user) return;
+    if (nft.is_pinned) return;
+
+    const updatedNFTs = nfts.map((item) => {
+      if (item.nft_id === nft.nft_id) {
+        const isCurrentlyPinned = item.is_pinned;
+        return {
+          ...item,
+          is_pinned: !isCurrentlyPinned,
+          nft_pins: isCurrentlyPinned ? item.nft_pins - 1 : item.nft_pins + 1,
+        };
+      }
+      return item;
+    });
+
+    setNfts(updatedNFTs);
+
+    const { error } = await supabase.from("user_pins").insert([
+      {
+        user_id: user?.id,
+        nft_id: nft.nft_id,
+      },
+    ]);
+
+    if (error) {
+      console.error("Error following user:", error);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    if (tabOption && userPageProfile && !loading) {
+      fetchNfts(tabOption, 1);
+      setPage(1);
+    }
+  }, [tabOption, userPageProfile, loading]);
 
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex justify-center">
       <div className="w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar">
         <div className="px-8 container mx-auto">
-          {/* Profile Header */}
           <div className="mt-12 mb-6 flex justify-center">
             <div className="flex flex-col items-center">
               <div className="relative w-[150px] h-[150px]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={
                     process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL! +
@@ -159,31 +250,32 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
             </div>
           </div>
 
-          {/* NFT Category Tabs */}
-          <UserNavigation onNavigationChange={() => {}} />
+          <UserNavigation
+            tabOption={tabOption}
+            onNavigationChange={(tabOption: UserTabOption) =>
+              setTabOption(tabOption)
+            }
+          />
 
-          {/* NFT Grid */}
-          <div className="mt-8 mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {nfts[selectedCategory].map((nft) => (
-              <div
-                key={nft.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden"
-              >
-                <Image
-                  src={nft.imageUrl}
-                  alt={nft.title}
-                  width={300}
-                  height={300}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{nft.title}</h3>
-                </div>
-              </div>
+          <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            {nfts.map((item) => (
+              <NFTFeedItem
+                key={item.nft_id}
+                item={item}
+                makeOffer={makeOffer}
+                pinItem={pinItem}
+              />
             ))}
           </div>
         </div>
       </div>
+      {offerItem && (
+        <Offer
+          type="make_offer"
+          initialNFT={offerItem}
+          closeModal={() => setOfferItem(null)}
+        />
+      )}
     </div>
   );
 };

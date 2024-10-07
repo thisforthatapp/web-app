@@ -1,3 +1,5 @@
+// should be used in offer/transaction comp
+
 import React, { useState, useEffect, useRef } from "react";
 import Modal from "react-modal";
 import { Close } from "@/icons";

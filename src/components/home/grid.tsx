@@ -2,12 +2,11 @@ import { FC, useEffect, useState } from "react";
 import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { Offer } from "@/components/modals";
+import { GridNavigation } from "@/components/home";
+import { NFTFeedItem } from "@/components/shared";
 import { GridTabOption } from "@/types/main";
 import { NFTFeedItem as NFTFeedItemType } from "@/types/supabase";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
-import { NFTFeedItem } from "@/components/shared";
-
-import GridNavigation from "./gridNavigation";
 
 const Grid: FC = () => {
   const { user, loading } = useAuth();
@@ -18,17 +17,8 @@ const Grid: FC = () => {
   const [, setPage] = useState(1);
   const [, setHasMore] = useState(true);
 
-  /*
-    const handleDealModalOpen = (itemId: number) => {
-      setSelectedItemId(itemId);
-      setDealModalOpen(true);
-    };
-  */
-
   const fetchNfts = async (tabOption: GridTabOption, page: number) => {
     let query;
-
-    // console.log("fetchNfts", tabOption);
 
     switch (tabOption) {
       case "home":
@@ -37,17 +27,6 @@ const Grid: FC = () => {
           range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
           range_end: page * GRID_ITEMS_PER_PAGE - 1,
         });
-        // query = supabase
-        //   .from("nfts")
-        //   .select(
-        //     "*, user_pins!left(user_id), user_profile!nfts_user_id_fkey (*)"
-        //   )
-        //   // .eq("user_pins.user_id", user?.id)
-        //   .order("updated_at", { ascending: false })
-        //   .range(
-        //     (page - 1) * GRID_ITEMS_PER_PAGE,
-        //     page * GRID_ITEMS_PER_PAGE - 1
-        //   );
         break;
       case "followers":
         query = await supabase.rpc("get_following_feed", {
@@ -74,8 +53,6 @@ const Grid: FC = () => {
 
     const { data, error } = await query;
 
-    console.log("query", tabOption, query, data, error);
-
     if (error) {
       console.error("Error fetching songs:", error);
       return;
@@ -86,7 +63,7 @@ const Grid: FC = () => {
     } else {
       setNfts((prevNfts) => {
         const newNfts = data.filter(
-          (newNft: NFTFeedItem) =>
+          (newNft: NFTFeedItemType) =>
             !prevNfts.some((prevNft) => prevNft.nft_id === newNft.nft_id)
         );
         return [...prevNfts, ...newNfts];
@@ -100,53 +77,36 @@ const Grid: FC = () => {
     setOfferItem(nft);
   };
 
+  // TEMP: disable unpin to prevent spammy toggling and too many notifications
   const pinItem = async (nft: NFTFeedItemType) => {
-    console.log("pinItem", nft);
-
     if (!user) return;
+    if (nft.is_pinned) return;
 
-    const { data, error } = await supabase.from("user_pins").insert([
+    const updatedNFTs = nfts.map((item) => {
+      if (item.nft_id === nft.nft_id) {
+        const isCurrentlyPinned = item.is_pinned;
+        return {
+          ...item,
+          is_pinned: !isCurrentlyPinned,
+          nft_pins: isCurrentlyPinned ? item.nft_pins - 1 : item.nft_pins + 1,
+        };
+      }
+      return item;
+    });
+
+    setNfts(updatedNFTs);
+
+    const { error } = await supabase.from("user_pins").insert([
       {
         user_id: user?.id,
         nft_id: nft.nft_id,
       },
     ]);
 
-    console.log("data", data);
-
     if (error) {
       console.error("Error following user:", error);
       return;
     }
-
-    /*
-    if (isFollowing) {
-      const { error } = await supabase
-        .from("user_follows")
-        .delete()
-        .eq("follower_id", user?.id)
-        .eq("followed_id", userPageProfile?.id);
-
-      if (error) {
-        console.error("Error unfollowing user:", error);
-        return;
-      }
-      // setIsFollowing(false);
-    } else {
-      const { error } = await supabase.from("user_pins").insert([
-        {
-          user_id: user?.id,
-          nft_id: itemId,
-        },
-      ]);
-
-      if (error) {
-        console.error("Error following user:", error);
-        return;
-      }
-      // setIsFollowing(true);
-    }
-    */
   };
 
   useEffect(() => {

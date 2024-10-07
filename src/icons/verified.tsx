@@ -10,7 +10,7 @@ export default function Verified({
   useAsIcon = false,
   ...props
 }: VerifiedProps) {
-  const color = useAsIcon ? "#000" : isVerified ? "#004aff" : "#A0AEC0";
+  const color = useAsIcon ? "#000" : isVerified ? "#22c55e" : "#A0AEC0";
 
   return (
     <svg

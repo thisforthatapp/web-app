@@ -1,28 +1,30 @@
-import { FC, useState } from "react";
+import { FC } from "react";
+import { UserTabOption } from "@/types/main";
 
-interface NavItem {
+interface UserNavItem {
   id: string;
   label: string;
   emoji: string;
 }
 
 interface UserNavigationProps {
-  onNavigationChange: (id: string) => void;
+  tabOption: string;
+  onNavigationChange: (id: UserTabOption) => void;
 }
 
-const navItems: NavItem[] = [
-  { id: "for_swap_yes", label: "Ok to Trade", emoji: "✅" },
-  { id: "for_swap_no", label: "Not Eager to Trade", emoji: "❌" },
-  { id: "swaps", label: "Swaps", emoji: "🤝" },
+const navItems: UserNavItem[] = [
+  { id: "yes_for_swap", label: "Ok to Trade", emoji: "✅" },
+  { id: "no_for_swap", label: "Not Eager to Trade", emoji: "❌" },
+  { id: "offers", label: "Offers", emoji: "🤝" },
   { id: "pinned", label: "Pinned", emoji: "📌" },
 ];
 
-const UserNavigation: FC<UserNavigationProps> = ({ onNavigationChange }) => {
-  const [activeItem, setActiveItem] = useState<string>("home");
-
+const UserNavigation: FC<UserNavigationProps> = ({
+  tabOption,
+  onNavigationChange,
+}) => {
   const handleItemClick = (id: string) => {
-    setActiveItem(id);
-    onNavigationChange(id);
+    onNavigationChange(id as UserTabOption);
   };
 
   return (
@@ -32,13 +34,13 @@ const UserNavigation: FC<UserNavigationProps> = ({ onNavigationChange }) => {
           <button
             onClick={() => handleItemClick(item.id)}
             className={`
-                flex items-center px-4 py-2 rounded-full transition-all duration-300 ease-in-out border borer-gray-200
-                ${
-                  activeItem === item.id
-                    ? "bg-gray-800 text-white shadow-lg transform scale-105"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }
-              `}
+              flex items-center px-4 py-2 rounded-full transition-all duration-300 ease-in-out border borer-gray-200
+              ${
+                tabOption === item.id
+                  ? "bg-gray-700 text-white shadow-lg transform scale-105"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }
+            `}
           >
             <span className="mr-2 text-lg">{item.emoji}</span>
             <span className="font-medium">{item.label}</span>

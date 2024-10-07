@@ -7,7 +7,6 @@ import { useIsMobile } from "@/hooks";
 import { supabase } from "@/utils/supabaseClient";
 import { AccountDropdown, NotificationDropdown } from "@/components";
 import {
-  Wallet as WalletModal,
   Login as LoginModal,
   Onboard as OnboardModal,
 } from "@/components/modals";
@@ -16,9 +15,7 @@ import { Login, Search, Hamburger, Close } from "@/icons";
 const Navbar: FC = () => {
   const { user, loading, profile, hasProfile } = useAuth();
   const isMobile = useIsMobile();
-  const [modal, setModal] = useState<
-    boolean | "login" | "onboard" | "wallet" | "add"
-  >(false);
+  const [modal, setModal] = useState<boolean | "login" | "onboard">(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -150,7 +147,6 @@ const Navbar: FC = () => {
           </div>
         </div>
       )}
-      {modal === "wallet" && <WalletModal closeModal={() => setModal(false)} />}
       {modal === "login" && <LoginModal closeModal={() => setModal(false)} />}
       {modal === "onboard" && (
         <OnboardModal closeModal={() => setModal(false)} />

@@ -109,9 +109,9 @@ const NotificationDropdown = () => {
 
       {isOpen && (
         <div className="absolute max-h-96 right-[-55px] mt-[10px] w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 flex flex-col">
-          <div className="flex-grow overflow-y-auto hide-scrollbar">
+          <div className="min-h-[350px] flex items-center justify-center flex-grow overflow-y-auto hide-scrollbar">
             <div>
-              {notifications.length > 0 ? (
+              {/* {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
@@ -139,7 +139,8 @@ const NotificationDropdown = () => {
                 <div className="px-4 py-3 text-sm text-gray-500">
                   No new notifications
                 </div>
-              )}
+              )} */}
+              notifications
             </div>
           </div>
         </div>
