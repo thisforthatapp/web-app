@@ -7,6 +7,7 @@ export interface Profile {
   social_links: JSON;
   created_at: string;
   updated_at: string;
+  banned: boolean;
 }
 
 export interface NFT {

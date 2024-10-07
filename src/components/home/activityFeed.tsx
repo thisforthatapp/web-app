@@ -3,6 +3,7 @@ import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { CollapsibleIcon } from "@/icons";
 import { Activity } from "@/types/supabase";
+import { formatDate } from "@/utils/helpers";
 
 function renderMessageText(text: string) {
   // This regex matches most common URL formats
@@ -44,6 +45,60 @@ function renderMessageText(text: string) {
 
   return <>{parts}</>;
 }
+
+const FeedItem = ({ activity }: { activity: Activity }) => {
+  return (
+    <div
+      key={activity.id}
+      className="flex items-start border-b border-gray-100 p-4"
+    >
+      <div className="relative w-12 h-12 mr-3 shrink-0">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={
+            process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+            activity.profile_pic_url
+          }
+          alt="Profile"
+          className="w-full h-full rounded-full"
+        />
+        {activity.activity_type === "pin" && (
+          <div className="absolute bottom-[-4px] right-[-4px] bg-white rounded-full text-xs p-1 shadow-sm border border-black">
+            📌
+          </div>
+        )}
+      </div>
+      <div>
+        <div className="flex items-center gap-x-2">
+          <div className="text-sm font-semibold">{activity.username}</div>
+          <div className="text-xs text-gray-400">
+            {formatDate(new Date(activity.created_at))}
+          </div>
+        </div>
+        {activity.activity_type === "message" && (
+          <div className="text-sm mt-1">
+            {renderMessageText(activity.content || "")}
+          </div>
+        )}
+        {activity.activity_type === "pin" && (
+          <div className="text-sm mt-1">
+            <div>
+              pinned{" "}
+              <span className="font-semibold">
+                {activity.metadata?.nft_name}
+              </span>
+            </div>
+            <img
+              src={activity.metadata?._nft_image}
+              className="mt-2 w-16 h-16 rounded-md"
+              alt="NFT"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
   showCollapsibleTab = true,
@@ -103,7 +158,8 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
       }
 
       if (data && data.length > 0) {
-        setActivities((prevActivities) => [...prevActivities, ...data]);
+        const reversedData = data.reverse();
+        setActivities((prevActivities) => [...reversedData, ...prevActivities]);
         setPage(page + 1);
       } else {
         setHasMore(false);
@@ -121,10 +177,10 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
     if (!profile) return;
 
     try {
-      // if (profile?.banned) {
-      //   alert("You are banned from commenting.");
-      //   return;
-      // }
+      if (profile?.banned) {
+        alert("You are banned from commenting.");
+        return;
+      }
 
       const optimisticId = Math.random();
       const newMsg = {
@@ -195,29 +251,8 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
             {loading && (
               <div className="text-center text-gray-500">Loading...</div>
             )}
-            {activities.map((activity) => (
-              <div
-                key={activity.id}
-                className="flex items-start border-b border-gray-200 px-4 pt-4 pb-2"
-              >
-                <img
-                  src={
-                    process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
-                    activity.profile_pic_url
-                  }
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-                <div>
-                  <p className="text-sm font-semibold">{activity.username}</p>
-                  <p className="text-sm text-gray-700">
-                    {renderMessageText(activity.content || "")}
-                  </p>
-                  <span className="text-xs text-gray-400">
-                    {new Date(activity.created_at).toLocaleTimeString()}
-                  </span>
-                </div>
-              </div>
+            {activities.map((activity: Activity) => (
+              <FeedItem key={activity.id} activity={activity} />
             ))}
             <div ref={messagesEndRef}></div>
           </div>

@@ -164,7 +164,7 @@ const Grid: FC = () => {
           setTabOption(tabOption)
         }
       />
-      <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+      <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
         {nfts.map((item) => (
           <NFTFeedItem
             key={item.nft_id}
