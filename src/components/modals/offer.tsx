@@ -5,19 +5,15 @@ import Modal from "react-modal";
 import { useIsMobile } from "@/hooks";
 import { getModalStyles } from "@/styles";
 import { Main, Select, Transaction } from "@/components/offer";
-import { NFT, Profile } from "@/types/supabase";
+import { NFTFeedItem } from "@/types/supabase";
 
 interface Props {
   type: "make_offer" | "view_offer";
-  initialDetails?: { nft: NFT; user: Profile } | null;
+  initialNFT?: NFTFeedItem | null;
   closeModal: () => void;
 }
 
-const Offer: React.FC<Props> = ({
-  type,
-  initialDetails = null,
-  closeModal,
-}) => {
+const Offer: React.FC<Props> = ({ type, initialNFT = null, closeModal }) => {
   const isMobile = useIsMobile();
   const customStyles = getModalStyles(isMobile);
 

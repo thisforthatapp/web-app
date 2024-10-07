@@ -5,24 +5,24 @@ import { Tooltip } from "react-tooltip";
 import { Verified } from "@/icons";
 
 interface VerifiedProps {
+  id: string;
   isVerified: boolean;
-  verifiedDate: string;
   className?: string;
 }
 
 const VerifiedBadge: React.FC<VerifiedProps> = ({
+  id,
   isVerified,
-  verifiedDate,
   className,
 }) => (
   <div className={className}>
     <Verified
       isVerified={isVerified}
       className="w-full h-full"
-      data-tooltip-id={`verified-tooltip-${verifiedDate}`}
+      data-tooltip-id={`verified-tooltip-${id}`}
     />
     <Tooltip
-      id={`verified-tooltip-${verifiedDate}`}
+      id={`verified-tooltip-${id}`}
       place="bottom"
       content={isVerified ? "ownership verified" : "ownership not verified"}
     />

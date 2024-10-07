@@ -7,6 +7,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useRef,
 } from "react";
 import { User, AuthError } from "@supabase/supabase-js";
 import { supabase } from "@/utils/supabaseClient";
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     hasProfile: null,
     profile: null,
   });
+  const lastUserIdRef = useRef<string | null>(null);
 
   const checkUserProfile = useCallback(async (user: User) => {
     try {
@@ -76,17 +78,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const user = session?.user || null;
-      setState((prev) => ({ ...prev, user, loading: !!user }));
+      console.log("onAuthStateChange", event, session);
 
-      if (
-        user &&
-        (event === "INITIAL_SESSION" ||
-          event === "USER_UPDATED" ||
-          event === "SIGNED_IN")
-      ) {
+      const user = session?.user || null;
+
+      if (user && (event === "INITIAL_SESSION" || event === "USER_UPDATED")) {
+        lastUserIdRef.current = user.id;
+        setState((prev) => ({ ...prev, user, loading: !!user }));
         checkUserProfile(user);
+      } else if (user && event === "SIGNED_IN") {
+        if (user.id !== lastUserIdRef.current) {
+          lastUserIdRef.current = user.id;
+          setState((prev) => ({ ...prev, user, loading: true }));
+          checkUserProfile(user);
+        }
       } else {
+        lastUserIdRef.current = null;
         setState((prev) => ({
           ...prev,
           user: null,

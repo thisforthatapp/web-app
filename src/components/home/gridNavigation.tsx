@@ -37,7 +37,7 @@ const GridNavigation: FC<GridNavigationProps> = ({
                 flex items-center px-4 py-2 rounded-full transition-all duration-300 ease-in-out border borer-gray-200
                 ${
                   tabOption === item.id
-                    ? "bg-gray-800 text-white shadow-lg transform scale-105"
+                    ? "bg-gray-700 text-white shadow-lg transform scale-105"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }
               `}

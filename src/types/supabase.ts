@@ -31,6 +31,26 @@ export interface NFT {
   user_profile: Profile;
 }
 
+export interface NFTFeedItem {
+  nft_chain_id: number;
+  nft_collection_contract: string;
+  nft_collection_name: string;
+  nft_created_at: string;
+  nft_id: string;
+  nft_name: string;
+  nft_pins: number;
+  nft_image: string;
+  nft_thumbnail: string;
+  nft_token_id: string;
+  nft_token_type: string;
+  nft_user_id: string;
+  nft_user_id_profile_pic_url: string;
+  nft_user_id_username: string;
+  nft_is_verified: boolean;
+  nft_verified_at: string | null;
+  is_pinned: boolean;
+}
+
 export interface Activity {
   id: string;
   user_id: string;
