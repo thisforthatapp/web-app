@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setState((prev) => ({ ...prev, user, loading: true }));
           checkUserProfile(user);
         }
-      } else {
+      } else if (event !== "TOKEN_REFRESHED") {
         lastUserIdRef.current = null;
         setState((prev) => ({
           ...prev,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "react-modal";
 import { useIsMobile } from "@/hooks";
 import { getModalStyles } from "@/styles";
@@ -17,7 +17,7 @@ const Offer: React.FC<Props> = ({ type, initialNFT = null, closeModal }) => {
   const isMobile = useIsMobile();
   const customStyles = getModalStyles(isMobile);
 
-  const [view, setView] = useState<"main" | "select" | "transaction" | null>(
+  const [view] = useState<"main" | "select" | "transaction" | null>(
     type === "make_offer" ? "select" : "main"
   );
 
@@ -31,7 +31,7 @@ const Offer: React.FC<Props> = ({ type, initialNFT = null, closeModal }) => {
         style={customStyles}
       >
         {view === "main" && <Main />}
-        {view === "select" && <Select />}
+        {view === "select" && <Select initialNFT={initialNFT!} />}
         {view === "transaction" && <Transaction />}
       </Modal>
     </div>
