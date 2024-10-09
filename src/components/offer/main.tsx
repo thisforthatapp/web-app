@@ -1,72 +1,131 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
+import { useAuth } from "@/providers/authProvider";
+import { supabase } from "@/utils/supabaseClient";
 import { Close } from "@/icons";
 
-const Main: FC = () => {
+const Main: FC<{ offerId: string; info: any }> = ({ offerId, info }) => {
+  const { profile, hasProfile } = useAuth();
   const [newMessage, setNewMessage] = useState<string>("");
+
+  const [offerActivityItems, setOfferActivityItems] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [page, setPage] = useState<number>(1);
+
+  const fetchOfferActivity = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("user_offer_items")
+        .select("*")
+        .eq("offer_id", offerId)
+        .order("created_at", { ascending: false })
+        .limit(25);
+      // .range();
+
+      if (error) {
+        throw error;
+      }
+
+      setOfferActivityItems(data);
+    } catch (error) {
+      console.error("Failed to fetch activities", error);
+    } finally {
+    }
+  };
 
   const submitMessage = async (event: React.FormEvent) => {
     event.preventDefault();
-    // if (!newMessage.trim()) return;
-    // if (!profile) return;
+    if (!newMessage.trim()) return;
+    if (!profile) return;
 
-    // try {
-    //   if (profile?.banned) {
-    //     alert("You are banned from commenting.");
-    //     return;
-    //   }
+    try {
+      if (profile?.banned) {
+        alert("You are banned from commenting.");
+        return;
+      }
 
-    //   const optimisticId = Math.random();
-    //   const newMsg = {
-    //     user_id: profile.id,
-    //     activity_type: "message",
-    //     content: newMessage.trim(),
-    //     username: profile.username,
-    //     profile_pic_url: profile.profile_pic_url,
-    //   };
+      const optimisticId = Math.random();
 
-    //   // optimistaclly update the UI
-    //   setActivities((prevActivities) => [
-    //     ...prevActivities,
-    //     {
-    //       ...newMsg,
-    //       id: optimisticId,
-    //       created_at: new Date().toISOString(),
-    //       metadata: null,
-    //     } as unknown as Activity,
-    //   ]);
+      const newOfferItem = {
+        offer_id: offerId,
+        user_id: profile.id,
+        item_type: "message",
+        content: newMessage.trim(),
+      };
 
-    //   const { error } = await supabase.from("activities").insert(newMsg);
+      // optimistaclly update the UI
+      setOfferActivityItems((prevActivityItems) => [
+        ...prevActivityItems,
+        {
+          ...newOfferItem,
+          id: optimisticId,
+          created_at: new Date().toISOString(),
+        } as unknown,
+      ]);
 
-    //   if (error) {
-    //     console.error("Error submitting comment:", error);
-    //     setActivities(
-    //       activities.filter((activity) => Number(activity.id) !== optimisticId)
-    //     );
-    //   } else {
-    //     setNewMessage("");
-    //   }
-    // } catch (error) {
-    //   console.error("Failed to send message", error);
-    // }
+      const { error } = await supabase
+        .from("user_offer_items")
+        .insert(newOfferItem);
+
+      if (error) {
+        console.error("Error submitting comment:", error);
+        setOfferActivityItems(
+          offerActivityItems.filter(
+            (activityItem) => Number(activityItem.id) !== optimisticId
+          )
+        );
+      } else {
+        setNewMessage("");
+      }
+    } catch (error) {
+      console.error("Failed to send message", error);
+    }
   };
+
+  useEffect(() => {
+    if (offerId) {
+      fetchOfferActivity();
+    }
+  }, [offerId]);
 
   return (
     <>
-      <div>
-        <p className="font-semibold">Alica</p>
-        <p className="text-sm text-gray-500">
-          Offer made 10/9/2024, 11:07:37 AM
-        </p>
-        <div className="text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+      <div className="flex py-4">
+        <div>
+          <div className="font-semibold">Alice</div>
+          <div className="text-sm text-gray-500">
+            Offer made 10/9/2024, 11:07:37 AM
+          </div>
+        </div>
+        <div className="ml-auto text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
           Negotiation
         </div>
-        <div onClick={() => {}}>
+        <div className="mx-6" onClick={() => {}}>
           <Close className="w-6 h-6" />
         </div>
       </div>
-      <div className="min-h-[350px] bg-gray-100">Body</div>
-      <div className="flex justify-between bg-gray-100">
-        <div>Create A Counter Offer</div>
+      <div className="min-h-[500px] bg-gray-100">
+        {offerActivityItems.map((item: any) => (
+          <div
+            key={item.id}
+            className="flex items-center justify-between p-4 border-b border-gray-200"
+          >
+            <div>
+              <div className="font-semibold">{item.item_type}</div>
+              {/* <div className="text-sm text-gray-500">{item.content}</div> */}
+            </div>
+            <div className="text-sm text-gray-500">
+              {new Date(item.created_at).toLocaleString()}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-center bg-gray-100 px-4 gap-x-4">
+        <button className="bg-green-300 px-4 py-4 rounded-md mb-4 shadow-sm cursor-pointer">
+          🤝 Accept Offer
+        </button>
+        <button className="bg-yellow-300 px-4 py-4 rounded-md mb-4 shadow-sm cursor-pointer">
+          🤝 Counter Offer
+        </button>
       </div>
       <div className="p-3">
         <form onSubmit={submitMessage} className="gap-x-2 flex">
