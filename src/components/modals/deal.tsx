@@ -68,7 +68,6 @@ interface ChatMessage {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Deal: React.FC<Props> = ({ itemId, closeModal }) => {
-  const [isMobile, setIsMobile] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [dealStatus, setDealStatus] = useState<DealStatus>({
     stage: "negotiation",
@@ -183,36 +182,7 @@ const Deal: React.FC<Props> = ({ itemId, closeModal }) => {
 
   useEffect(() => {
     setInteractions([initialOffer]);
-
-    const handleResize = () => setIsMobile(window.innerWidth <= 640);
-    window.addEventListener("resize", handleResize);
-    handleResize();
-    return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  const customStyles = {
-    content: {
-      overflow: "visible",
-      background: "#fff",
-      color: "#000",
-      top: isMobile ? "0" : "50%",
-      left: isMobile ? "0" : "50%",
-      right: isMobile ? "0" : "auto",
-      bottom: isMobile ? "0" : "auto",
-      width: isMobile ? "100%" : "90%",
-      maxWidth: isMobile ? "100%" : "550px",
-      height: isMobile ? "100%" : "90%",
-      margin: isMobile ? "0" : "auto",
-      borderRadius: isMobile ? "0" : "15px",
-      transform: isMobile ? "none" : "translate(-50%, -50%)",
-      border: "none",
-      padding: 0,
-    },
-    overlay: {
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      zIndex: 100,
-    },
-  };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderInteraction = (interaction: DealInteraction) => {
@@ -655,50 +625,42 @@ const Deal: React.FC<Props> = ({ itemId, closeModal }) => {
     // You might want to close the modal or update the deal status here
   };
   return (
-    <Modal
-      isOpen={true}
-      onRequestClose={closeModal}
-      style={customStyles}
-      contentLabel="Deal Modal"
-    >
-      <div className="flex flex-col h-full">
-        {/* Top bar */}
-        <div className="border-b p-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <img
-              src={offeror.avatar}
-              alt={offeror.name}
-              className="w-10 h-10 rounded-full mr-3"
-            />
-            <div>
-              <p className="font-semibold">{offeror.name}</p>
-              <p className="text-sm text-gray-500">
-                Offer made {initialOffer.timestamp.toLocaleString()}
-              </p>
-            </div>
+    <div className="flex flex-col h-full">
+      {/* Top bar */}
+      <div className="border-b p-4 flex justify-between items-center">
+        <div className="flex items-center">
+          <img
+            src={offeror.avatar}
+            alt={offeror.name}
+            className="w-10 h-10 rounded-full mr-3"
+          />
+          <div>
+            <p className="font-semibold">{offeror.name}</p>
+            <p className="text-sm text-gray-500">
+              Offer made {initialOffer.timestamp.toLocaleString()}
+            </p>
           </div>
-          <div className="text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-            {dealStatus.stage.charAt(0).toUpperCase() +
-              dealStatus.stage.slice(1)}
-          </div>
-          <Link href={`/nft/1/1/1`} onClick={closeModal}>
-            <Close className="w-6 h-6" />
-          </Link>
         </div>
-
-        {/* Chat interface */}
-        {renderChatInterface()}
-
-        {/* Action items or Message input */}
-        {renderActionItems()}
-
-        {/* Render deal details overlay */}
-        {renderDealDetails()}
-
-        {/* Render acceptance process overlay */}
-        {renderAcceptanceOverlay()}
+        <div className="text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+          {dealStatus.stage.charAt(0).toUpperCase() + dealStatus.stage.slice(1)}
+        </div>
+        <Link href={`/nft/1/1/1`} onClick={closeModal}>
+          <Close className="w-6 h-6" />
+        </Link>
       </div>
-    </Modal>
+
+      {/* Chat interface */}
+      {renderChatInterface()}
+
+      {/* Action items or Message input */}
+      {renderActionItems()}
+
+      {/* Render deal details overlay */}
+      {renderDealDetails()}
+
+      {/* Render acceptance process overlay */}
+      {renderAcceptanceOverlay()}
+    </div>
   );
 };
 

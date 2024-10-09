@@ -9,11 +9,17 @@ import { NFTFeedItem } from "@/types/supabase";
 
 interface Props {
   type: "make_offer" | "view_offer";
+  offerId?: string | null;
   initialNFT?: NFTFeedItem | null;
   closeModal: () => void;
 }
 
-const Offer: React.FC<Props> = ({ type, initialNFT = null, closeModal }) => {
+const Offer: React.FC<Props> = ({
+  type,
+  offerId = null,
+  initialNFT = null,
+  closeModal,
+}) => {
   const isMobile = useIsMobile();
   const customStyles = getModalStyles(isMobile);
 

@@ -23,7 +23,7 @@ const AccountNFTSPage: React.FC = () => {
       .range((page - 1) * GRID_ITEMS_PER_PAGE, page * GRID_ITEMS_PER_PAGE - 1);
 
     if (error) {
-      console.error("Error fetching songs:", error);
+      console.error("Error fetching items:", error);
       return;
     }
 

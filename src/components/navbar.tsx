@@ -142,7 +142,7 @@ const Navbar: FC = () => {
               <Link href="/about">About</Link>
               <Link href="/legal/terms">Terms</Link>
               <Link href="/legal/privacy">Privacy</Link>
-              <Link href="/contact">Contact</Link>
+              <Link href="/discord">Discord</Link>
             </div>
           </div>
         </div>

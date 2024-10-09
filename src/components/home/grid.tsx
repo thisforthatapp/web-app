@@ -3,22 +3,43 @@ import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { Offer } from "@/components/modals";
 import { GridNavigation } from "@/components/home";
-import { NFTFeedItem } from "@/components/shared";
+import { NFTFeedItem, OfferFeedItem } from "@/components/shared";
 import { GridTabOption } from "@/types/main";
-import { NFTFeedItem as NFTFeedItemType } from "@/types/supabase";
+import {
+  NFTFeedItem as NFTFeedItemType,
+  OfferFeedItem as OfferFeedItemType,
+} from "@/types/supabase";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 
 const Grid: FC = () => {
   const { user, loading } = useAuth();
-  const [offerItem, setOfferItem] = useState<NFTFeedItemType | null>(null);
 
-  const [nfts, setNfts] = useState<NFTFeedItemType[]>([]);
-  const [tabOption, setTabOption] = useState<GridTabOption>("home");
-  const [, setPage] = useState(1);
-  const [, setHasMore] = useState(true);
+  const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(
+    null
+  );
+  const [expandOfferItem, setExpandOfferItem] =
+    useState<OfferFeedItemType | null>(null);
 
-  const fetchNfts = async (tabOption: GridTabOption, page: number) => {
+  const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>(
+    []
+  );
+
+  const [tabOption, setTabOption] = useState<GridTabOption>("offers");
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchItems = async (tabOption: GridTabOption, page: number) => {
     let query;
+
+    // required logged in
+    if (tabOption === "offers" || tabOption === "pinned") {
+      if (!user?.id) {
+        setItems([]);
+        setPage(1);
+        setHasMore(true);
+        return;
+      }
+    }
 
     switch (tabOption) {
       case "home":
@@ -42,6 +63,18 @@ const Grid: FC = () => {
           range_end: page * GRID_ITEMS_PER_PAGE - 1,
         });
         break;
+      case "offers":
+        query = await supabase
+          .from("user_offers")
+          .select(
+            "*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)"
+          )
+          .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
+          .range(
+            (page - 1) * GRID_ITEMS_PER_PAGE,
+            page * GRID_ITEMS_PER_PAGE - 1
+          );
+        break;
       default:
         query = await supabase.rpc("get_home_feed", {
           current_user_id: user?.id,
@@ -54,27 +87,46 @@ const Grid: FC = () => {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching songs:", error);
+      console.error("Error fetching items:", error);
       return;
     }
 
     if (page === 1) {
-      setNfts(data);
+      setItems(data);
     } else {
-      setNfts((prevNfts) => {
-        const newNfts = data.filter(
-          (newNft: NFTFeedItemType) =>
-            !prevNfts.some((prevNft) => prevNft.nft_id === newNft.nft_id)
-        );
-        return [...prevNfts, ...newNfts];
-      });
+      if (tabOption === "offers") {
+        setItems((prevOffers) => {
+          const newOffers = data.filter(
+            (newOffer: OfferFeedItemType) =>
+              !(prevOffers as OfferFeedItemType[]).some(
+                (prevOffer) => prevOffer.id === newOffer.id
+              )
+          );
+          return [...prevOffers, ...newOffers];
+        });
+      } else {
+        setItems((prevNfts) => {
+          const newNfts = data.filter(
+            (newNft: NFTFeedItemType) =>
+              !(prevNfts as NFTFeedItemType[]).some(
+                (prevNft) => prevNft.nft_id === newNft.nft_id
+              )
+          );
+          return [...prevNfts, ...newNfts];
+        });
+      }
     }
 
     setHasMore(data.length === GRID_ITEMS_PER_PAGE);
   };
 
   const makeOffer = async (nft: NFTFeedItemType) => {
-    setOfferItem(nft);
+    setMakeOfferItem(nft);
+  };
+
+  const expandOffer = async (offer: OfferFeedItemType) => {
+    console.log("Expanding offer:", offer);
+    setExpandOfferItem(offer);
   };
 
   // TEMP: disable unpin to prevent spammy toggling and too many notifications
@@ -94,7 +146,7 @@ const Grid: FC = () => {
       return item;
     });
 
-    setNfts(updatedNFTs);
+    setItems(updatedNFTs);
 
     const { error } = await supabase.from("user_pins").insert([
       {
@@ -111,7 +163,7 @@ const Grid: FC = () => {
 
   useEffect(() => {
     if (tabOption && !loading) {
-      fetchNfts(tabOption, 1);
+      fetchItems(tabOption, 1);
       setPage(1);
     }
   }, [tabOption, loading]);
@@ -120,26 +172,46 @@ const Grid: FC = () => {
     <div className="w-full overflow-y-auto hide-scrollbar">
       <GridNavigation
         tabOption={tabOption}
-        onNavigationChange={(tabOption: GridTabOption) =>
-          setTabOption(tabOption)
-        }
+        onNavigationChange={(tabOption: GridTabOption) => {
+          setItems([]);
+          setTabOption(tabOption);
+        }}
       />
-      <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-        {nfts.map((item) => (
-          <NFTFeedItem
-            key={item.nft_id}
-            item={item}
-            makeOffer={makeOffer}
-            pinItem={pinItem}
-          />
-        ))}
-      </div>
+      {tabOption === "offers" ? (
+        <div className="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+          {(items as OfferFeedItemType[]).map((item) => (
+            <OfferFeedItem
+              key={item.id}
+              item={item}
+              expandOffer={expandOffer}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="p-5 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+          {(items as NFTFeedItemType[]).map((item) => (
+            <NFTFeedItem
+              key={item.nft_id}
+              item={item}
+              makeOffer={makeOffer}
+              pinItem={pinItem}
+            />
+          ))}
+        </div>
+      )}
       {/* has more button */}
-      {offerItem && (
+      {makeOfferItem && (
         <Offer
           type="make_offer"
-          initialNFT={offerItem}
-          closeModal={() => setOfferItem(null)}
+          initialNFT={makeOfferItem}
+          closeModal={() => setMakeOfferItem(null)}
+        />
+      )}
+      {expandOfferItem && (
+        <Offer
+          type="view_offer"
+          offerId={expandOfferItem.id}
+          closeModal={() => setExpandOfferItem(null)}
         />
       )}
     </div>

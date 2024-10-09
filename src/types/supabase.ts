@@ -62,6 +62,17 @@ export interface NFTFeedItem {
   // add wallet address?
 }
 
+export interface OfferFeedItem {
+  id: string;
+  user_id: string;
+  user_id_counter: string;
+  initial_offer: JSON;
+  status: "initiated" | "negotiating" | "denied" | "accepted" | "completed";
+  created_at: string;
+  user: Profile;
+  counter_user: Profile;
+}
+
 export interface Activity {
   id: string;
   user_id: string;

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import React from "react";
+import { FC } from "react";
 
-const Footer: React.FC = () => {
+const Footer: FC = () => {
   return (
     <footer className="fixed bottom-0 flex h-[50px] w-full items-center i justify-between bg-gray-100 border-t border-gray-200 px-6">
       <div>© TFT Labs</div>
@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
         <span className="mx-2 text-gray-400">·</span>
         <Link href="/legal/privacy">Privacy</Link>
         <span className="mx-2 text-gray-400">·</span>
-        <Link href="/contact">Contact</Link>
+        <Link href="/discord">Discord</Link>
       </nav>
     </footer>
   );

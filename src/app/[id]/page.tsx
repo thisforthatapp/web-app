@@ -152,7 +152,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     });
 
     if (error) {
-      console.error("Error fetching songs:", error);
+      console.error("Error fetching items:", error);
       return;
     }
 
