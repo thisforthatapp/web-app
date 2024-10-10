@@ -70,6 +70,7 @@ const Grid: FC = () => {
             "*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)"
           )
           .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
+          .order("updated_at", { ascending: false })
           .range(
             (page - 1) * GRID_ITEMS_PER_PAGE,
             page * GRID_ITEMS_PER_PAGE - 1
@@ -178,7 +179,7 @@ const Grid: FC = () => {
         }}
       />
       {tabOption === "offers" ? (
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6">
+        <div className="p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4">
           {(items as OfferFeedItemType[]).map((item) => (
             <OfferFeedItem
               key={item.id}
@@ -209,7 +210,12 @@ const Grid: FC = () => {
       )}
       {expandOfferItem && (
         <Offer
-          type="view_offer"
+          type={
+            expandOfferItem.status === "accepted" ||
+            expandOfferItem.status === "completed"
+              ? "transaction"
+              : "view_offer"
+          }
           offerId={expandOfferItem.id}
           closeModal={() => setExpandOfferItem(null)}
         />

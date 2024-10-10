@@ -11,53 +11,9 @@ interface Notification {
   time: string;
 }
 
-const NotificationDropdown = () => {
+const NotificationDropdown = ({ notifications }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Mock fetching notifications
-    // In a real app, you'd fetch this from your API
-    const mockNotifications = [
-      {
-        id: 1,
-        type: "offer",
-        user: "Alice",
-        content: "made an offer on your NFT",
-        time: "2m ago",
-      },
-      {
-        id: 2,
-        type: "interest",
-        user: "Bob",
-        content: "expressed interest in your NFT",
-        time: "5m ago",
-      },
-      {
-        id: 3,
-        type: "sale",
-        user: "Charlie",
-        content: "purchased an NFT you were watching",
-        time: "10m ago",
-      },
-      {
-        id: 4,
-        type: "message",
-        user: "David",
-        content: "sent you a message",
-        time: "1h ago",
-      },
-      {
-        id: 5,
-        type: "follow",
-        user: "Eve",
-        content: "started following you",
-        time: "2h ago",
-      },
-    ];
-    setNotifications(mockNotifications);
-  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event: { target: unknown }) => {
@@ -93,6 +49,7 @@ const NotificationDropdown = () => {
         return "🔔";
     }
   };
+
   return (
     <div className="relative" ref={dropdownRef}>
       <button
@@ -108,39 +65,23 @@ const NotificationDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute max-h-96 right-[-55px] mt-[10px] w-80 bg-white rounded-md shadow-lg overflow-hidden z-10 flex flex-col">
-          <div className="min-h-[350px] flex items-center justify-center flex-grow overflow-y-auto hide-scrollbar">
+        <div className="absolute max-h-96 right-[-55px] mt-[10px] w-96 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden z-10 flex flex-col">
+          <div className="min-h-[350px] flex flex-col flex-grow w-full overflow-y-auto hide-scrollbar">
             <div>
-              {/* {notifications.length > 0 ? (
+              {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                    className="px-4 py-3 hover:bg-gray-50 border-b border-gray-200 w-full"
                   >
-                    <div className="flex items-start">
-                      <div className="flex-shrink-0 mr-3">
-                        {getNotificationIcon(notification.type)}
-                      </div>
-                      <div className="flex-grow">
-                        <p className="text-sm font-medium text-gray-800">
-                          <span className="font-semibold">
-                            {notification.user}
-                          </span>{" "}
-                          {notification.content}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {notification.time}
-                        </p>
-                      </div>
-                    </div>
+                    {notification.notification_type}
                   </div>
                 ))
               ) : (
-                <div className="px-4 py-3 text-sm text-gray-500">
+                <div className="flex flex-grow items-center justify-center px-4 py-3 text-sm text-gray-500">
                   No new notifications
                 </div>
-              )} */}
-              notifications
+              )}
             </div>
           </div>
         </div>

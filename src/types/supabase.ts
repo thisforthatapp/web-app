@@ -66,7 +66,7 @@ export interface OfferFeedItem {
   id: string;
   user_id: string;
   user_id_counter: string;
-  initial_offer: JSON;
+  offer: JSON;
   status: "initiated" | "negotiating" | "denied" | "accepted" | "completed";
   created_at: string;
   user: Profile;

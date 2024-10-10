@@ -1,12 +1,10 @@
-// if you have an offer / interest, it should pop to the top of the list -> can delete
-// the top should have a toggle of (offers) / (interest) / (deals)
-
 "use client";
 
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import Link from "next/link";
-import { Options, VerifiedBadge } from "@/components/shared";
-import { Pin } from "@/icons";
+import { OfferFeedItem, Options, VerifiedBadge } from "@/components/shared";
+import { supabase } from "@/utils/supabaseClient";
+import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
 
 interface ActivityItem {
   id: string;
@@ -60,14 +58,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   </button>
 );
 
-const NFTComponent: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [dealModalOpen, setDealModalOpen] = React.useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [interestModalOpen, setInterestModalOpen] = React.useState(false);
-  const [activeTab, setActiveTab] = useState<
-    "offers" | "looking" | "transactions"
-  >("offers");
+const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
+  const [items, setItems] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   // Mock data - replace with actual data fetching logic
   const image = "/temp/nft.png";
@@ -82,63 +76,52 @@ const NFTComponent: FC = () => {
   const verifiedDate = "2024-09-25";
   const openseaLink = "https://opensea.io/collection/cryptopunks";
 
-  const activities: ActivityItem[] = [
-    {
-      id: "1",
-      type: "offers",
-      user: "Alice",
-      // userAvatar: "/temp/profile.webp",
-      amount: "2.5 ETH",
-      timestamp: new Date("2023-09-25T10:30:00"),
-    },
-    {
-      id: "2",
-      type: "offers",
-      user: "Bob",
-      // userAvatar: "/temp/profile.webp",
-      amount: "2.5 ETH",
-      timestamp: new Date("2023-09-25T10:30:00"),
-    },
-    {
-      id: "3",
-      type: "looking",
-      user: "Sam",
-      // userAvatar: "/temp/profile.webp",
-      timestamp: new Date("2023-09-25T09:45:00"),
-    },
+  const fetchItems = async (page: number) => {
+    const { data, error } = await supabase
+      .from("nfts_offers")
+      .select(
+        "*, user_offers!nfts_offers_offer_id_fkey(*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*))"
+      )
+      .eq("nft_id", nft.id)
+      .order("updated_at", { ascending: false })
+      .range((page - 1) * GRID_ITEMS_PER_PAGE, page * GRID_ITEMS_PER_PAGE - 1);
 
-    {
-      id: "4",
-      type: "looking",
-      user: "Karel",
-      // userAvatar: "/temp/profile.webp",
-      timestamp: new Date("2023-09-25T09:45:00"),
-    },
+    if (error) {
+      console.error("Error fetching items:", error);
+      return;
+    }
 
-    // ... (add more mock data for each type)
-  ];
-  const filteredActivities = activities.filter((item) => {
-    if (activeTab === "offers") return item.type === "offers";
-    if (activeTab === "looking") return item.type === "looking";
-    if (activeTab === "transactions") return item.type === "transactions";
-    return true;
-  });
+    if (page === 1) {
+      setItems(data);
+    } else {
+      setItems((prevOffers) => {
+        const newOffers = data.filter(
+          (newOffer: any) =>
+            !(prevOffers as any[]).some(
+              (prevOffer) => prevOffer.id === newOffer.id
+            )
+        );
+        return [...prevOffers, ...newOffers];
+      });
+    }
+
+    setHasMore(data.length === GRID_ITEMS_PER_PAGE);
+  };
+
+  useEffect(() => {
+    fetchItems(1);
+    setPage(1);
+  }, []);
+
+  console.log("items", items);
 
   return (
     <div className="absolute top-[75px] bottom-0 w-full flex">
-      <div className="w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar">
-        <div className="flex justify-center mt-6 gap-x-8">
+      <div className="w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar justify-center my-8">
+        <div className="flex flex-col lg:flex-row justify-center gap-x-8">
           <div className="relative w-[400px]">
-            <div
-              className="cursor-pointer absolute top-3.5 left-3.5 rounded-full w-8 h-8 flex items-center justify-center bg-gray-200 opacity-25"
-              onClick={(e) => {
-                e.preventDefault();
-              }}
-            >
-              <Pin className="text-gray-600" />
-            </div>
             <img
-              src={image}
+              src={nft?.image}
               alt="NFT"
               className="w-full h-[400px] w-[400px] object-cover rounded-lg"
             />
@@ -161,11 +144,7 @@ const NFTComponent: FC = () => {
                 Follow
               </button> */}
                 </div>
-                <VerifiedBadge
-                  isVerified={isVerified}
-                  verifiedDate={verifiedDate}
-                  className=""
-                />
+                <VerifiedBadge isVerified={isVerified} className="" />
               </Link>
 
               <div className="grid grid-cols-3 gap-4">
@@ -197,68 +176,17 @@ const NFTComponent: FC = () => {
               />
             </div>
           </div>
-          <div>
-            <div className="w-[550px] bg-white rounded-lg shadow-lg overflow-y-auto hide-scrollbar max-h-[660px]">
-              <div className="flex border-b border-gray-200">
-                <button
-                  className={`flex-1 py-4 px-4 text-base font-medium ${
-                    activeTab === "offers"
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("offers")}
-                >
-                  🤝 Offers
-                </button>
-                <button
-                  className={`flex-1 py-4 px-4 text-base font-medium ${
-                    activeTab === "looking"
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                  onClick={() => setActiveTab("looking")}
-                >
-                  👀 Looking
-                </button>
-              </div>
-              <div className="overflow-y-auto hide-scrollbar h-[650px]">
-                {filteredActivities.map((item) => (
-                  <Link
-                    key={item.id}
-                    href={`/nft/1/1/1/deal/1`}
-                    className="block hover:bg-gray-50 transition-colors duration-150 ease-in-out"
-                  >
-                    <div className="p-4 flex items-center space-x-4 border-b border-gray-100">
-                      <img
-                        src="/temp/profile.webp"
-                        alt={item.user}
-                        className="w-10 h-10 rounded-full"
-                      />
-                      <div className="flex-grow">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium text-gray-900">
-                            {item.user}
-                          </span>
-                        </div>
-                        <p className="text-gray-600">
-                          {item.type === "offers" && "🤝 Made an offer"}
-                          {item.type === "looking" && "👀 Expressed interest"}
-                          {item.type === "transactions" &&
-                            "💰 Completed transaction"}
-                          {/* {item.amount && ` - ${item.amount}`} */}
-                        </p>
-                      </div>
-                      {item.type === "offers" && (
-                        <div className="text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                          Negotiating
-                        </div>
-                      )}
-                      <span className="text-sm text-gray-500">5m</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+          <div className="overflow-y-auto hide-scrollbar h-[650px] w-[600px] flex flex-col gap-y-4">
+            {(items as any[]).map((item) => (
+              <OfferFeedItem
+                key={item.id}
+                item={item.user_offers}
+                // expandOffer={expandOffer}
+              />
+            ))}
+          </div>
+          <div className="flex lg:hidden">
+            action buttons that show on mobile
           </div>
         </div>
       </div>

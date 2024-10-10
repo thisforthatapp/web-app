@@ -17,6 +17,7 @@ const Navbar: FC = () => {
   const isMobile = useIsMobile();
   const [modal, setModal] = useState<boolean | "login" | "onboard">(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -72,7 +73,7 @@ const Navbar: FC = () => {
             </>
           ) : (
             <>
-              <NotificationDropdown />
+              <NotificationDropdown notifications={notifications} />
               <AccountDropdown username={profile?.username || ""} />
             </>
           )}
@@ -97,6 +98,29 @@ const Navbar: FC = () => {
       )}
     </>
   );
+
+  const getLatestNotifications = async () => {
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user?.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      return;
+    }
+
+    setNotifications(data);
+  };
+
+  useEffect(() => {
+    if (user) {
+      getLatestNotifications();
+    }
+  }, [user]);
+
+  console.log("notifications", notifications);
 
   return (
     <>

@@ -9,7 +9,7 @@ import { NFTFeedItem } from "@/types/supabase";
 import { supabase } from "@/utils/supabaseClient";
 
 interface Props {
-  type: "make_offer" | "view_offer";
+  type: "make_offer" | "view_offer" | "transaction";
   offerId?: string | null;
   initialNFT?: NFTFeedItem | null;
   closeModal: () => void;
@@ -25,7 +25,11 @@ const Offer: React.FC<Props> = ({
   const customStyles = getModalStyles(isMobile);
 
   const [view] = useState<"main" | "select" | "transaction" | null>(
-    type === "make_offer" ? "select" : "main"
+    type === "make_offer"
+      ? "select"
+      : type === "view_offer"
+      ? "main"
+      : "transaction"
   );
   const [offerInfo, setOfferInfo] = useState<any | null>(null);
 
@@ -57,6 +61,23 @@ const Offer: React.FC<Props> = ({
     }
   }, [offerId]);
 
+  const acceptOffer = async () => {
+    console.log("Accepting offer...");
+
+    const { data } = await supabase
+      .from("user_offers")
+      .update({
+        status: "accepted",
+        updated_at: new Date(),
+      })
+      .eq("id", offerId);
+  };
+
+  const counterOffer = async () => {
+    console.log("Counter offering...");
+    // present choice screen
+  };
+
   return (
     <div>
       <Modal
@@ -66,7 +87,15 @@ const Offer: React.FC<Props> = ({
         onRequestClose={closeModal}
         style={customStyles}
       >
-        {view === "main" && <Main offerId={offerId!} info={offerInfo} />}
+        {view === "main" && (
+          <Main
+            offerId={offerId!}
+            info={offerInfo}
+            acceptOffer={acceptOffer}
+            counterOffer={() => {}}
+            closeModal={closeModal}
+          />
+        )}
         {view === "select" && <Select initialNFT={initialNFT!} />}
         {view === "transaction" && <Transaction info={offerInfo} />}
       </Modal>

@@ -34,7 +34,9 @@ const NFTUserEditItem: React.FC<NFTItemProps> = ({ item, toggleForSwap }) => {
           {item.nfts.name}
         </div>
         <button
-          className="bg-gray-50 p-2 border border-gray-100 rounded-md m-2 hover:bg-gray-200 transition-colors duration-200"
+          className={`${
+            item.for_swap ? "bg-green-100" : "bg-red-100"
+          } p-2 border border-gray-100 rounded-md m-2 hover:bg-gray-200 transition-colors duration-200`}
           onClick={(e) => {
             e.preventDefault();
             toggleForSwap();

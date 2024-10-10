@@ -69,14 +69,14 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
       </div>
       <div className="mt-3">
         <button
-          className="w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 border border-gray-200 shadow-sm"
+          className="w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-sm"
           onClick={(e) => {
             e.preventDefault();
             makeOffer(item);
           }}
         >
           <span className="flex items-center mr-2.5 text-2xl">🤝</span>
-          <span className="text-gray-800 text-lg font-semibold">Trade</span>
+          <span className="text-gray-800 text-lg font-semibold">Offer</span>
         </button>
       </div>
     </Link>

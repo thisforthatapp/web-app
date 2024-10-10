@@ -15,8 +15,8 @@ interface GridNavigationProps {
 const navItems: GridNavItem[] = [
   { id: "home", label: "Home", emoji: "🏠" },
   { id: "followers", label: "Following", emoji: "👥" },
-  { id: "pinned", label: "Pinned", emoji: "📌" },
-  { id: "offers", label: "Offers", emoji: "🤝" },
+  { id: "pinned", label: "My Pinned", emoji: "📌" },
+  { id: "offers", label: "My Offers", emoji: "🤝" },
 ];
 
 const GridNavigation: FC<GridNavigationProps> = ({

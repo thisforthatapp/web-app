@@ -3,7 +3,7 @@
 import { FC } from "react";
 import { useRouter } from "next/navigation";
 import NFTComponent from "@/components/nft";
-import { Deal } from "@/components/modals";
+import { Offer } from "@/components/modals";
 
 interface NFTPageProps {
   params: {
@@ -18,12 +18,13 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
   return (
     <>
       <NFTComponent />
-      <Deal
-        itemId={""}
+      {/* <Offer
+        type="view_offer"
+        offerId="1"
         closeModal={() => {
           router.push("/nft/1/1/1");
         }}
-      />
+      /> */}
     </>
   );
 };

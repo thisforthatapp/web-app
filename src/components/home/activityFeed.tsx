@@ -1,9 +1,10 @@
-import { FC, useState, useRef, useEffect } from "react";
+import React, { FC, useState, useRef, useEffect } from "react";
 import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import { CollapsibleIcon } from "@/icons";
 import { Activity } from "@/types/supabase";
 import { formatDate } from "@/utils/helpers";
+import { NFTImage } from "@/components/shared";
 
 function renderMessageText(text: string) {
   // This regex matches most common URL formats
@@ -46,56 +47,144 @@ function renderMessageText(text: string) {
   return <>{parts}</>;
 }
 
+const formatItems = (items, decoration) => {
+  return items.map((nft, index) => (
+    <React.Fragment key={nft.id}>
+      <span
+        className={`font-semibold text-gray-800 hover:underline cursor-pointer underline decoration-4 ${decoration}`}
+      >
+        {nft.name}
+      </span>
+      {index < items.length - 1 && ", "}
+    </React.Fragment>
+  ));
+};
+
+const NFTOfferDisplay = ({ item }) => {
+  const userItems = item.metadata.offer
+    ? formatItems(item.metadata.offer.user, "decoration-red-500")
+    : null;
+  const counterUserItems = item.metadata.offer
+    ? formatItems(item.metadata.offer.userCounter, "decoration-blue-500")
+    : null;
+
+  return (
+    <div className="flex items-start w-full">
+      <div className="relative w-12 h-12 mr-4 shrink-0">
+        <img
+          src={
+            process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+            item?.profile_pic_url
+          }
+          alt="Profile"
+          className="w-full h-full rounded-full"
+        />
+        <div className="absolute bottom-[-6px] right-[-6px] bg-white rounded-full text-xs p-1 shadow-sm border border-black">
+          🤝
+        </div>
+      </div>
+      <div>
+        <div className="flex items-center gap-x-2">
+          <div className="text-sm font-semibold">{item?.username}</div>
+          <div className="text-xs text-gray-400">
+            {formatDate(new Date(item.created_at))}
+          </div>
+        </div>
+        <div className="mt-1">
+          <div>
+            offering <span>{userItems}</span> for{" "}
+            <span>{counterUserItems}</span>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {item.metadata.offer.user.map((nft) => (
+              <div
+                key={nft.id}
+                className="w-16 h-16 object-cover rounded-md border-4 border-red-500 overflow-hidden"
+              >
+                <NFTImage
+                  key={nft.id}
+                  src={nft.image}
+                  alt={nft.name}
+                  fallback={nft.name.substring(0, 4) + "..."}
+                />
+              </div>
+            ))}
+            {item.metadata.offer.userCounter.map((nft) => (
+              <div
+                key={nft.id}
+                className="w-16 h-16 object-cover rounded-md border-4 border-blue-500 "
+              >
+                <NFTImage
+                  key={nft.id}
+                  src={nft.image}
+                  alt={nft.name}
+                  fallback={nft.name.substring(0, 3) + "..."}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const FeedItem = ({ activity }: { activity: Activity }) => {
   return (
     <div
       key={activity.id}
       className="flex items-start border-b border-gray-100 p-4"
     >
-      <div className="relative w-12 h-12 mr-3 shrink-0">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={
-            process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
-            activity.profile_pic_url
-          }
-          alt="Profile"
-          className="w-full h-full rounded-full"
-        />
-        {activity.activity_type === "pin" && (
-          <div className="absolute bottom-[-4px] right-[-4px] bg-white rounded-full text-xs p-1 shadow-sm border border-black">
-            📌
-          </div>
-        )}
-      </div>
-      <div>
-        <div className="flex items-center gap-x-2">
-          <div className="text-sm font-semibold">{activity.username}</div>
-          <div className="text-xs text-gray-400">
-            {formatDate(new Date(activity.created_at))}
-          </div>
-        </div>
-        {activity.activity_type === "message" && (
-          <div className="text-sm mt-1">
-            {renderMessageText(activity.content || "")}
-          </div>
-        )}
-        {activity.activity_type === "pin" && (
-          <div className="text-sm mt-1">
-            <div>
-              pinned{" "}
-              <span className="font-semibold">
-                {activity.metadata?.nft_name}
-              </span>
-            </div>
+      {activity.activity_type === "offer_start" ? (
+        <NFTOfferDisplay item={activity} />
+      ) : (
+        <>
+          <div className="relative w-12 h-12 mr-3 shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={activity.metadata?._nft_image}
-              className="mt-2 w-16 h-16 rounded-md"
-              alt="NFT"
+              src={
+                process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+                activity.profile_pic_url
+              }
+              alt="Profile"
+              className="w-full h-full rounded-full"
             />
+            {activity.activity_type === "pin" && (
+              <div className="absolute bottom-[-4px] right-[-4px] bg-white rounded-full text-xs p-1 shadow-sm border border-black">
+                📌
+              </div>
+            )}
           </div>
-        )}
-      </div>
+          <div>
+            <div className="flex items-center gap-x-2">
+              <div className="text-sm font-semibold">{activity.username}</div>
+              <div className="text-xs text-gray-400">
+                {formatDate(new Date(activity.created_at))}
+              </div>
+            </div>
+            {activity.activity_type === "message" && (
+              <div className="text-sm mt-1">
+                {renderMessageText(activity.content || "")}
+              </div>
+            )}
+            {activity.activity_type === "pin" && (
+              <div className="text-sm mt-1">
+                <div>
+                  pinned{" "}
+                  <span className="font-semibold">
+                    {activity.metadata?.nft_name}
+                  </span>
+                </div>
+                <img
+                  src={activity.metadata?._nft_image}
+                  className="mt-2 w-16 h-16 rounded-md"
+                  alt="NFT"
+                />
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -221,6 +310,8 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({
     feedCollapsed ? "w-12" : "w-[460px]"
   } bg-white transition-all duration-300 ease-in-out shrink-0`;
   const mobileStyle = `h-full w-full`;
+
+  console.log("activities", activities);
 
   return (
     <div className={`${showCollapsibleTab ? desktopStyle : mobileStyle}`}>

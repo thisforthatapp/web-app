@@ -44,7 +44,7 @@ const Select = ({ initialNFT }) => {
       console.log("User 1:", user1Items);
       console.log("User 2:", user2Items);
 
-      const { data, error } = await supabase.rpc("create_initial_offer", {
+      const { data, error } = await supabase.rpc("create_offer", {
         p_user_id: profile?.id,
         p_user_id_counter: initialNFT.nft_user_id,
         p_offer: {
