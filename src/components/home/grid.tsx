@@ -4,6 +4,7 @@ import { GridNavigation } from '@/components/home'
 import { Offer } from '@/components/modals'
 import { NFTFeedItem, OfferFeedItem } from '@/components/shared'
 import { useAuth } from '@/providers/authProvider'
+import { useToast } from '@/providers/toastProvider'
 import { GridTabOption } from '@/types/main'
 import {
   NFTFeedItem as NFTFeedItemType,
@@ -14,107 +15,100 @@ import { supabase } from '@/utils/supabaseClient'
 
 const Grid: FC = () => {
   const { user, loading } = useAuth()
-
+  const { showToast } = useToast()
   const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
   const [expandOfferItem, setExpandOfferItem] = useState<OfferFeedItemType | null>(null)
-
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
-
-  const [tabOption, setTabOption] = useState<GridTabOption>('home')
+  const [tabOption, setTabOption] = useState<GridTabOption>('offers')
   const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
 
   const fetchItems = async (tabOption: GridTabOption, page: number) => {
-    let query
-
-    // required logged in
-    if (tabOption === 'offers' || tabOption === 'pinned') {
-      if (!user?.id) {
-        setItems([])
-        setPage(1)
-        setHasMore(true)
-        return
-      }
+    if (tabOption !== 'home' && !user) {
+      setItems([])
+      setPage(1)
+      setHasMore(false)
+      return
     }
 
+    const rangeStart = (page - 1) * GRID_ITEMS_PER_PAGE
+    const rangeEnd = page * GRID_ITEMS_PER_PAGE - 1
+
+    let query
+    const baseParams = {
+      current_user_id: user?.id || null,
+      range_start: rangeStart,
+      range_end: rangeEnd,
+    }
+
+    // Build query based on tab option
     switch (tabOption) {
       case 'home':
-        query = await supabase.rpc('get_home_feed', {
-          current_user_id: user?.id || null,
-          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
-          range_end: page * GRID_ITEMS_PER_PAGE - 1,
-        })
+        query = supabase.rpc('get_home_feed', baseParams)
         break
       case 'followers':
-        query = await supabase.rpc('get_following_feed', {
-          current_user_id: user?.id,
-          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
-          range_end: page * GRID_ITEMS_PER_PAGE - 1,
-        })
+        query = supabase.rpc('get_following_feed', baseParams)
         break
       case 'pinned':
-        query = await supabase.rpc('get_pinned_feed', {
-          current_user_id: user?.id,
-          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
-          range_end: page * GRID_ITEMS_PER_PAGE - 1,
-        })
+        query = supabase.rpc('get_pinned_feed', baseParams)
         break
       case 'offers':
-        query = await supabase
+        query = supabase
           .from('user_offers')
           .select(
             '*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)',
           )
           .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
           .order('updated_at', { ascending: false })
-          .range((page - 1) * GRID_ITEMS_PER_PAGE, page * GRID_ITEMS_PER_PAGE - 1)
+          .range(rangeStart, rangeEnd)
         break
       default:
-        query = await supabase.rpc('get_home_feed', {
-          current_user_id: user?.id,
-          range_start: (page - 1) * GRID_ITEMS_PER_PAGE,
-          range_end: page * GRID_ITEMS_PER_PAGE - 1,
-        })
-        break
+        query = supabase.rpc('get_home_feed', baseParams)
     }
 
+    // Execute query
     const { data, error } = await query
 
     if (error) {
+      showToast(`⚠️ Error fetching items`, 2500)
       console.error('Error fetching items:', error)
       return
     }
 
+    // Update items based on page and tab option
     if (page === 1) {
       setItems(data)
     } else {
-      if (tabOption === 'offers') {
-        setItems((prevOffers) => {
-          const newOffers = data.filter(
-            (newOffer: OfferFeedItemType) =>
-              !(prevOffers as OfferFeedItemType[]).some(
-                (prevOffer) => prevOffer.id === newOffer.id,
-              ),
-          )
-          return [...prevOffers, ...newOffers]
-        })
-      } else {
-        setItems((prevNfts) => {
-          const newNfts = data.filter(
-            (newNft: NFTFeedItemType) =>
-              !(prevNfts as NFTFeedItemType[]).some(
-                (prevNft) => prevNft.nft_id === newNft.nft_id,
-              ),
-          )
-          return [...prevNfts, ...newNfts]
-        })
-      }
+      setItems((prevItems) => {
+        const isOffer = tabOption === 'offers'
+        const newItems = data.filter(
+          (newItem: OfferFeedItemType | NFTFeedItemType) =>
+            !prevItems.some((prevItem: OfferFeedItemType | NFTFeedItemType) =>
+              isOffer
+                ? (prevItem as OfferFeedItemType).id === (newItem as OfferFeedItemType).id
+                : (prevItem as NFTFeedItemType).nft_id === (newItem as NFTFeedItemType).nft_id,
+            ),
+        )
+        return [...prevItems, ...newItems]
+      })
     }
 
     setHasMore(data.length === GRID_ITEMS_PER_PAGE)
   }
 
+  useEffect(() => {
+    if (tabOption && !loading) {
+      fetchItems(tabOption, 1)
+      setPage(1)
+    }
+  }, [tabOption, loading])
+
   const makeOffer = async (nft: NFTFeedItemType) => {
+    if (!user) {
+      showToast(`⚠️ You have to login to use this`, 2500)
+      return
+    }
+
     setMakeOfferItem(nft)
   }
 
@@ -123,12 +117,19 @@ const Grid: FC = () => {
     setExpandOfferItem(offer)
   }
 
-  // TEMP: disable unpin to prevent spammy toggling and too many notifications
+  /* only allows pins for now. too many notifs if allow pin/unpin */
   const pinItem = async (nft: NFTFeedItemType) => {
-    if (!user) return
-    if (nft.is_pinned) return
+    if (!user) {
+      showToast(`⚠️ You have to login to use this`, 2500)
+      return
+    }
 
-    const updatedNFTs = nfts.map((item) => {
+    if (nft.is_pinned) {
+      showToast(`✅ NFT already pinned`, 1500)
+      return
+    }
+
+    const updatedNFTs = (items as NFTFeedItemType[]).map((item: NFTFeedItemType) => {
       if (item.nft_id === nft.nft_id) {
         const isCurrentlyPinned = item.is_pinned
         return {
@@ -142,6 +143,8 @@ const Grid: FC = () => {
 
     setItems(updatedNFTs)
 
+    showToast(`✅ NFT pinned`, 1500)
+
     const { error } = await supabase.from('user_pins').insert([
       {
         user_id: user?.id,
@@ -150,29 +153,29 @@ const Grid: FC = () => {
     ])
 
     if (error) {
+      showToast(`⚠️ Error pinning NFT`, 2500)
       console.error('Error following user:', error)
       return
     }
   }
 
-  useEffect(() => {
-    if (tabOption && !loading) {
-      fetchItems(tabOption, 1)
-      setPage(1)
+  const handleTabChange = (newTabOption: GridTabOption) => {
+    if (newTabOption !== 'home' && !user) {
+      showToast(`⚠️ You have to login to use this`, 2500)
+      return
     }
-  }, [tabOption, loading])
+
+    setItems([])
+    setPage(1)
+    setHasMore(false)
+    setTabOption(newTabOption)
+  }
 
   return (
     <div className='w-full overflow-y-auto hide-scrollbar'>
-      <GridNavigation
-        tabOption={tabOption}
-        onNavigationChange={(tabOption: GridTabOption) => {
-          setItems([])
-          setTabOption(tabOption)
-        }}
-      />
+      <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
       {tabOption === 'offers' ? (
-        <div className='p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-4'>
+        <div className='p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4'>
           {(items as OfferFeedItemType[]).map((item) => (
             <OfferFeedItem key={item.id} item={item} expandOffer={expandOffer} />
           ))}
@@ -189,10 +192,25 @@ const Grid: FC = () => {
           ))}
         </div>
       )}
-      {/* has more button */}
+      {hasMore && (
+        <div className='w-full flex items-center justify-center my-4'>
+          <button
+            onClick={() => {
+              const nextPage = page + 1
+              setPage(nextPage)
+              fetchItems(tabOption, nextPage)
+            }}
+            className='px-10 py-3 text-lg rounded-full bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-colors duration-300'
+          >
+            Load More
+          </button>
+        </div>
+      )}
+
       {makeOfferItem && (
         <Offer
           type='make_offer'
+          offerId={null}
           initialNFT={makeOfferItem}
           closeModal={() => setMakeOfferItem(null)}
         />
@@ -205,6 +223,7 @@ const Grid: FC = () => {
               : 'view_offer'
           }
           offerId={expandOfferItem.id}
+          initialNFT={null}
           closeModal={() => setExpandOfferItem(null)}
         />
       )}

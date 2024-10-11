@@ -6,6 +6,7 @@ import Image from 'next/image'
 
 import { useIsMobile } from '@/hooks'
 import { Close, Google } from '@/icons'
+import { useToast } from '@/providers/toastProvider'
 import { getModalStyles } from '@/styles'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -14,6 +15,7 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ closeModal }) => {
+  const { showToast } = useToast()
   const isMobile = useIsMobile()
   const customStyles = getModalStyles(isMobile)
 
@@ -26,6 +28,7 @@ const Login: React.FC<LoginProps> = ({ closeModal }) => {
         },
       })
     } catch (error) {
+      showToast(`⚠️ Login failed`, 2500)
       console.error('Login failed:', error)
     }
   }

@@ -1,115 +1,107 @@
-"use client";
+'use client'
 
-import { FC, useEffect, useState } from "react";
-import Modal from "react-modal";
-import { useAuth } from "@/providers/authProvider";
-import { useIsMobile } from "@/hooks";
-import { getModalStyles } from "@/styles";
-import { Main, Select, Transaction } from "@/components/offer";
-import { NFTFeedItem } from "@/types/supabase";
-import { supabase } from "@/utils/supabaseClient";
+import { FC, useEffect, useState } from 'react'
+import Modal from 'react-modal'
+
+import { Main, Select, Transaction } from '@/components/offer'
+import { useIsMobile } from '@/hooks'
+import { useAuth } from '@/providers/authProvider'
+import { getModalStyles } from '@/styles'
+import { NFTFeedItem } from '@/types/supabase'
+import { supabase } from '@/utils/supabaseClient'
 
 interface BaseProps {
-  closeModal: () => void;
+  closeModal: () => void
 }
 
 interface MakeOfferProps extends BaseProps {
-  type: "make_offer";
-  initialNFT: NFTFeedItem;
-  offerId: null;
+  type: 'make_offer'
+  initialNFT: NFTFeedItem
+  offerId: null
 }
 
 interface ViewOfferProps extends BaseProps {
-  type: "view_offer";
-  initialNFT: null;
-  offerId: string;
+  type: 'view_offer'
+  initialNFT: null
+  offerId: string
 }
 
 interface TransactionProps extends BaseProps {
-  type: "transaction";
-  initialNFT: null;
-  offerId?: string;
+  type: 'transaction'
+  initialNFT: null
+  offerId?: string
 }
 
-type Props = MakeOfferProps | ViewOfferProps | TransactionProps;
+type Props = MakeOfferProps | ViewOfferProps | TransactionProps
 
-const Offer: FC<Props> = ({
-  type,
-  offerId = null,
-  initialNFT = null,
-  closeModal,
-}) => {
-  const { user, profile } = useAuth();
-  const isMobile = useIsMobile();
-  const customStyles = getModalStyles(isMobile);
+const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal }) => {
+  const { user, profile } = useAuth()
+  const isMobile = useIsMobile()
+  const customStyles = getModalStyles(isMobile)
 
-  const [view, setView] = useState<"main" | "select" | "transaction" | null>(
-    type === "make_offer"
-      ? "select"
-      : type === "view_offer"
-      ? "main"
-      : "transaction"
-  );
-  const [offerInfo, setOfferInfo] = useState<any | null>(null);
+  const [view, setView] = useState<'main' | 'select' | 'transaction' | null>(
+    type === 'make_offer' ? 'select' : type === 'view_offer' ? 'main' : 'transaction',
+  )
+  const [offerInfo, setOfferInfo] = useState<any | null>(null)
 
   const fetchOfferInfo = async () => {
     try {
       const { data, error } = await supabase
-        .from("user_offers")
+        .from('user_offers')
         .select(
-          "*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)"
+          '*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)',
         )
-        .eq("id", offerId)
-        .single();
+        .eq('id', offerId)
+        .single()
 
       if (error) {
-        throw error;
+        throw error
       }
 
       if (data) {
-        setOfferInfo(data);
+        setOfferInfo(data)
       }
     } catch (error) {
-      console.error("Failed to fetch offer info", error);
+      console.error('Failed to fetch offer info', error)
     }
-  };
+  }
 
   useEffect(() => {
     if (offerId) {
-      fetchOfferInfo();
+      fetchOfferInfo()
     }
-  }, [offerId]);
+  }, [offerId])
 
   const acceptOffer = async () => {
-    console.log("Accepting offer...");
-    if (!user) return;
+    console.log('Accepting offer...')
+    if (!user) return
 
-    const { data, error } = await supabase.rpc("accept_offer", {
+    const { data, error } = await supabase.rpc('accept_offer', {
       p_offer_id: offerId,
       p_user_id: user.id,
-    });
+    })
 
-    console.log("Accepted!");
-  };
+    console.log('Accepted!')
+  }
 
   const counterOffer = async () => {
-    console.log("Counter offering...");
+    console.log('Counter offering...')
     // present choice screen
-    setView("select");
-  };
+    setView('select')
+  }
 
-  console.log("offerInfo", offerInfo);
+  console.log('offerInfo', offerInfo)
 
   return (
     <div>
       <Modal
-        id="react-modal"
+        id='react-modal'
         ariaHideApp={false}
         isOpen={true}
         onRequestClose={closeModal}
         style={customStyles}
       >
-        {view === "main" && (
+        {view === 'main' && (
           <Main
             offerId={offerId!}
             info={offerInfo}
@@ -118,12 +110,12 @@ const Offer: FC<Props> = ({
             closeModal={closeModal}
           />
         )}
-        {view === "select" && (
+        {view === 'select' && (
           <Select
-            type={type === "make_offer" ? "initial_offer" : "counter_offer"}
+            type={type === 'make_offer' ? 'initial_offer' : 'counter_offer'}
             offerId={offerId}
             userA={
-              type === "make_offer"
+              type === 'make_offer'
                 ? {
                     id: profile?.id,
                     username: profile?.username,
@@ -136,7 +128,7 @@ const Offer: FC<Props> = ({
                   }
             }
             userB={
-              type === "make_offer"
+              type === 'make_offer'
                 ? {
                     id: initialNFT?.nft_user_id,
                     username: initialNFT?.nft_user_id_username,
@@ -148,31 +140,28 @@ const Offer: FC<Props> = ({
                     profile_pic_url: offerInfo.counter_user?.profile_pic_url,
                   }
             }
-            initUserAItems={type === "make_offer" ? [] : offerInfo.offer.user}
+            initUserAItems={type === 'make_offer' ? [] : offerInfo.offer.user}
             initUserBItems={
-              type === "make_offer"
+              type === 'make_offer'
                 ? [
                     {
-                      id: initialNFT?.nft_id ?? "",
-                      name: initialNFT?.nft_name ?? "",
-                      image: initialNFT?.nft_image ?? "",
-                      chaind_id: initialNFT?.nft_chain_id ?? "",
-                      collection_contract:
-                        initialNFT?.nft_collection_contract ?? "",
-                      token_id: initialNFT?.nft_token_id ?? "",
-                      token_type: initialNFT?.nft_token_type ?? "",
+                      id: initialNFT?.nft_id ?? '',
+                      name: initialNFT?.nft_name ?? '',
+                      image: initialNFT?.nft_image ?? '',
+                      chaind_id: initialNFT?.nft_chain_id ?? '',
+                      collection_contract: initialNFT?.nft_collection_contract ?? '',
+                      token_id: initialNFT?.nft_token_id ?? '',
+                      token_type: initialNFT?.nft_token_type ?? '',
                     },
                   ]
                 : offerInfo.offer.userCounter
             }
           />
         )}
-        {view === "transaction" && (
-          <Transaction info={offerInfo} closeModal={closeModal} />
-        )}
+        {view === 'transaction' && <Transaction info={offerInfo} closeModal={closeModal} />}
       </Modal>
     </div>
-  );
-};
+  )
+}
 
-export default Offer;
+export default Offer
