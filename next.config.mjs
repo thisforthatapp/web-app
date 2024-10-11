@@ -4,17 +4,17 @@ const nextConfig = {
   async redirects() {
     return [
       {
-        source: "/account",
-        destination: "/account/activity",
+        source: '/account',
+        destination: '/account/activity',
         permanent: true,
       },
-    ];
+    ]
   },
   webpack: (config) => {
-    config.resolve.fallback = { fs: false, net: false, tls: false };
-    config.externals.push("pino-pretty", "encoding");
-    return config;
+    config.resolve.fallback = { fs: false, net: false, tls: false }
+    config.externals.push('pino-pretty', 'encoding')
+    return config
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

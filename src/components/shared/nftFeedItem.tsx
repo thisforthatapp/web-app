@@ -1,22 +1,23 @@
-import { FC } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { NFTImage, VerifiedBadge, Options } from "@/components/shared";
-import { NFTFeedItem as NFTFeedItemType } from "@/types/supabase";
+import { FC } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+import { NFTImage, Options, VerifiedBadge } from '@/components/shared'
+import { NFTFeedItem as NFTFeedItemType } from '@/types/supabase'
 
 interface NFTItemProps {
-  item: NFTFeedItemType;
-  makeOffer: (nft: NFTFeedItemType) => void;
-  pinItem: (nft: NFTFeedItemType) => void;
+  item: NFTFeedItemType
+  makeOffer: (nft: NFTFeedItemType) => void
+  pinItem: (nft: NFTFeedItemType) => void
 }
 
 const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
-  const router = useRouter();
+  const router = useRouter()
 
   const navigateToUser = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    router.push(`/${item.nft_user_id_username}`);
-  };
+    e.preventDefault()
+    router.push(`/${item.nft_user_id_username}`)
+  }
 
   return (
     <Link
@@ -24,14 +25,14 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
         item.nft_collection_contract
       }/${item.nft_token_id}`}
     >
-      <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
-        <div className="absolute top-1 right-1 z-10">
+      <div className='bg-white rounded-lg shadow-md overflow-hidden relative'>
+        <div className='absolute top-1 right-1 z-10'>
           <Options onOptionSelect={() => {}} />
         </div>
         <VerifiedBadge
           id={item.nft_id}
           isVerified={item.nft_is_verified}
-          className="absolute left-1 top-1 z-10 w-10 h-10"
+          className='absolute left-1 top-1 z-10 w-10 h-10'
         />
         {/* <button
           className={`absolute bottom-[65px] left-[5px] text-sm flex justify-between items-center px-2.5 py-2.5 rounded-md transition-colors duration-200 ${
@@ -46,57 +47,52 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
         >
           <span className="flex items-center">📌</span>
         </button> */}
-        <NFTImage
-          src={item.nft_image}
-          alt={item.nft_name}
-          fallback={item.nft_name}
-        />
+        <NFTImage src={item.nft_image} alt={item.nft_name} fallback={item.nft_name} />
         {/* <div className="text-center my-4 font-semibold text-sm">
           {item.nft_name}
         </div> */}
-        <div className="flex justify-between px-3 py-3">
-          <div
-            className="flex items-center justify-center w-full"
-            onClick={navigateToUser}
-          >
+        <div className='flex justify-between px-3 py-3'>
+          <div className='flex items-center justify-center w-full' onClick={navigateToUser}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${item?.nft_user_id_profile_pic_url}`}
               alt={item?.nft_user_id_username}
-              className="w-6 h-6 rounded-full"
+              className='w-6 h-6 rounded-full'
             />
-            <span className="text-lg ml-2 text-gray-700 font-semibold">
+            <span className='text-lg ml-2 text-gray-700 font-semibold'>
               {item?.nft_user_id_username}
             </span>
           </div>
         </div>
       </div>
-      <div className="mt-3 flex gap-x-2 gap-y-2">
-        <button
-          className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-sm ${
-            item.is_pinned ? "" : "bg-red-50 hover:bg-red-100"
-          }`}
-          onClick={(e) => {
-            e.preventDefault();
-            makeOffer(item);
-          }}
-        >
-          <span className="flex items-center mr-2 text-2xl">📌</span>
-          <span className="text-lg font-semibold">Pin</span>
-        </button>
-        <button
-          className="w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-sm"
-          onClick={(e) => {
-            e.preventDefault();
-            makeOffer(item);
-          }}
-        >
-          <span className="flex items-center mr-2 text-2xl">🤝</span>
-          <span className="text-gray-800 text-lg font-semibold">Offer</span>
-        </button>
+      <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-1 overflow-hidden'>
+        <div className='flex w-full gap-x-2'>
+          <button
+            className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md ${
+              item.is_pinned ? '' : 'bg-red-50 hover:bg-red-100'
+            }`}
+            onClick={(e) => {
+              e.preventDefault()
+              makeOffer(item)
+            }}
+          >
+            <span className='flex items-center mr-1 text-2xl'>📌</span>
+            <span className='text-lg font-semibold'>Pin</span>
+          </button>
+          <button
+            className='w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'
+            onClick={(e) => {
+              e.preventDefault()
+              makeOffer(item)
+            }}
+          >
+            <span className='flex items-center mr-1 text-2xl'>🤝</span>
+            <span className='text-gray-800 text-lg font-semibold'>Offer</span>
+          </button>
+        </div>
       </div>
     </Link>
-  );
-};
+  )
+}
 
-export default NFTFeedItem;
+export default NFTFeedItem

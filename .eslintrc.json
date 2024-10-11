@@ -3,6 +3,7 @@
   "plugins": ["prettier", "simple-import-sort"],
   "rules": {
     "prettier/prettier": "error",
+    "@next/next/no-img-element": "off", // Disable next/image warnings
     "simple-import-sort/imports": [
       "error",
       {
