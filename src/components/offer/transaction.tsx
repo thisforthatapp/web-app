@@ -1,10 +1,12 @@
+// TODO: this needs lot of work
+
 import { FC, useState } from "react";
 import { Close } from "@/icons";
 import Link from "next/link";
 import { Checkmark } from "@/icons";
 
 interface Props {
-  itemId: string;
+  info: any;
   closeModal: () => void;
 }
 
@@ -51,7 +53,7 @@ interface DealStage {
   description: string;
 }
 
-const Transaction: FC<Props> = ({ itemId, closeModal }) => {
+const Transaction: FC<Props> = ({ info, closeModal }) => {
   const [dealStatus, setDealStatus] = useState<DealStatus>({
     stage: "deposit",
   });

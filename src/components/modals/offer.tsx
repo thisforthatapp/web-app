@@ -39,7 +39,7 @@ const Offer: FC<Props> = ({
   initialNFT = null,
   closeModal,
 }) => {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const isMobile = useIsMobile();
   const customStyles = getModalStyles(isMobile);
 
@@ -82,14 +82,12 @@ const Offer: FC<Props> = ({
 
   const acceptOffer = async () => {
     console.log("Accepting offer...");
+    if (!user) return;
 
-    const { data } = await supabase
-      .from("user_offers")
-      .update({
-        status: "accepted",
-        updated_at: new Date(),
-      })
-      .eq("id", offerId);
+    const { data, error } = await supabase.rpc("accept_offer", {
+      p_offer_id: offerId,
+      p_user_id: user.id,
+    });
 
     console.log("Accepted!");
   };
@@ -169,7 +167,9 @@ const Offer: FC<Props> = ({
             }
           />
         )}
-        {view === "transaction" && <Transaction info={offerInfo} />}
+        {view === "transaction" && (
+          <Transaction info={offerInfo} closeModal={closeModal} />
+        )}
       </Modal>
     </div>
   );

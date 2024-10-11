@@ -6,7 +6,7 @@ import { NFTOfferMetadata, ProfileMinimal } from "@/types/supabase";
 
 type Props = {
   type: "initial_offer" | "counter_offer";
-  offerId: string | undefined;
+  offerId: string | null;
   userA: ProfileMinimal;
   userB: ProfileMinimal;
   initUserAItems: NFTOfferMetadata[];
