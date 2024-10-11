@@ -293,7 +293,10 @@ const Main: FC<{
         >
           ✅ Accept
         </button>
-        <button className="bg-yellow-300 p-3 rounded-md shadow-sm cursor-pointer w-full font-semibold text-xl">
+        <button
+          className="bg-yellow-300 p-3 rounded-md shadow-sm cursor-pointer w-full font-semibold text-xl"
+          onClick={counterOffer}
+        >
           🤝 Counter
         </button>
       </div>

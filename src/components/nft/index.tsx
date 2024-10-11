@@ -5,6 +5,7 @@ import Link from "next/link";
 import { OfferFeedItem, Options, VerifiedBadge } from "@/components/shared";
 import { supabase } from "@/utils/supabaseClient";
 import { GRID_ITEMS_PER_PAGE } from "@/utils/constants";
+import { Etherscan, Opensea } from "@/icons";
 
 interface ActivityItem {
   id: string;
@@ -119,20 +120,24 @@ const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
     <div className="absolute top-[75px] bottom-0 w-full flex">
       <div className="w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar justify-center my-8">
         <div className="flex flex-col lg:flex-row justify-center gap-x-8">
-          <div className="relative w-[400px]">
-            <img
-              src={nft?.image}
-              alt="NFT"
-              className="w-full h-[400px] w-[400px] object-cover rounded-lg"
-            />
-            <div className="absolute top-2 right-2">
-              <Options onOptionSelect={() => {}} />
-            </div>
-            <div className="px-2 py-4 mb-4">
-              <Link
-                href="/user/1"
-                className="flex items-center justify-between mb-6"
-              >
+          <div className="relative w-[400px] flex flex-col">
+            <div className="bg-white rounded-lg shadow-md mb-4">
+              <div>
+                <VerifiedBadge
+                  id={nft.id}
+                  isVerified={isVerified}
+                  className="absolute left-2 top-2 z-10 w-12 h-12"
+                />
+                <img
+                  src={nft?.image}
+                  alt="NFT"
+                  className="w-full h-[400px] w-[400px] object-cover rounded-lg"
+                />
+                <div className="absolute top-2 right-2">
+                  <Options onOptionSelect={() => {}} />
+                </div>
+              </div>
+              <div className="py-4 flex items-center justify-center">
                 <div className="flex items-center">
                   <img
                     src={ownerImage}
@@ -140,26 +145,19 @@ const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
                     className="w-8 h-8 rounded-full"
                   />
                   <div className="text-xl font-bold ml-2">{owner}</div>
-                  {/* <button className="bg-gray-100 px-2 py-1 rounded-full text-xs ml-3 border border-gray-200">
-                Follow
-              </button> */}
                 </div>
-                <VerifiedBadge isVerified={isVerified} className="" />
-              </Link>
-
-              <div className="grid grid-cols-3 gap-4">
-                <InfoItem label="Chain" value={chain} link={openseaLink} />
-                <InfoItem
-                  label="Collection"
-                  value={collection}
-                  link={openseaLink}
-                />
-                <InfoItem label="Token ID" value={tokenId} link={openseaLink} />
-                <InfoItem label="Floor Price" value={floorPrice} />
-                <InfoItem label="Last Sale" value={lastSalePrice} />
               </div>
             </div>
-            <div className="flex space-x-4">
+            {/* <div className="grid grid-cols-3 gap-4 bg-white shadow-md mt-4 p-4 rounded-md">
+              <InfoItem label="Chain" value={chain} link={openseaLink} />
+              <InfoItem
+                label="Collection"
+                value={collection}
+                link={openseaLink}
+              />
+              <InfoItem label="Token ID" value={tokenId} link={openseaLink} />
+            </div> */}
+            {/* <div className="flex space-x-4">
               <ActionButton
                 emoji="🤝"
                 text="Make Offer"
@@ -174,16 +172,53 @@ const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
                 onClick={() => setInterestModalOpen(true)}
                 className="bg-gray-800"
               />
+            </div> */}
+            <div className="bg-white p-4 mb-4 flex items-center shadow-sm rounded-md">
+              <Opensea className="w-10 h-10" />
+              <div className="ml-3">View On Opensea</div>
+            </div>
+            <div className="bg-white p-4 flex items-center shadow-sm rounded-md">
+              <Etherscan className="w-10 h-10" />
+              <div className="ml-3">View On Etherscan</div>
+            </div>
+            <div className="flex gap-x-4 gap-y-2 mt-4">
+              <button
+                className={`w-full flex justify-center items-center bg-red-50 p-3 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-sm`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  // makeOffer(item);
+                }}
+              >
+                <span className="flex items-center mr-2 text-2xl">📌</span>
+                <span className="text-lg font-semibold">Pin</span>
+              </button>
+              <button
+                className="w-full flex justify-center items-center bg-yellow-50 p-3 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-sm"
+                onClick={(e) => {
+                  e.preventDefault();
+                  // makeOffer(item);
+                }}
+              >
+                <span className="flex items-center mr-2 text-2xl">🤝</span>
+                <span className="text-gray-800 text-lg font-semibold">
+                  Offer
+                </span>
+              </button>
             </div>
           </div>
-          <div className="overflow-y-auto hide-scrollbar h-[650px] w-[600px] flex flex-col gap-y-4">
-            {(items as any[]).map((item) => (
-              <OfferFeedItem
-                key={item.id}
-                item={item.user_offers}
-                // expandOffer={expandOffer}
-              />
-            ))}
+          <div className="flex flex-col">
+            <div className="w-full bg-white p-4 flex items-center justify-center border border-gray-200 mb-4 rounded-md font-semibold text-xl">
+              Offers for CryptoPunk #1658
+            </div>
+            <div className="overflow-y-auto hide-scrollbar h-[650px] w-[600px] flex flex-col gap-y-4">
+              {(items as any[]).map((item) => (
+                <OfferFeedItem
+                  key={item.id}
+                  item={item.user_offers}
+                  // expandOffer={expandOffer}
+                />
+              ))}
+            </div>
           </div>
           <div className="flex lg:hidden">
             action buttons that show on mobile

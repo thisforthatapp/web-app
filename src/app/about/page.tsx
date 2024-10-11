@@ -1,10 +1,14 @@
-import React from "react";
+import { FC } from "react";
 
-const AboutPage: React.FC = () => {
+const AboutPage: FC = () => {
   return (
     <div>
-      <h1>About Us</h1>
-      <p>This is the about page.</p>
+      <div>About Us</div>
+      <div>
+        <div>- mention what TFT is</div>
+        <div>- mention chains its on</div>
+        <div>- mention whats coming</div>
+      </div>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navbar } from "@/components";
 import { Web3Provider } from "@/providers/web3Provider";
 import { AuthProvider } from "@/providers/authProvider";
+import { ToastProvider } from "@/providers/toastProvider";
 
 export const metadata: Metadata = {
   title: "TFT - Swap NFTS for NFTs",
@@ -20,10 +21,12 @@ export default function RootLayout({
       <body>
         <Web3Provider>
           <AuthProvider>
-            <div className="h-screen flex items-center justify-center flex-col">
-              <Navbar />
-              {children}
-            </div>
+            <ToastProvider>
+              <div className="h-screen flex items-center justify-center flex-col">
+                <Navbar />
+                {children}
+              </div>
+            </ToastProvider>
           </AuthProvider>
         </Web3Provider>
       </body>

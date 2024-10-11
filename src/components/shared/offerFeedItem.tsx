@@ -12,7 +12,7 @@ interface OfferItemProps {
 const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
   const StatusBubble: FC<{ status: string }> = ({ status }) => {
     return (
-      <div className="text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded absolute top-4 right-4">
+      <div className="text-sm font-semibold bg-yellow-200 text-yellow-800 px-2 py-1 rounded absolute top-4 right-4">
         negotiating
       </div>
     );
@@ -20,11 +20,11 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
 
   return (
     <div
-      className="flex items-center shadow-sm rounded-md cursor-pointer py-4 relative bg-yellow-50"
+      className="flex items-center shadow-sm rounded-md cursor-pointer py-4 relative bg-yellow-50 border-gray-200 border"
       onClick={() => expandOffer(item)}
     >
       <StatusBubble status={item.status} />
-      <div className="absolute bottom-4 right-4 text-gray-400">
+      <div className="absolute bottom-4 right-4 text-gray-700 font-semibold">
         {timeAgoShort(new Date(item.updated_at))}
       </div>
       <div className="ml-6 mr-2 flex flex-col font-semibold shrink-0 gap-y-4">

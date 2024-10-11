@@ -18,3 +18,5 @@ export { default as Image } from "./image";
 export { default as Handshake } from "./handshake";
 export { default as Add } from "./add";
 export { default as CollapsibleIcon } from "./collapsibleIcon";
+export { default as Etherscan } from "./etherscan";
+export { default as Opensea } from "./opensea";

@@ -33,41 +33,57 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           isVerified={item.nft_is_verified}
           className="absolute left-1 top-1 z-10 w-10 h-10"
         />
+        {/* <button
+          className={`absolute bottom-[65px] left-[5px] text-sm flex justify-between items-center px-2.5 py-2.5 rounded-md transition-colors duration-200 ${
+            item.is_pinned
+              ? "bg-gray-700 text-white"
+              : "bg-gray-100 hover:bg-gray-200 text-gray-800"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            pinItem(item);
+          }}
+        >
+          <span className="flex items-center">📌</span>
+        </button> */}
         <NFTImage
           src={item.nft_image}
           alt={item.nft_name}
           fallback={item.nft_name}
         />
-        <div className="text-center my-4 font-semibold">{item.nft_name}</div>
-        <div className="flex justify-between px-3 pb-3">
-          <div className="pt-2 flex items-center" onClick={navigateToUser}>
+        {/* <div className="text-center my-4 font-semibold text-sm">
+          {item.nft_name}
+        </div> */}
+        <div className="flex justify-between px-3 py-3">
+          <div
+            className="flex items-center justify-center w-full"
+            onClick={navigateToUser}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${item?.nft_user_id_profile_pic_url}`}
               alt={item?.nft_user_id_username}
               className="w-6 h-6 rounded-full"
             />
-            <span className="ml-2 text-gray-700">
+            <span className="text-lg ml-2 text-gray-700 font-semibold">
               {item?.nft_user_id_username}
             </span>
           </div>
-          <button
-            className={`text-sm flex justify-between items-center px-2.5 py-1 rounded-md transition-colors duration-200 ${
-              item.is_pinned
-                ? "bg-gray-700 text-white"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              pinItem(item);
-            }}
-          >
-            <span className="flex items-center mr-1.5">📌</span>
-            <span className="font-semibold">{item.nft_pins}</span>
-          </button>
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 flex gap-x-2 gap-y-2">
+        <button
+          className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-sm ${
+            item.is_pinned ? "" : "bg-red-50 hover:bg-red-100"
+          }`}
+          onClick={(e) => {
+            e.preventDefault();
+            makeOffer(item);
+          }}
+        >
+          <span className="flex items-center mr-2 text-2xl">📌</span>
+          <span className="text-lg font-semibold">Pin</span>
+        </button>
         <button
           className="w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-sm"
           onClick={(e) => {
@@ -75,7 +91,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             makeOffer(item);
           }}
         >
-          <span className="flex items-center mr-2.5 text-2xl">🤝</span>
+          <span className="flex items-center mr-2 text-2xl">🤝</span>
           <span className="text-gray-800 text-lg font-semibold">Offer</span>
         </button>
       </div>

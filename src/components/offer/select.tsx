@@ -1,35 +1,54 @@
-import React, { useState } from "react";
+import { FC, useState } from "react";
 import { useAuth } from "@/providers/authProvider";
 import { supabase } from "@/utils/supabaseClient";
 import SelectNFT from "./selectNft";
+import { NFTOfferMetadata, ProfileMinimal } from "@/types/supabase";
 
-const Select = ({ initialNFT }) => {
-  const { profile } = useAuth();
-  const [user1Items, setUser1Items] = useState([]);
-  const [user2Items, setUser2Items] = useState([
-    {
-      id: initialNFT.nft_id,
-      name: initialNFT.nft_name,
-      image: initialNFT.nft_image,
-      chaind_id: initialNFT.nft_chain_id,
-      collection_contract: initialNFT.nft_collection_contract,
-      token_id: initialNFT.nft_token_id,
-      token_type: initialNFT.nft_token_type,
-    },
-  ]);
+type Props = {
+  type: "initial_offer" | "counter_offer";
+  offerId: string | undefined;
+  userA: ProfileMinimal;
+  userB: ProfileMinimal;
+  initUserAItems: NFTOfferMetadata[];
+  initUserBItems: NFTOfferMetadata[];
+};
+
+type UserProps = {
+  bg: string;
+  user: ProfileMinimal;
+  items: NFTOfferMetadata[];
+  showSelectScreen: (user: ProfileMinimal) => void;
+};
+
+const Select: FC<Props> = ({
+  type,
+  offerId,
+  userA,
+  userB,
+  initUserAItems,
+  initUserBItems,
+}) => {
+  const { user } = useAuth();
+  const [userAItems, setUserAItems] = useState(initUserAItems);
+  const [userBItems, setUserBItems] = useState(initUserBItems);
   const [isSelectingNFTs, setIsSelectingNFTs] = useState(false);
-  const [selectingUser, setSelectingUser] = useState(null);
+  const [selectingUser, setSelectingUser] = useState<null | ProfileMinimal>(
+    null
+  );
 
-  const addItem = (user) => {
+  const showSelectScreen = (user: ProfileMinimal) => {
     setSelectingUser(user);
     setIsSelectingNFTs(true);
   };
 
-  const handleNFTSelection = (nfts) => {
-    if (selectingUser === "user1") {
-      setUser1Items(nfts);
+  const handleNFTSelection = (
+    user: ProfileMinimal,
+    nfts: NFTOfferMetadata[]
+  ) => {
+    if (user === userA) {
+      setUserAItems(nfts);
     } else {
-      setUser2Items(nfts);
+      setUserBItems(nfts);
     }
   };
 
@@ -38,59 +57,73 @@ const Select = ({ initialNFT }) => {
     setSelectingUser(null);
   };
 
-  const proposeTrade = async () => {
+  const makeOffer = async () => {
+    if (!user) return;
+
     try {
-      console.log("Proposing trade with the following items:");
-      console.log("User 1:", user1Items);
-      console.log("User 2:", user2Items);
+      if (type === "initial_offer") {
+        const { data, error } = await supabase.rpc("create_offer", {
+          p_user_id: userA.id,
+          p_user_id_counter: userB.id,
+          p_offer: {
+            user: userAItems,
+            userCounter: userBItems,
+          },
+        });
 
-      const { data, error } = await supabase.rpc("create_offer", {
-        p_user_id: profile?.id,
-        p_user_id_counter: initialNFT.nft_user_id,
-        p_offer: {
-          user: user1Items,
-          userCounter: user2Items,
-        },
-      });
+        console.log("return data:", data, error);
 
-      console.log("return data:", data, error);
+        if (error) throw error;
 
-      if (error) throw error;
+        // alert("Trade proposed successfully!");
+        // go to main screen
+      } else {
+        if (!offerId) return;
 
-      // alert("Trade proposed successfully!");
-      // go to main screen
+        const { data, error } = await supabase.rpc("counter_offer", {
+          p_offer_id: offerId,
+          p_user_id: user.id,
+          p_user_id_counter: user.id === userA.id ? userB.id : userA.id,
+          p_new_offer: {
+            user: userAItems,
+            userCounter: userBItems,
+          },
+        });
+
+        console.log("counter offer return data:", data, error);
+
+        if (error) throw error;
+
+        // alert("Trade proposed successfully!");
+        // go to main screen
+      }
     } catch (error) {
-      console.error("Error proposing trade:", error);
-      alert("Failed to propose trade. Please try again.");
+      console.error("Error making offer:", error);
+      alert("Failed to make offer. Please try again.");
     }
   };
 
-  const UserSection = ({ user, items, onAddItem }) => (
-    <div
-      className={`flex-1 p-5 relative ${
-        user === "user2" ? "bg-gray-100" : "bg-white"
-      }`}
-    >
+  const UserSection: FC<UserProps> = ({
+    bg,
+    user,
+    items,
+    showSelectScreen,
+  }) => (
+    <div className={`flex-1 p-5 relative ${bg}`}>
       <div className="flex items-center">
         <img
           src={
             process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
-            (user === "user1"
-              ? profile?.profile_pic_url
-              : initialNFT?.nft_user_id_profile_pic_url)
+            user?.profile_pic_url
           }
           alt="Profile Picture"
           className="w-10 h-10 rounded-full"
         />
-        <div className="text-lg font-semibold ml-2">
-          {user === "user1"
-            ? profile?.username
-            : initialNFT?.nft_user_id_username}
-        </div>
+        <div className="text-lg font-semibold ml-2">{user?.username}</div>
       </div>
       <button
         className="absolute top-5 right-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200"
-        onClick={() => onAddItem(user)}
+        onClick={() => showSelectScreen(user)}
       >
         + Add NFT
       </button>
@@ -100,10 +133,10 @@ const Select = ({ initialNFT }) => {
             key={index}
             className="border-gray-900 border-4 p-4 rounded-lg flex-1 text-center cursor-pointer"
             onClick={() => {
-              if (user === "user1") {
-                setUser1Items((prev) => prev.filter((i) => i.id !== item.id));
+              if (user === userA) {
+                setUserAItems((prev) => prev.filter((i) => i.id !== item.id));
               } else {
-                setUser2Items((prev) => prev.filter((i) => i.id !== item.id));
+                setUserBItems((prev) => prev.filter((i) => i.id !== item.id));
               }
             }}
           >
@@ -121,22 +154,30 @@ const Select = ({ initialNFT }) => {
 
   return (
     <div className="flex flex-col h-screen rounded-lg bg-gray-100 overflow-hidden">
-      <UserSection user="user1" items={user1Items} onAddItem={addItem} />
-      <UserSection user="user2" items={user2Items} onAddItem={addItem} />
+      <UserSection
+        bg="bg-blue-200"
+        user={userA}
+        items={userAItems}
+        showSelectScreen={showSelectScreen}
+      />
+      <UserSection
+        bg="bg-red-200"
+        user={userB}
+        items={userBItems}
+        showSelectScreen={showSelectScreen}
+      />
 
       <button
         className="p-4 m-5 bg-yellow-200 text-lg rounded-lg font-semibold hover:bg-yellow-300 transition-colors duration-200"
-        onClick={proposeTrade}
+        onClick={makeOffer}
       >
-        Propose Trade
+        {type === "initial_offer" ? "Propose Trade" : "Counter Offer"}
       </button>
 
-      {isSelectingNFTs && (
+      {selectingUser && isSelectingNFTs && (
         <SelectNFT
-          userId={
-            selectingUser === "user1" ? profile.id : initialNFT.nft_user_id
-          }
-          selectedNFTs={selectingUser === "user1" ? user1Items : user2Items}
+          user={selectingUser}
+          selectedNFTs={selectingUser === userA ? userAItems : userBItems}
           onSelect={handleNFTSelection}
           onClose={closeNFTSelection}
         />

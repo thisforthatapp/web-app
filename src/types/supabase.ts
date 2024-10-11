@@ -10,6 +10,12 @@ export interface Profile {
   banned: boolean;
 }
 
+export interface ProfileMinimal {
+  id: string;
+  username: string;
+  profile_pic_url: string;
+}
+
 export interface UserNFT {
   id: string;
   user_id: string;
@@ -60,6 +66,16 @@ export interface NFTFeedItem {
   nft_verified_at: string | null;
   is_pinned: boolean;
   // add wallet address?
+}
+
+export interface NFTOfferMetadata {
+  id: string;
+  name: string;
+  image: string;
+  chaind_id: number;
+  collection_contract: string;
+  token_id: string;
+  token_type: string;
 }
 
 export interface OfferFeedItem {
