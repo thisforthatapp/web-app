@@ -175,13 +175,13 @@ const Grid: FC = () => {
     <div className='w-full overflow-y-auto hide-scrollbar'>
       <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
       {tabOption === 'offers' ? (
-        <div className='p-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-4'>
+        <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
           {(items as OfferFeedItemType[]).map((item) => (
             <OfferFeedItem key={item.id} item={item} expandOffer={expandOffer} />
           ))}
         </div>
       ) : (
-        <div className='p-5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
+        <div className='p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
           {(items as NFTFeedItemType[]).map((item) => (
             <NFTFeedItem
               key={item.nft_id}

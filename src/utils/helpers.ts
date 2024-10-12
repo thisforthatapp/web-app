@@ -1,3 +1,49 @@
+interface ChainInfo {
+  id: string
+  name: string
+  openSeaSlug: string
+  blockExplorerUrl: string
+}
+
+const chainInfoMap: { [key: string]: ChainInfo } = {
+  '1': {
+    id: '1',
+    name: 'Ethereum',
+    openSeaSlug: 'ethereum',
+    blockExplorerUrl: 'https://etherscan.io',
+  },
+  '8453': {
+    id: '8453',
+    name: 'Base',
+    openSeaSlug: 'base',
+    blockExplorerUrl: 'https://basescan.org',
+  },
+  '42161': {
+    id: '42161',
+    name: 'Arbitrum',
+    openSeaSlug: 'arbitrum',
+    blockExplorerUrl: 'https://arbiscan.io',
+  },
+  '10': {
+    id: '10',
+    name: 'Optimism',
+    openSeaSlug: 'optimism',
+    blockExplorerUrl: 'https://optimistic.etherscan.io',
+  },
+  '137': {
+    id: '137',
+    name: 'Polygon',
+    openSeaSlug: 'matic',
+    blockExplorerUrl: 'https://polygonscan.com',
+  },
+  '324': {
+    id: '324',
+    name: 'ZkSync',
+    openSeaSlug: 'zksync',
+    blockExplorerUrl: 'https://explorer.zksync.io',
+  },
+}
+
 export async function uploadFile(
   formData: FormData,
   token: string,
@@ -130,4 +176,31 @@ export function timeAgoShort(date: Date): string {
   if (interval > 1) return Math.floor(interval) + 'm'
 
   return Math.floor(seconds) + 's'
+}
+
+export const getChainInfo = (chainId: string): ChainInfo => {
+  const chain = chainInfoMap[chainId]
+  if (!chain) {
+    console.warn(`Chain ID ${chainId} not found, defaulting to Ethereum`)
+    return chainInfoMap['1']
+  }
+  return chain
+}
+
+export const getOpenSeaUrl = (
+  chainId: string,
+  collectionContract: string,
+  tokenId: string,
+): string => {
+  const chain = getChainInfo(chainId)
+  return `https://opensea.io/assets/${chain.openSeaSlug}/${collectionContract}/${tokenId}`
+}
+
+export const getBlockExplorerUrl = (
+  chainId: string,
+  collectionContract: string,
+  tokenId: string,
+): string => {
+  const chain = getChainInfo(chainId)
+  return `${chain.blockExplorerUrl}/nft/${collectionContract}/${tokenId}`
 }

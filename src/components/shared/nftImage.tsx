@@ -1,23 +1,30 @@
 import { FC, useState } from 'react'
+import { Tooltip } from 'react-tooltip'
 
 interface NFTImageProps {
   src: string
   alt: string
   fallback: string
+  showTooltip?: boolean
+  tooltipId?: string
+  tooltipText?: string
 }
 
-const NFTImage: FC<NFTImageProps> = ({ src, alt, fallback }) => {
+const NFTImage: FC<NFTImageProps> = ({
+  src,
+  alt,
+  fallback,
+  showTooltip = false,
+  tooltipId = '',
+  tooltipText = '',
+}) => {
   const [error, setError] = useState<boolean>(false)
 
-  if (error) {
-    return (
-      <div className='aspect-square flex items-center justify-center text-center p-4 bg-gray-200'>
-        <span className='text-gray-600 font-semibold break-words'>{fallback}</span>
-      </div>
-    )
-  }
-
-  return (
+  const imageContent = error ? (
+    <div className='aspect-square flex items-center justify-center text-center p-4 bg-gray-200'>
+      <span className='text-gray-600 font-semibold break-words'>{fallback}</span>
+    </div>
+  ) : (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
@@ -26,6 +33,19 @@ const NFTImage: FC<NFTImageProps> = ({ src, alt, fallback }) => {
       onError={() => setError(true)}
     />
   )
+
+  if (showTooltip) {
+    return (
+      <>
+        <div data-tooltip-id={tooltipId}>{imageContent}</div>
+        <Tooltip id={tooltipId} place='bottom'>
+          {tooltipText}
+        </Tooltip>
+      </>
+    )
+  }
+
+  return imageContent
 }
 
 export default NFTImage

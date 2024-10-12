@@ -1,0 +1,65 @@
+import React from 'react'
+import Link from 'next/link'
+
+import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
+import { UserNFT } from '@/types/supabase'
+import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
+
+interface NFTItemProps {
+  item: UserNFT
+  toggleForSwap: () => void
+}
+
+const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
+  <div className='flex flex-col bg-white rounded-lg shadow-md overflow-hidden relative'>
+    <div className='absolute top-1 right-1 z-10'>
+      <NftOptions
+        chainId={item.nfts.chain_id.toString()}
+        collectionContract={item.nfts.collection_contract}
+        tokenId={item.nfts.token_id}
+      />
+    </div>
+    <VerifiedBadge
+      id={item.nft_id}
+      chainName={CHAIN_IDS_TO_CHAINS[item.nfts.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
+      collectionName={item.nfts.collection_name}
+      tokenId={item.nfts.token_id}
+      isVerified={item.nfts.is_verified && item.nfts.user_id === item.user_id}
+      className='absolute left-1 top-1 z-10 w-10 h-10'
+    />
+    <NFTImage src={item.nfts.image} alt={item.nfts.name} fallback={item.nfts.name} />
+  </div>
+)
+
+const SwapStatusButton: React.FC<{
+  forSwap: boolean
+  onClick: (e: React.MouseEvent) => void
+}> = ({ forSwap, onClick }) => (
+  <div
+    className={`${
+      forSwap ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'
+    } mt-3 flex gap-x-2 gap-y-2 w-full flex justify-center items-center overflow-hidden px-1 py-2.5 rounded-md transition-colors duration-200 shadow-md`}
+    onClick={onClick}
+  >
+    <span className='flex items-center mr-1 text-lg'>{forSwap ? '✅' : '❌'}</span>
+    <span className='text-lg font-semibold'>
+      {forSwap ? 'Ok To Trade' : 'Not Eager To Trade'}
+    </span>
+  </div>
+)
+
+const NFTAccountItem: React.FC<NFTItemProps> = ({ item, toggleForSwap }) => {
+  const handleSwapToggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    toggleForSwap()
+  }
+
+  return (
+    <Link href={`/nft/${item.nfts.id}`}>
+      <NFTImageWrapper item={item} />
+      <SwapStatusButton forSwap={item.for_swap} onClick={handleSwapToggle} />
+    </Link>
+  )
+}
+
+export default NFTAccountItem

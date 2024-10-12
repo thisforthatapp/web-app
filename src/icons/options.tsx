@@ -7,7 +7,7 @@ export default function Options(props: SVGProps<SVGSVGElement>) {
         <filter id='shadow' x='-20%' y='-20%' width='140%' height='140%'>
           <feGaussianBlur in='SourceAlpha' stdDeviation='0.5' />
           <feOffset dx='0.5' dy='0.5' result='offsetblur' />
-          <feFlood floodColor='rgba(0,0,0,0.5)' />
+          <feFlood floodColor='rgba(0,0,0,1)' />
           <feComposite in2='offsetblur' operator='in' />
           <feMerge>
             <feMergeNode />

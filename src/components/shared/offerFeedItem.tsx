@@ -1,35 +1,15 @@
 import React, { FC } from 'react'
-import Link from 'next/link'
 
 import { NFTImage } from '@/components/shared'
 import { ArrowLeftRight } from '@/icons'
-import { OfferFeedItem as OfferFeedItemType } from '@/types/supabase'
-import { timeAgoShort } from '@/utils/helpers'
-
-interface NFT {
-  id: string
-  imageUrl: string
-}
-
-interface User {
-  username: string
-  profilePicUrl: string
-}
-
-interface OfferFeedItemType {
-  user: User
-  counterUser: User
-  userNFTs: NFT[]
-  counterUserNFTs: NFT[]
-  status: 'negotiating' | 'accepted' | 'rejected'
-}
+import { NFTOfferMetadata, OfferFeedItem as OfferFeedItemType, Profile } from '@/types/supabase'
 
 interface OfferItemProps {
   item: OfferFeedItemType
   expandOffer: (offer: OfferFeedItemType) => void
 }
 
-const NFTGrid: FC<{ nfts: NFT[] }> = ({ nfts }) => {
+const NFTGrid: FC<{ offerId: string; nfts: NFTOfferMetadata[] }> = ({ offerId, nfts }) => {
   const gridClass =
     nfts.length === 1 ? 'grid-cols-1' : nfts.length <= 4 ? 'grid-cols-2' : 'grid-cols-3'
 
@@ -37,14 +17,21 @@ const NFTGrid: FC<{ nfts: NFT[] }> = ({ nfts }) => {
     <div className={`grid ${gridClass}`}>
       {nfts.map((nft) => (
         <div key={nft.id} className='w-full h-full object-cover overflow-hidden'>
-          <NFTImage src={nft.image} alt={nft.name} fallback={nft.name} />
+          <NFTImage
+            src={nft.image}
+            alt={nft.name}
+            fallback={nft.name}
+            showTooltip={true}
+            tooltipId={offerId + '_' + nft.id}
+            tooltipText={nft.name}
+          />
         </div>
       ))}
     </div>
   )
 }
 
-const UserInfo: FC<{ user: User }> = ({ user }) => (
+const UserInfo: FC<{ user: Profile }> = ({ user }) => (
   <div className='flex items-center justify-center p-2 mt-auto bg-white'>
     <img
       src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user.profile_pic_url}
@@ -66,14 +53,17 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
       </div>
       <div className='flex w-full bg-gray-50'>
         <div className='w-1/2 flex flex-col'>
-          <NFTGrid nfts={item.offer.user} />
+          <NFTGrid offerId={item.id} nfts={(item.offer as { user: NFTOfferMetadata[] }).user} />
           <UserInfo user={item.user} />
         </div>
         <div className='absolute bottom-[13px] left-[50%] ml-[-12px] z-[100]'>
           <ArrowLeftRight />
         </div>
         <div className='w-1/2 flex flex-col '>
-          <NFTGrid nfts={item.offer.userCounter} />
+          <NFTGrid
+            offerId={item.id}
+            nfts={(item.offer as { userCounter: NFTOfferMetadata[] }).userCounter}
+          />
           <UserInfo user={item.counter_user} />
         </div>
       </div>

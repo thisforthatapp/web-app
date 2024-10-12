@@ -2,8 +2,9 @@ import { FC } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { NFTImage, Options, VerifiedBadge } from '@/components/shared'
+import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
 import { NFTFeedItem as NFTFeedItemType } from '@/types/supabase'
+import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
 
 interface NFTItemProps {
   item: NFTFeedItemType
@@ -20,17 +21,20 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
   }
 
   return (
-    <Link
-      href={`/nft/${item.nft_chain_id.toString()}/${
-        item.nft_collection_contract
-      }/${item.nft_token_id}`}
-    >
+    <Link href={`/nft/${item.nft_id}`}>
       <div className='bg-white rounded-lg shadow-md overflow-hidden relative'>
         <div className='absolute top-1 right-1 z-10'>
-          <Options onOptionSelect={() => {}} />
+          <NftOptions
+            chainId={item.nft_chain_id.toString()}
+            collectionContract={item.nft_collection_contract}
+            tokenId={item.nft_token_id}
+          />
         </div>
         <VerifiedBadge
           id={item.nft_id}
+          chainName={CHAIN_IDS_TO_CHAINS[item.nft_chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
+          collectionName={item.nft_collection_name}
+          tokenId={item.nft_token_id}
           isVerified={item.nft_is_verified}
           className='absolute left-1 top-1 z-10 w-10 h-10'
         />
