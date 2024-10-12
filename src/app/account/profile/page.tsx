@@ -96,7 +96,7 @@ const AccountProfilePage: FC = () => {
 
   return (
     <div className='absolute top-[75px] bottom-0 w-full flex'>
-      <div className='flex flex-col flex-1 p-4 lg:p-8 bg-gray-100 overflow-y-auto hide-scrollbar'>
+      <div className='flex flex-col flex-1 p-4 bg-gray-100 overflow-y-auto hide-scrollbar'>
         <div className='bg-white rounded-lg shadow p-6 mb-6'>
           <div className='text-xl font-semibold mb-4'>Profile Picture</div>
           <div className='flex items-center'>

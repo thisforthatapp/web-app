@@ -6,7 +6,7 @@ import { NFTOfferMetadata, OfferFeedItem as OfferFeedItemType, Profile } from '@
 
 interface OfferItemProps {
   item: OfferFeedItemType
-  expandOffer: (offer: OfferFeedItemType) => void
+  viewOffer: (offer: OfferFeedItemType) => void
 }
 
 const NFTGrid: FC<{ offerId: string; nfts: NFTOfferMetadata[] }> = ({ offerId, nfts }) => {
@@ -42,11 +42,11 @@ const UserInfo: FC<{ user: Profile }> = ({ user }) => (
   </div>
 )
 
-const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
+const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer }) => {
   return (
     <div
       className='flex flex-col items-center shadow-md overflow-hidden rounded-md cursor-pointer relative'
-      onClick={() => expandOffer(item)}
+      onClick={() => viewOffer(item)}
     >
       <div className='bg-yellow-400 text-yellow-800 font-semibold absolute top-2 right-2 p-1 rounded-md text-sm'>
         negotiating

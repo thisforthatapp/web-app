@@ -13,11 +13,46 @@ import {
 import { GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
+const OfferGrid: React.FC<{
+  items: OfferFeedItemType[]
+  viewOffer: (item: OfferFeedItemType) => void
+}> = ({ items, viewOffer }) => (
+  <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
+    {items.map((item) => (
+      <OfferFeedItem key={item.id} item={item} viewOffer={viewOffer} />
+    ))}
+  </div>
+)
+
+const NFTGrid: React.FC<{
+  items: NFTFeedItemType[]
+  makeOffer: (item: NFTFeedItemType) => void
+  pinItem: (item: NFTFeedItemType) => void
+}> = ({ items, makeOffer, pinItem }) => (
+  <div className='p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
+    {items.map((item) => (
+      <NFTFeedItem key={item.nft_id} item={item} makeOffer={makeOffer} pinItem={pinItem} />
+    ))}
+  </div>
+)
+
+const LoadMoreButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <div className='w-full flex items-center justify-center my-4'>
+    <button
+      onClick={onClick}
+      className='px-10 py-3 text-lg rounded-full bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-colors duration-300'
+    >
+      Load More
+    </button>
+  </div>
+)
+
 const Grid: FC = () => {
   const { user, loading } = useAuth()
   const { showToast } = useToast()
   const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
-  const [expandOfferItem, setExpandOfferItem] = useState<OfferFeedItemType | null>(null)
+  const [viewOfferItem, setViewOfferItem] = useState<OfferFeedItemType | null>(null)
+
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
   const [tabOption, setTabOption] = useState<GridTabOption>('home')
   const [page, setPage] = useState(1)
@@ -109,12 +144,16 @@ const Grid: FC = () => {
       return
     }
 
+    if (nft.nft_user_id === user.id) {
+      showToast(`⚠️ You can't make an offer on your own NFT`, 2500)
+      return
+    }
+
     setMakeOfferItem(nft)
   }
 
-  const expandOffer = async (offer: OfferFeedItemType) => {
-    console.log('Expanding offer:', offer)
-    setExpandOfferItem(offer)
+  const viewOffer = async (offer: OfferFeedItemType) => {
+    setViewOfferItem(offer)
   }
 
   /* only allows pins for now. too many notifs if allow pin/unpin */
@@ -142,7 +181,6 @@ const Grid: FC = () => {
     })
 
     setItems(updatedNFTs)
-
     showToast(`✅ NFT pinned`, 1500)
 
     const { error } = await supabase.from('user_pins').insert([
@@ -154,7 +192,7 @@ const Grid: FC = () => {
 
     if (error) {
       showToast(`⚠️ Error pinning NFT`, 2500)
-      console.error('Error following user:', error)
+      console.error('Error pinning NFT:', error)
       return
     }
   }
@@ -171,41 +209,21 @@ const Grid: FC = () => {
     setTabOption(newTabOption)
   }
 
+  const handleLoadMore = () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchItems(tabOption, nextPage)
+  }
+
   return (
     <div className='w-full overflow-y-auto hide-scrollbar'>
       <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
       {tabOption === 'offers' ? (
-        <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
-          {(items as OfferFeedItemType[]).map((item) => (
-            <OfferFeedItem key={item.id} item={item} expandOffer={expandOffer} />
-          ))}
-        </div>
+        <OfferGrid items={items as OfferFeedItemType[]} viewOffer={viewOffer} />
       ) : (
-        <div className='p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
-          {(items as NFTFeedItemType[]).map((item) => (
-            <NFTFeedItem
-              key={item.nft_id}
-              item={item}
-              makeOffer={makeOffer}
-              pinItem={pinItem}
-            />
-          ))}
-        </div>
+        <NFTGrid items={items as NFTFeedItemType[]} makeOffer={makeOffer} pinItem={pinItem} />
       )}
-      {hasMore && (
-        <div className='w-full flex items-center justify-center my-4'>
-          <button
-            onClick={() => {
-              const nextPage = page + 1
-              setPage(nextPage)
-              fetchItems(tabOption, nextPage)
-            }}
-            className='px-10 py-3 text-lg rounded-full bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-colors duration-300'
-          >
-            Load More
-          </button>
-        </div>
-      )}
+      {hasMore && <LoadMoreButton onClick={handleLoadMore} />}
 
       {makeOfferItem && (
         <Offer
@@ -215,16 +233,16 @@ const Grid: FC = () => {
           closeModal={() => setMakeOfferItem(null)}
         />
       )}
-      {expandOfferItem && (
+      {viewOfferItem && (
         <Offer
           type={
-            expandOfferItem.status === 'accepted' || expandOfferItem.status === 'completed'
+            viewOfferItem.status === 'accepted' || viewOfferItem.status === 'completed'
               ? 'transaction'
               : 'view_offer'
           }
-          offerId={expandOfferItem.id}
+          offerId={viewOfferItem.id}
           initialNFT={null}
-          closeModal={() => setExpandOfferItem(null)}
+          closeModal={() => setViewOfferItem(null)}
         />
       )}
     </div>
