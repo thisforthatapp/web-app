@@ -19,7 +19,7 @@ const Grid: FC = () => {
   const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
   const [expandOfferItem, setExpandOfferItem] = useState<OfferFeedItemType | null>(null)
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
-  const [tabOption, setTabOption] = useState<GridTabOption>('offers')
+  const [tabOption, setTabOption] = useState<GridTabOption>('home')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
 

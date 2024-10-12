@@ -2,6 +2,7 @@ import React, { FC } from 'react'
 import Link from 'next/link'
 
 import { NFTImage } from '@/components/shared'
+import { ArrowLeftRight } from '@/icons'
 import { OfferFeedItem as OfferFeedItemType } from '@/types/supabase'
 import { timeAgoShort } from '@/utils/helpers'
 
@@ -50,27 +51,8 @@ const UserInfo: FC<{ user: User }> = ({ user }) => (
       alt={user.username}
       className='w-8 h-8 rounded-full mr-2'
     />
-    <span className='text-sm font-semibold'>{user.username}</span>
+    <span className='font-semibold'>{user.username}</span>
   </div>
-)
-
-const ArrowLeftRight: FC = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    width='24'
-    height='24'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-    strokeLinecap='round'
-    strokeLinejoin='round'
-  >
-    <path d='M8 3L4 7l4 4' />
-    <path d='M4 7h16' />
-    <path d='m16 21 4-4-4-4' />
-    <path d='M20 17H4' />
-  </svg>
 )
 
 const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
@@ -87,7 +69,9 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, expandOffer }) => {
           <NFTGrid nfts={item.offer.user} />
           <UserInfo user={item.user} />
         </div>
-        <div className='absolute left-[50%] h-full bg-gray-100 w-[1px]' />
+        <div className='absolute bottom-[13px] left-[50%] ml-[-12px] z-[100]'>
+          <ArrowLeftRight />
+        </div>
         <div className='w-1/2 flex flex-col '>
           <NFTGrid nfts={item.offer.userCounter} />
           <UserInfo user={item.counter_user} />

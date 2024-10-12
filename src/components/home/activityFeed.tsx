@@ -1,6 +1,7 @@
-import React, { FC, useEffect, useRef, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 
-import { NFTImage } from '@/components/shared'
+import { NFTOfferDisplay } from '@/components/shared'
+import { useChatScroll } from '@/hooks'
 import { CollapsibleIcon } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
@@ -10,8 +11,9 @@ import { formatDate } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
 function renderMessageText(text: string) {
-  // This regex matches most common URL formats
-  const urlRegex = /(\b(https?):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi
+  // This regex matches URLs with common TLDs, requiring either www. or http(s)://
+  const urlRegex =
+    /\b(?:https?:\/\/|www\.)[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|](?:\.(?:com|net|org|edu|gov|mil|co|io|ai|app|dev|xyz))\b/gi
 
   const parts: (string | JSX.Element)[] = []
   let lastIndex = 0
@@ -24,7 +26,11 @@ function renderMessageText(text: string) {
     }
 
     // Add the matched URL
-    const fullUrl = match[0]
+    let fullUrl = match[0]
+    if (!fullUrl.startsWith('http://') && !fullUrl.startsWith('https://')) {
+      fullUrl = 'https://' + fullUrl
+    }
+
     parts.push(
       <a
         key={match.index}
@@ -34,7 +40,7 @@ function renderMessageText(text: string) {
         onClick={(e: React.MouseEvent) => e.stopPropagation()}
         className='underline'
       >
-        {fullUrl}
+        {match[0]}
       </a>,
     )
 
@@ -49,126 +55,44 @@ function renderMessageText(text: string) {
   return <>{parts}</>
 }
 
-const formatItems = (items, decoration) => {
-  return items.map((nft, index) => (
-    <React.Fragment key={nft.id}>
-      <span
-        className={`font-semibold text-gray-800 hover:underline cursor-pointer underline decoration-4 ${decoration}`}
-      >
-        {nft.name}
-      </span>
-      {index < items.length - 1 && ', '}
-    </React.Fragment>
-  ))
-}
-
-const NFTOfferDisplay = ({ item }) => {
-  const userItems = item.metadata.offer
-    ? formatItems(item.metadata.offer.user, 'decoration-red-500')
-    : null
-  const counterUserItems = item.metadata.offer
-    ? formatItems(item.metadata.offer.userCounter, 'decoration-blue-500')
-    : null
-
-  return (
-    <div className='flex items-start w-full'>
-      <div className='relative w-12 h-12 mr-4 shrink-0'>
-        <img
-          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + item?.profile_pic_url}
-          alt='Profile'
-          className='w-full h-full rounded-full'
-        />
-        <div className='absolute bottom-[-6px] right-[-6px] bg-white rounded-full text-xs p-1 shadow-sm border border-black'>
-          🤝
-        </div>
-      </div>
-      <div>
-        <div className='flex items-center gap-x-2'>
-          <div className='text-sm font-semibold'>{item?.username}</div>
-          <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
-        </div>
-        <div className='mt-1'>
-          <div>
-            offering <span>{userItems}</span> for <span>{counterUserItems}</span>
-          </div>
-          <div className='flex flex-wrap gap-2 mt-4'>
-            {item.metadata.offer.user.map((nft) => (
-              <div
-                key={nft.id}
-                className='w-16 h-16 object-cover rounded-md border-4 border-red-500 overflow-hidden'
-              >
-                <NFTImage
-                  key={nft.id}
-                  src={nft.image}
-                  alt={nft.name}
-                  fallback={nft.name.substring(0, 4) + '...'}
-                />
-              </div>
-            ))}
-            {item.metadata.offer.userCounter.map((nft) => (
-              <div
-                key={nft.id}
-                className='w-16 h-16 object-cover rounded-md border-4 border-blue-500 '
-              >
-                <NFTImage
-                  key={nft.id}
-                  src={nft.image}
-                  alt={nft.name}
-                  fallback={nft.name.substring(0, 3) + '...'}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const FeedItem = ({ activity }: { activity: Activity }) => {
   return (
     <div key={activity.id} className='flex items-start border-b border-gray-100 p-4'>
-      {activity.activity_type === 'offer_start' ? (
-        <NFTOfferDisplay item={activity} />
-      ) : (
-        <>
-          <div className='relative w-12 h-12 mr-3 shrink-0'>
-            <img
-              src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
-              alt='Profile'
-              className='w-full h-full rounded-full'
-            />
-            {activity.activity_type === 'pin' && (
-              <div className='absolute bottom-[-4px] right-[-4px] bg-white rounded-full text-xs p-1 shadow-sm border border-black'>
-                📌
-              </div>
-            )}
+      <div className='relative w-12 h-12 mr-3 shrink-0'>
+        <img
+          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
+          alt='Profile'
+          className='w-full h-full rounded-full'
+        />
+      </div>
+      <div>
+        <div className='flex items-center gap-x-2'>
+          <div className='text-sm font-semibold'>{activity.username}</div>
+          <div className='text-xs text-gray-400'>
+            {formatDate(new Date(activity.created_at))}
           </div>
-          <div>
-            <div className='flex items-center gap-x-2'>
-              <div className='text-sm font-semibold'>{activity.username}</div>
-              <div className='text-xs text-gray-400'>
-                {formatDate(new Date(activity.created_at))}
-              </div>
+        </div>
+        {activity.activity_type === 'message' && (
+          <div className='mt-1'>{renderMessageText(activity.content || '')}</div>
+        )}
+        {activity.activity_type === 'pin' && (
+          <div className='mt-1'>
+            <div>
+              📌 pinned{' '}
+              <span className='font-semibold'>
+                {(activity.metadata as { nft_name: string }).nft_name}
+              </span>
             </div>
-            {activity.activity_type === 'message' && (
-              <div className='text-sm mt-1'>{renderMessageText(activity.content || '')}</div>
-            )}
-            {activity.activity_type === 'pin' && (
-              <div className='text-sm mt-1'>
-                <div>
-                  pinned <span className='font-semibold'>{activity.metadata?.nft_name}</span>
-                </div>
-                <img
-                  src={activity.metadata?._nft_image}
-                  className='mt-2 w-16 h-16 rounded-md'
-                  alt='NFT'
-                />
-              </div>
-            )}
+            <img
+              src={(activity.metadata as { nft_image: string }).nft_image}
+              className='mt-2 w-12 h-12 rounded-md'
+              alt='NFT'
+            />
           </div>
-        </>
-      )}
+        )}
+        {(activity.activity_type === 'offer_start' ||
+          activity.activity_type === 'offer_counter') && <NFTOfferDisplay item={activity} />}
+      </div>
     </div>
   )
 }
@@ -176,16 +100,18 @@ const FeedItem = ({ activity }: { activity: Activity }) => {
 const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab = true }) => {
   const { user, profile } = useAuth()
   const { showToast } = useToast()
+
   const [feedCollapsed, setFeedCollapsed] = useState(false)
   const toggleFeed = () => setFeedCollapsed(!feedCollapsed)
 
   const [activities, setActivities] = useState<Activity[]>([])
   const [newMessage, setNewMessage] = useState<string>('')
+
   const [loading, setLoading] = useState<boolean>(false)
   const [hasMore, setHasMore] = useState<boolean>(true)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  // const chatFeedRef = useRef<HTMLDivElement | null>(null);
   const [page, setPage] = useState<number>(1)
+
+  const { chatContainerRef, scrollToBottom, isNearBottom } = useChatScroll([activities])
 
   useEffect(() => {
     // Subscribe to real-time updates
@@ -198,7 +124,14 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
           schema: 'public',
         },
         (payload) => {
-          setActivities((prevActivities) => [payload.new as Activity, ...prevActivities])
+          // Ignore own messages
+          if (payload.new.user_id === user?.id) return
+
+          const shouldScroll = isNearBottom()
+          setActivities((prevActivities) => [...prevActivities, payload.new as Activity])
+          if (shouldScroll) {
+            scrollToBottom()
+          }
         },
       )
       .subscribe()
@@ -209,7 +142,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
     return () => {
       supabase.channel('activities').unsubscribe()
     }
-  }, [])
+  }, [user?.id])
 
   const fetchActivities = async (page: number) => {
     if (loading || !hasMore) return
@@ -223,17 +156,18 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
         .range((page - 1) * FEED_ITEMS_PER_PAGE, page * FEED_ITEMS_PER_PAGE - 1)
 
       if (error) {
+        showToast(`⚠️ Failed to fetch activities`, 2500)
         throw error
       }
 
       if (data && data.length > 0) {
         const reversedData = data.reverse()
         setActivities((prevActivities) => [...reversedData, ...prevActivities])
-        setPage(page + 1)
       } else {
         setHasMore(false)
       }
     } catch (error) {
+      showToast(`⚠️ Failed to fetch activities`, 2500)
       console.error('Failed to fetch activities', error)
     } finally {
       setLoading(false)
@@ -266,6 +200,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
       }
 
       // optimistaclly update the UI
+      const shouldScroll = isNearBottom()
       setActivities((prevActivities) => [
         ...prevActivities,
         {
@@ -285,6 +220,10 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
       } else {
         setNewMessage('')
       }
+
+      if (shouldScroll) {
+        scrollToBottom()
+      }
     } catch (error) {
       showToast(`⚠️ Failed to send message`, 2500)
       console.error('Failed to send message', error)
@@ -294,9 +233,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
   const desktopStyle = `shadow-[0_0_3px_#bbbbbb] hidden lg:flex flex-col h-full ${
     feedCollapsed ? 'w-12' : 'w-[460px]'
   } bg-white transition-all duration-300 ease-in-out shrink-0`
-  const mobileStyle = `h-full w-full`
-
-  console.log('activities', activities)
+  const mobileStyle = `h-full w-full flex flex-col`
 
   return (
     <div className={`${showCollapsibleTab ? desktopStyle : mobileStyle}`}>
@@ -323,12 +260,22 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
       )}
       {!feedCollapsed && (
         <>
-          <div className='flex-1 overflow-y-auto hide-scrollbar'>
-            {loading && <div className='text-center text-gray-500'>Loading...</div>}
+          <div ref={chatContainerRef} className='flex-1 overflow-y-auto hide-scrollbar'>
+            {activities.length > 0 && hasMore && (
+              <button
+                className='bg-gray-200 py-2 text-gray-700 hover:bg-gray-300 transition-colors duration-300 text-center w-full'
+                onClick={() => {
+                  const nextPage = page + 1
+                  setPage(nextPage)
+                  fetchActivities(nextPage)
+                }}
+              >
+                Load more
+              </button>
+            )}
             {activities.map((activity: Activity) => (
               <FeedItem key={activity.id} activity={activity} />
             ))}
-            <div ref={messagesEndRef}></div>
           </div>
           <div className='p-3'>
             <form onSubmit={submitMessage} className='gap-x-2 flex'>

@@ -82,7 +82,7 @@ export interface OfferFeedItem {
   id: string
   user_id: string
   user_id_counter: string
-  offer: JSON
+  offer: unknown // JSON
   status: 'initiated' | 'negotiating' | 'denied' | 'accepted' | 'completed'
   created_at: string
   user: Profile
@@ -94,7 +94,7 @@ export interface Activity {
   user_id: string
   activity_type: 'message' | 'offer_start' | 'offer_counter' | 'offer_accepted' | 'pin'
   content: string | null
-  metadata: JSON | null
+  metadata: unknown // JSON | null
   username: string
   profile_pic_url: string
   created_at: string

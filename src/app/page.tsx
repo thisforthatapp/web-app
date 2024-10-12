@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div className='absolute top-[75px] bottom-0 w-full flex'>
-      <div className={`w-full relative bg-[#f9f9f9] flex ${isMobile ? 'mb-14' : 'mb-[50px]'}`}>
+      <div className={`w-full relative bg-[#f9f9f9] flex ${isMobile ? 'mb-16' : 'mb-[50px]'}`}>
         <ContentArea activeTab={activeTab} isMobile={isMobile} />
       </div>
       {isMobile ? (
