@@ -1,5 +1,5 @@
-import { FC, useEffect, useState } from 'react'
-
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
 import { NFTOfferMetadata, ProfileMinimal, UserNFT } from '@/types/supabase'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -13,8 +13,6 @@ type Props = {
 const SelectNFT: FC<Props> = ({ user, selectedNFTs, onSelect, onClose }) => {
   const [availableNFTs, setAvailableNFTs] = useState<UserNFT[]>([])
   const [selectedItems, setSelectedItems] = useState(selectedNFTs)
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 9
 
   useEffect(() => {
     fetchUserNFTs()
@@ -33,109 +31,117 @@ const SelectNFT: FC<Props> = ({ user, selectedNFTs, onSelect, onClose }) => {
     }
   }
 
-  const handleItemSelect = (item: UserNFT) => {
-    const itemFormatted = {
-      id: item.nfts.id,
-      name: item.nfts.name,
-      image: item.nfts.image,
-      chaind_id: item.nfts.chain_id,
-      collection_contract: item.nfts.collection_contract,
-      token_id: item.nfts.token_id,
-      token_type: item.nfts.token_type,
-    }
+  const handleItemSelect = useCallback(
+    (item: UserNFT) => {
+      const itemFormatted = {
+        id: item.nfts.id,
+        name: item.nfts.name,
+        image: item.nfts.image,
+        chaind_id: item.nfts.chain_id,
+        collection_contract: item.nfts.collection_contract,
+        token_id: item.nfts.token_id,
+        token_type: item.nfts.token_type,
+      }
 
-    const isSelected = selectedItems.some((selected) => selected.id === itemFormatted.id)
-    let updatedSelection
-    if (isSelected) {
-      updatedSelection = selectedItems.filter((selected) => selected.id !== itemFormatted.id)
-    } else {
-      updatedSelection = [...selectedItems, itemFormatted]
-    }
+      setSelectedItems((prevItems) => {
+        const isSelected = prevItems.some((selected) => selected.id === itemFormatted.id)
+        let updatedSelection
+        if (isSelected) {
+          updatedSelection = prevItems.filter((selected) => selected.id !== itemFormatted.id)
+        } else {
+          updatedSelection = [...prevItems, itemFormatted]
+        }
+        onSelect(user, updatedSelection)
+        return updatedSelection
+      })
+    },
+    [user, onSelect],
+  )
 
-    // pass back the nft item in the format expected by the parent component
-    setSelectedItems(updatedSelection)
-    onSelect(user, updatedSelection)
-  }
-
-  const NFTGrid: FC<{
-    items: UserNFT[]
-    selectedItems: NFTOfferMetadata[]
-    onSelect: (item: UserNFT) => void
-  }> = ({ items, selectedItems, onSelect }) => (
-    <div className='grid grid-cols-3 gap-2'>
-      {items.map((item) => {
-        const isSelected = selectedItems.some((selected) => selected.id === item.nfts.id)
-        return (
-          <div
-            key={item.id}
-            className={`p-4 border-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-shadow duration-200 ${
-              isSelected ? 'border-gray-800' : 'border-white'
-            }`}
-            onClick={() => onSelect(item)}
-          >
-            <img
-              src={item.nfts.image}
-              alt={item.nfts.name}
-              className='w-full h-32 object-cover rounded'
-            />
-            <p className='mt-2 text-center font-semibold'>{item.nfts.name}</p>
-          </div>
-        )
-      })}
-    </div>
+  const selectedItemIds = useMemo(
+    () => new Set(selectedItems.map((item) => item.id)),
+    [selectedItems],
   )
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4'>
-      <div className='bg-white rounded-lg p-6 w-full max-w-2xl'>
-        <h2 className='text-2xl font-bold mb-4'>Select NFTs to Trade</h2>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className='bg-white rounded-lg p-6 w-full h-full max-w-2xl flex flex-col'
+      >
+        <div className='flex items-center justify-between mb-6'>
+          <h2 className='text-2xl font-bold text-gray-800'>Select NFTs to Swap</h2>
+          <button
+            onClick={onClose}
+            className='text-gray-500 hover:text-gray-700 transition-colors duration-200'
+          >
+            <svg className='w-6 h-6' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M6 18L18 6M6 6l12 12'
+              />
+            </svg>
+          </button>
+        </div>
         <NFTGrid
           items={availableNFTs}
-          selectedItems={selectedItems}
+          selectedItemIds={selectedItemIds}
           onSelect={handleItemSelect}
         />
-        <button
-          className='w-full mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200'
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className='w-full mt-auto pt-6 px-4 py-3 bg-yellow-400 text-gray-800 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-md flex justify-center items-center'
           onClick={onClose}
         >
-          Done
-        </button>
-      </div>
+          <span className='text-lg font-semibold'>Done</span>
+        </motion.button>
+      </motion.div>
     </div>
   )
 }
 
+const NFTGrid: FC<{
+  items: UserNFT[]
+  selectedItemIds: Set<string>
+  onSelect: (item: UserNFT) => void
+}> = React.memo(({ items, selectedItemIds, onSelect }) => (
+  <div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+    {items.map((item) => (
+      <NFTItem
+        key={item.id}
+        item={item}
+        isSelected={selectedItemIds.has(item.nfts.id)}
+        onSelect={onSelect}
+      />
+    ))}
+  </div>
+))
+
+const NFTItem: FC<{
+  item: UserNFT
+  isSelected: boolean
+  onSelect: (item: UserNFT) => void
+}> = React.memo(({ item, isSelected, onSelect }) => (
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className={`p-4 border-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-all duration-200 ${
+      isSelected ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200'
+    }`}
+    onClick={() => onSelect(item)}
+  >
+    <img
+      src={item.nfts.image}
+      alt={item.nfts.name}
+      className='w-full h-32 object-cover rounded'
+    />
+    <p className='mt-2 text-center font-semibold text-gray-800 truncate'>{item.nfts.name}</p>
+  </motion.div>
+))
+
 export default SelectNFT
-
-/* <Pagination
-          totalItems={availableNFTs.length}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        /> */
-
-// const Pagination = ({
-//   totalItems,
-//   itemsPerPage,
-//   currentPage,
-//   onPageChange,
-// }) => {
-//   const totalPages = Math.ceil(totalItems / itemsPerPage);
-//   return (
-//     <div className="flex justify-center mt-4 space-x-2">
-//       {[...Array(totalPages)].map((_, index) => (
-//         <button
-//           key={index}
-//           onClick={() => onPageChange(index + 1)}
-//           className={`px-3 py-1 rounded ${
-//             currentPage === index + 1
-//               ? "bg-blue-500 text-white"
-//               : "bg-gray-200 hover:bg-gray-300"
-//           }`}
-//         >
-//           {index + 1}
-//         </button>
-//       ))}
-//     </div>
-//   );
-// };

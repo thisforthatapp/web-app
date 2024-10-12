@@ -57,7 +57,7 @@ const NFTComponent: FC<NFTComponentProps> = ({ nft }) => {
       <div className='mt-6 md:my-0 w-full bg-[#f9f9f9] flex flex-col md:flex-row justify-start md:justify-center md:gap-4 md:gap-8 p-0 md:p-8 pb-24 md:pb-8'>
         <NFTImage nft={nft} />
         <div className='flex flex-col flex-grow max-w-3xl px-4 md:px-0'>
-          <NFTTitle />
+          <NFTTitle nft={nft} />
           <OffersGrid items={items} />
           <div className='h-[100px] md:hidden' />
         </div>
@@ -119,16 +119,40 @@ const ExternalLinks: FC = () => (
   </div>
 )
 
-const NFTTitle: FC = () => (
-  <div className='w-full bg-white p-4 flex items-center justify-center border border-gray-200 mb-4 rounded-md font-semibold text-xl'>
-    🤝 Offers for CryptoPunk #1658
+const NFTTitle: FC<NFTTitleProps> = ({ nft }) => (
+  <div className='w-full bg-white p-6 mb-4 rounded-lg shadow-md'>
+    <div className='flex items-center justify-between'>
+      <div className='flex items-center'>
+        {/* <VerifiedBadge
+          id={nft.id}
+          chainName={CHAIN_IDS_TO_CHAINS[nft.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
+          collectionName={nft.collection_name}
+          tokenId={nft.token_id}
+          isVerified={true}
+          className='w-8 h-8 mr-3'
+        /> */}
+        <div>
+          <h2 className='text-2xl font-bold text-gray-800'>{nft.name}</h2>
+          <p className='text-sm text-gray-500'>{nft.collection_name}</p>
+        </div>
+      </div>
+      <div className='text-right'>
+        <p className='text-lg font-semibold text-gray-700'>Offers</p>
+        <p className='text-sm text-gray-500'>14</p>
+      </div>
+    </div>
   </div>
 )
 
 const OffersGrid: FC<{ items: any[] }> = ({ items }) => (
   <div className='md:overflow-y-auto hide-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0 md:pb-4'>
     {items.map((item) => (
-      <OfferFeedItem key={item.id} item={item.user_offers} viewOffer={() => {}} />
+      <OfferFeedItem
+        key={item.id}
+        item={item.user_offers}
+        viewOffer={() => {}}
+        currentUserId={''}
+      />
     ))}
   </div>
 )

@@ -15,11 +15,12 @@ import { supabase } from '@/utils/supabaseClient'
 
 const OfferGrid: React.FC<{
   items: OfferFeedItemType[]
+  userId: string | undefined
   viewOffer: (item: OfferFeedItemType) => void
-}> = ({ items, viewOffer }) => (
+}> = ({ items, userId, viewOffer }) => (
   <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
     {items.map((item) => (
-      <OfferFeedItem key={item.id} item={item} viewOffer={viewOffer} />
+      <OfferFeedItem key={item.id} item={item} viewOffer={viewOffer} currentUserId={userId} />
     ))}
   </div>
 )
@@ -219,7 +220,11 @@ const Grid: FC = () => {
     <div className='w-full overflow-y-auto hide-scrollbar'>
       <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
       {tabOption === 'offers' ? (
-        <OfferGrid items={items as OfferFeedItemType[]} viewOffer={viewOffer} />
+        <OfferGrid
+          items={items as OfferFeedItemType[]}
+          userId={user?.id}
+          viewOffer={viewOffer}
+        />
       ) : (
         <NFTGrid items={items as NFTFeedItemType[]} makeOffer={makeOffer} pinItem={pinItem} />
       )}

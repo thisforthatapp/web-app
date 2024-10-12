@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
-
+import { motion } from 'framer-motion'
 import { NFTImage } from '@/components/shared'
 import { Close } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
@@ -7,32 +7,30 @@ import { formatDate, timeAgo } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
 const ActivityItem = ({ item, user }: { item: any; user: any }) => {
-  const MessageDisplay = ({ item }) => {
-    return (
-      <div className='flex p-4 border-b border-gray-200 w-full'>
-        <div className='relative w-12 h-12 mr-4 shrink-0'>
-          <img
-            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
-            alt='Profile'
-            className='w-full h-full rounded-full'
-          />
-        </div>
-        <div>
-          <div className='flex items-center gap-x-2'>
-            <div className='text-sm font-semibold'>{user?.username}</div>
-            <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
-          </div>
-          <div className='text-black mt-1'>{item.content}</div>
-        </div>
+  const MessageDisplay = ({ item }) => (
+    <div className='flex p-4 border-b border-gray-200 w-full hover:bg-gray-50 transition-colors duration-200'>
+      <div className='relative w-10 h-10 mr-4 shrink-0'>
+        <img
+          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
+          alt='Profile'
+          className='w-full h-full rounded-full object-cover shadow-sm'
+        />
       </div>
-    )
-  }
+      <div className='flex-grow'>
+        <div className='flex items-center gap-x-2 mb-1'>
+          <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
+          <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
+        </div>
+        <div className='text-gray-700 text-sm'>{item.content}</div>
+      </div>
+    </div>
+  )
 
   const formatItems = (items, decoration) => {
     return items.map((nft, index) => (
       <React.Fragment key={nft.id}>
         <span
-          className={`font-semibold text-gray-800 hover:underline cursor-pointer underline decoration-4 ${decoration}`}
+          className={`font-semibold text-gray-800 hover:underline cursor-pointer underline decoration-2 ${decoration}`}
         >
           {nft.name}
         </span>
@@ -42,50 +40,45 @@ const ActivityItem = ({ item, user }: { item: any; user: any }) => {
   }
 
   const NFTOfferDisplay = ({ item }) => {
-    const userItems = item.offer ? formatItems(item.offer.user, 'decoration-red-500') : null
+    const userItems = item.offer ? formatItems(item.offer.user, 'decoration-red-400') : null
     const counterUserItems = item.offer
-      ? formatItems(item.offer.userCounter, 'decoration-blue-500')
+      ? formatItems(item.offer.userCounter, 'decoration-blue-400')
       : null
 
     return (
-      <div className='flex items-start border-b border-gray-200 px-4 py-6 w-full'>
-        <div className='relative w-12 h-12 mr-6 shrink-0'>
+      <div className='flex items-start border-b border-gray-200 px-4 py-6 w-full hover:bg-gray-50 transition-colors duration-200'>
+        <div className='relative w-10 h-10 mr-4 shrink-0'>
           <img
             src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
             alt='Profile'
-            className='w-full h-full rounded-full'
+            className='w-full h-full rounded-full object-cover shadow-sm'
           />
-          <div className='absolute bottom-[-6px] right-[-6px] bg-white rounded-full text-xs p-1 shadow-sm border border-black'>
-            🤝
-          </div>
         </div>
-        <div>
-          <div className='flex items-center gap-x-2'>
-            <div className='text-sm font-semibold'>{user?.username}</div>
+        <div className='flex-grow'>
+          <div className='flex items-center gap-x-2 mb-2'>
+            <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
             <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
           </div>
-          <div className='mt-1'>
-            <div>
-              offering <span>{userItems}</span> for <span>{counterUserItems}</span>
-            </div>
-            <div className='flex flex-wrap gap-4 mt-4'>
-              {item.offer.user.map((nft) => (
-                <div
-                  key={nft.id}
-                  className='w-20 h-20 object-cover rounded-md border-4 border-red-500'
-                >
-                  <NFTImage key={nft.id} src={nft.image} alt={nft.name} fallback={nft.name} />
-                </div>
-              ))}
-              {item.offer.userCounter.map((nft) => (
-                <div
-                  key={nft.id}
-                  className='w-20 h-20 object-cover rounded-md border-4 border-blue-500'
-                >
-                  <NFTImage key={nft.id} src={nft.image} alt={nft.name} fallback={nft.name} />
-                </div>
-              ))}
-            </div>
+          <div className='text-sm text-gray-700 mb-3'>
+            🤝 offering <span>{userItems}</span> for <span>{counterUserItems}</span>
+          </div>
+          <div className='flex flex-wrap gap-3'>
+            {item.offer.user.map((nft) => (
+              <div
+                key={nft.id}
+                className='w-16 h-16 rounded-md border-2 border-red-400 overflow-hidden shadow-sm'
+              >
+                <NFTImage src={nft.image} alt={nft.name} fallback={nft.name} />
+              </div>
+            ))}
+            {item.offer.userCounter.map((nft) => (
+              <div
+                key={nft.id}
+                className='w-16 h-16 rounded-md border-2 border-blue-400 overflow-hidden shadow-sm'
+              >
+                <NFTImage src={nft.image} alt={nft.name} fallback={nft.name} />
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -93,7 +86,7 @@ const ActivityItem = ({ item, user }: { item: any; user: any }) => {
   }
 
   return (
-    <div className='flex items-center w-full'>
+    <div className='w-full'>
       {item.item_type === 'message' && <MessageDisplay item={item} />}
       {item.item_type === 'offer' && <NFTOfferDisplay item={item} />}
     </div>
@@ -109,10 +102,7 @@ const Main: FC<{
 }> = ({ offerId, info, acceptOffer, counterOffer, closeModal }) => {
   const { user, profile, hasProfile } = useAuth()
   const [newMessage, setNewMessage] = useState<string>('')
-
   const [offerActivityItems, setOfferActivityItems] = useState<any[]>([])
-  const [hasMore, setHasMore] = useState<boolean>(true)
-  const [page, setPage] = useState<number>(1)
 
   const fetchOfferActivity = async () => {
     try {
@@ -122,25 +112,18 @@ const Main: FC<{
         .eq('offer_id', offerId)
         .order('created_at', { ascending: false })
         .limit(25)
-      // .range();
 
-      if (error) {
-        throw error
-      }
+      if (error) throw error
 
-      const reversedData = data.reverse()
-
-      setOfferActivityItems(reversedData)
+      setOfferActivityItems(data.reverse())
     } catch (error) {
       console.error('Failed to fetch activities', error)
-    } finally {
     }
   }
 
   const submitMessage = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (!newMessage.trim()) return
-    if (!profile) return
+    if (!newMessage.trim() || !profile) return
 
     try {
       if (profile?.banned) {
@@ -149,7 +132,6 @@ const Main: FC<{
       }
 
       const optimisticId = Math.random()
-
       const newOfferItem = {
         offer_id: offerId,
         user_id: profile.id,
@@ -157,9 +139,8 @@ const Main: FC<{
         content: newMessage.trim(),
       }
 
-      // optimistaclly update the UI
-      setOfferActivityItems((prevActivityItems) => [
-        ...prevActivityItems,
+      setOfferActivityItems((prev) => [
+        ...prev,
         {
           ...newOfferItem,
           id: optimisticId,
@@ -171,9 +152,7 @@ const Main: FC<{
 
       if (error) {
         console.error('Error submitting comment:', error)
-        setOfferActivityItems(
-          offerActivityItems.filter((activityItem) => Number(activityItem.id) !== optimisticId),
-        )
+        setOfferActivityItems((prev) => prev.filter((item) => Number(item.id) !== optimisticId))
       } else {
         setNewMessage('')
       }
@@ -183,39 +162,54 @@ const Main: FC<{
   }
 
   useEffect(() => {
-    if (offerId) {
-      fetchOfferActivity()
-    }
+    if (offerId) fetchOfferActivity()
   }, [offerId])
 
-  console.log('user info', info)
+  const isInitialOfferUser = user?.id === info?.user_id
+  const isCounterUser = user?.id === info?.user_id_counter
+  const isLatestOfferUser = user?.id === info?.offer_user_id
+  const isLoggedIn = !!user
+  const isParticipant = isInitialOfferUser || isCounterUser
+
+  if (!isLoggedIn || !isParticipant) {
+    return (
+      <div className='flex flex-col items-center justify-center h-full bg-gray-100 p-4'>
+        <p className='text-lg text-gray-700'>
+          Waiting for{' '}
+          {info?.offer_user_id === info?.user_id ? info?.user?.username : 'counter user'} to
+          respond...
+        </p>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <div className='flex items-center py-4 px-4'>
-        <div className='flex flex-col'>
-          <div className='flex items-center'>
-            <img
-              src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + info?.user?.profile_pic_url}
-              alt={info?.user?.username}
-              className='ml-2 w-10 h-10 rounded-full object-cover'
-            />
-            <div className='ml-2.5'>
-              <div className='font-semibold'>{info?.user?.username}</div>
-              <div className='text-gray-500'>
-                made an offer {timeAgo(new Date(info?.created_at))}
-              </div>
+    <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
+      <div className='flex items-center justify-between py-4 px-6 bg-gray-50 border-b border-gray-200'>
+        <div className='flex items-center'>
+          <img
+            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + info?.user?.profile_pic_url}
+            alt={info?.user?.username}
+            className='w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm'
+          />
+          <div className='ml-3'>
+            <div className='font-semibold text-gray-800'>{info?.user?.username}</div>
+            <div className='text-sm text-gray-500'>
+              made an offer {timeAgo(new Date(info?.created_at))}
             </div>
           </div>
         </div>
-        {/* <div className="ml-auto text-sm font-semibold bg-yellow-100 text-yellow-800 px-4 py-2 rounded">
-          Negotiation
-        </div> */}
-        <div className='ml-auto cursor-pointer' onClick={() => closeModal()}>
-          <Close className='w-8 h-8' />
-        </div>
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          className='cursor-pointer text-gray-500 hover:text-gray-700'
+          onClick={closeModal}
+        >
+          <Close className='w-6 h-6' />
+        </motion.div>
       </div>
-      <div className='max-h-[450px] overflow-y-auto hide-scrollbar bg-gray-50'>
+
+      <div className='flex-grow overflow-y-auto bg-white'>
         {info &&
           offerActivityItems.map((item: any) => (
             <ActivityItem
@@ -223,53 +217,59 @@ const Main: FC<{
               item={item}
               user={item.user_id === info?.user_id ? info.user : info.counter_user}
             />
-            // <div
-            //   key={item.id}
-            //   className="flex items-center justify-between p-4 border-b border-gray-200"
-            // >
-            //   <div>
-            //     <div className="font-semibold">{item.item_type}</div>
-            //     {/* <div className="text-sm text-gray-500">{item.content}</div> */}
-            //   </div>
-            //   <div className="text-sm text-gray-500">
-            //     {new Date(item.created_at).toLocaleString()}
-            //   </div>
-            // </div>
           ))}
       </div>
-      <div className='px-4 pt-4'>
-        <form onSubmit={submitMessage} className='gap-x-2 flex h-[50px]'>
+
+      <div className='p-4 bg-gray-50 border-t border-gray-200'>
+        <form onSubmit={submitMessage} className='flex gap-x-2'>
           <input
             type='text'
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder='Send a message...'
-            className='flex-grow px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             type='submit'
-            className='bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='bg-blue-500 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
             disabled={!newMessage.trim() || !hasProfile}
           >
             Send
-          </button>
+          </motion.button>
         </form>
       </div>
-      <div className='flex items-center justify-center p-4 gap-x-4'>
-        <button
-          className='bg-green-300 p-3 rounded-md shadow-sm cursor-pointer w-full font-semibold text-xl'
-          onClick={acceptOffer}
-        >
-          ✅ Accept
-        </button>
-        <button
-          className='bg-yellow-300 p-3 rounded-md shadow-sm cursor-pointer w-full font-semibold text-xl'
-          onClick={counterOffer}
-        >
-          🤝 Counter
-        </button>
+
+      <div className='flex items-center justify-between p-4 bg-gray-100 border-t border-gray-200'>
+        {isLatestOfferUser ? (
+          <div className='text-center w-full'>
+            <p className='text-gray-700 font-semibold'>
+              Waiting for a response from the other user...
+            </p>
+          </div>
+        ) : (
+          <>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='bg-yellow-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+              onClick={counterOffer}
+            >
+              🤝 Counter
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className='bg-green-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+              onClick={acceptOffer}
+            >
+              ✅ Accept
+            </motion.button>
+          </>
+        )}
       </div>
-    </>
+    </div>
   )
 }
 

@@ -1,10 +1,9 @@
 import { FC, useState } from 'react'
-
 import { useAuth } from '@/providers/authProvider'
 import { NFTOfferMetadata, ProfileMinimal } from '@/types/supabase'
 import { supabase } from '@/utils/supabaseClient'
-
 import SelectNFT from './selectNft'
+import { motion } from 'framer-motion'
 
 type Props = {
   type: 'initial_offer' | 'counter_offer'
@@ -94,26 +93,35 @@ const Select: FC<Props> = ({ type, offerId, userA, userB, initUserAItems, initUs
   }
 
   const UserSection: FC<UserProps> = ({ bg, user, items, showSelectScreen }) => (
-    <div className={`flex-1 p-5 relative ${bg}`}>
-      <div className='flex items-center'>
-        <img
-          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
-          alt='Profile Picture'
-          className='w-10 h-10 rounded-full'
-        />
-        <div className='text-lg font-semibold ml-2'>{user?.username}</div>
+    <div className={`flex-1 p-6 relative ${bg} border-b border-gray-200`}>
+      <div className='flex items-center justify-between mb-4'>
+        <div className='flex items-center'>
+          <img
+            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
+            alt='Profile Picture'
+            className='w-12 h-12 rounded-full border-2 border-white shadow-md'
+          />
+          <div className='text-xl font-bold ml-3 text-gray-800'>{user?.username}</div>
+        </div>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className='px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
+          onClick={() => showSelectScreen(user)}
+        >
+          + Add NFT
+        </motion.button>
       </div>
-      <button
-        className='absolute top-5 right-5 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200'
-        onClick={() => showSelectScreen(user)}
-      >
-        + Add NFT
-      </button>
-      <div className='mt-6 flex-wrap flex p-2'>
+      <div className='mt-6 flex flex-wrap gap-4'>
         {items.map((item, index) => (
-          <div
+          <motion.div
             key={index}
-            className='w-32 h-32 border-gray-900 rounded-lg text-center cursor-pointer shadow-md'
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className='relative w-32 h-32 rounded-lg overflow-hidden shadow-lg cursor-pointer group'
             onClick={() => {
               if (user === userA) {
                 setUserAItems((prev) => prev.filter((i) => i.id !== item.id))
@@ -122,35 +130,44 @@ const Select: FC<Props> = ({ type, offerId, userA, userB, initUserAItems, initUs
               }
             }}
           >
-            <img src={item.image} alt={item.name} className='w-32 h-32 object-cover rounded' />
-            {/* <p className='mt-2'>{item.name}</p> */}
-          </div>
+            <img src={item.image} alt={item.name} className='w-full h-full object-cover' />
+            <div className='absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
+              <span className='text-white text-sm font-semibold'>Remove</span>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>
   )
 
   return (
-    <div className='flex flex-col h-screen rounded-lg bg-gray-100 overflow-hidden'>
+    <div className='flex flex-col h-screen overflow-hidden'>
       <UserSection
-        bg='bg-gray-50'
+        bg='none'
         user={userA}
         items={userAItems}
         showSelectScreen={showSelectScreen}
       />
       <UserSection
-        bg='bg-gray-100'
+        bg='bg-gray-50'
         user={userB}
         items={userBItems}
         showSelectScreen={showSelectScreen}
       />
 
-      <button
-        className='p-4 m-5 bg-yellow-200 text-lg rounded-lg font-semibold hover:bg-yellow-300 transition-colors duration-200'
-        onClick={makeOffer}
-      >
-        {type === 'initial_offer' ? 'Propose Trade' : 'Counter Offer'}
-      </button>
+      <div className='p-6'>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className='w-full flex justify-center items-center bg-yellow-400 p-4 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-md'
+          onClick={makeOffer}
+        >
+          <span className='flex items-center mr-2 text-2xl'>🤝</span>
+          <span className='text-gray-800 text-xl font-semibold'>
+            {type === 'initial_offer' ? 'Make Offer' : 'Counter Offer'}
+          </span>
+        </motion.button>
+      </div>
 
       {selectingUser && isSelectingNFTs && (
         <SelectNFT
