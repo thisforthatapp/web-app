@@ -18,7 +18,7 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
     try {
       const { data, error } = await supabase
         .from('nfts')
-        .select('*')
+        .select('*, user_profile!nfts_user_id_fkey(*)')
         .eq('id', params.id)
         .single()
 

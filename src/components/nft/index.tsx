@@ -3,80 +3,19 @@
 import React, { FC, useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { OfferFeedItem, Options, VerifiedBadge } from '@/components/shared'
+import { NftOptions, OfferFeedItem, VerifiedBadge } from '@/components/shared'
 import { Etherscan, Opensea } from '@/icons'
 import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
-interface ActivityItem {
-  id: string
-  type: 'offers' | 'looking' | 'transactions'
-  user: string
-  amount?: string
-  timestamp: Date
+interface NFTComponentProps {
+  nft: any
 }
 
-interface InfoItemProps {
-  label: string
-  value: string
-  link?: string
-}
-
-const InfoItem: React.FC<InfoItemProps> = ({ label, value, link }) => (
-  <div className='flex flex-col'>
-    <span className='text-sm text-gray-500'>{label}</span>
-    {link ? (
-      <Link href={link} className='text-blue-500 hover:underline'>
-        {value}
-      </Link>
-    ) : (
-      <span className='font-semibold'>{value}</span>
-    )}
-  </div>
-)
-
-interface ActionButtonProps {
-  emoji: string
-  text: string
-  count: number
-  onClick: () => void
-  className: string
-}
-
-const ActionButton: React.FC<ActionButtonProps> = ({
-  emoji,
-  text,
-  count,
-  onClick,
-  className,
-}) => (
-  <button
-    onClick={onClick}
-    className={`flex-1 py-4 text-white rounded-lg transition-colors text-sm flex items-center justify-center px-3 ${className}`}
-  >
-    <span>{emoji}</span>
-    <span className='ml-2'>{text}</span>
-    <span className='ml-auto font-bold'>{count}</span>
-  </button>
-)
-
-const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
+const NFTComponent: FC<NFTComponentProps> = ({ nft }) => {
   const [items, setItems] = useState<any[]>([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
-
-  // Mock data - replace with actual data fetching logic
-  const image = '/temp/nft.png'
-  const owner = 'fredwilson'
-  const ownerImage = '/temp/profile.webp'
-  const chain = 'Ethereum'
-  const collection = 'CryptoPunks'
-  const tokenId = '1'
-  const floorPrice = '5 ETH'
-  const lastSalePrice = '6 ETH'
-  const isVerified = true
-  const verifiedDate = '2024-09-25'
-  const openseaLink = 'https://opensea.io/collection/cryptopunks'
 
   const fetchItems = async (page: number) => {
     const { data, error } = await supabase
@@ -113,116 +52,123 @@ const NFTComponent: FC<{ nft: any }> = ({ nft }) => {
     setPage(1)
   }, [])
 
-  console.log('items', items)
-
   return (
-    <div className='absolute top-[75px] bottom-0 w-full flex'>
-      <div className='w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar justify-center my-8'>
-        <div className='flex flex-col lg:flex-row justify-center gap-x-8'>
-          <div className='relative w-[400px] flex flex-col'>
-            <div className='bg-white rounded-lg shadow-md mb-4'>
-              <div>
-                <VerifiedBadge
-                  id={nft.id}
-                  chainName={
-                    CHAIN_IDS_TO_CHAINS[nft_chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]
-                  }
-                  collectionName={nft_collection_name}
-                  tokenId={nft_token_id}
-                  isVerified={isVerified}
-                  className='absolute left-2 top-2 z-10 w-12 h-12'
-                />
-                <img
-                  src={nft?.image}
-                  alt='NFT'
-                  className='w-full h-[400px] w-[400px] object-cover rounded-lg'
-                />
-                <div className='absolute top-2 right-2'>
-                  <Options onOptionSelect={() => {}} />
-                </div>
-              </div>
-              <div className='py-4 flex items-center justify-center'>
-                <div className='flex items-center'>
-                  <img src={ownerImage} alt={owner} className='w-8 h-8 rounded-full' />
-                  <div className='text-xl font-bold ml-2'>{owner}</div>
-                </div>
-              </div>
-            </div>
-            {/* <div className="grid grid-cols-3 gap-4 bg-white shadow-md mt-4 p-4 rounded-md">
-              <InfoItem label="Chain" value={chain} link={openseaLink} />
-              <InfoItem
-                label="Collection"
-                value={collection}
-                link={openseaLink}
-              />
-              <InfoItem label="Token ID" value={tokenId} link={openseaLink} />
-            </div> */}
-            {/* <div className="flex space-x-4">
-              <ActionButton
-                emoji="🤝"
-                text="Make Offer"
-                count={4}
-                onClick={() => setDealModalOpen(true)}
-                className="bg-gray-800"
-              />
-              <ActionButton
-                emoji="👀"
-                text="Looking"
-                count={10}
-                onClick={() => setInterestModalOpen(true)}
-                className="bg-gray-800"
-              />
-            </div> */}
-            <div className='bg-white p-4 mb-4 flex items-center shadow-sm rounded-md'>
-              <Opensea className='w-10 h-10' />
-              <div className='ml-3'>View On Opensea</div>
-            </div>
-            <div className='bg-white p-4 flex items-center shadow-sm rounded-md'>
-              <Etherscan className='w-10 h-10' />
-              <div className='ml-3'>View On Etherscan</div>
-            </div>
-            <div className='flex gap-x-4 gap-y-2 mt-4'>
-              <button
-                className={`w-full flex justify-center items-center bg-red-50 p-3 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-sm`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  // makeOffer(item);
-                }}
-              >
-                <span className='flex items-center mr-2 text-2xl'>📌</span>
-                <span className='text-lg font-semibold'>Pin</span>
-              </button>
-              <button
-                className='w-full flex justify-center items-center bg-yellow-50 p-3 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-sm'
-                onClick={(e) => {
-                  e.preventDefault()
-                  // makeOffer(item);
-                }}
-              >
-                <span className='flex items-center mr-2 text-2xl'>🤝</span>
-                <span className='text-gray-800 text-lg font-semibold'>Offer</span>
-              </button>
-            </div>
-          </div>
-          <div className='flex flex-col'>
-            <div className='w-full bg-white p-4 flex items-center justify-center border border-gray-200 mb-4 rounded-md font-semibold text-xl'>
-              Offers for CryptoPunk #1658
-            </div>
-            <div className='overflow-y-auto hide-scrollbar h-[650px] w-[600px] flex flex-col gap-y-4'>
-              {(items as any[]).map((item) => (
-                <OfferFeedItem
-                  key={item.id}
-                  item={item.user_offers}
-                  // expandOffer={expandOffer}
-                />
-              ))}
-            </div>
-          </div>
-          <div className='flex lg:hidden'>action buttons that show on mobile</div>
+    <div className='absolute top-[75px] bottom-0 w-full flex overflow-y-auto'>
+      <div className='mt-6 md:my-0 w-full bg-[#f9f9f9] flex flex-col md:flex-row justify-start md:justify-center md:gap-4 md:gap-8 p-0 md:p-8 pb-24 md:pb-8'>
+        <NFTImage nft={nft} />
+        <div className='flex flex-col flex-grow max-w-3xl px-4 md:px-0'>
+          <NFTTitle />
+          <OffersGrid items={items} />
+          <div className='h-[100px] md:hidden' />
         </div>
       </div>
+      <MobileActionButtons />
     </div>
   )
 }
+
+const NFTImage: FC<{ nft: any }> = ({ nft }) => (
+  <div className='w-full md:w-[360px] flex flex-col md:sticky md:top-8'>
+    <div className='bg-white rounded-lg shadow-md mb-4 mx-4 md:mx-0'>
+      <div className='relative'>
+        <VerifiedBadge
+          id={nft.id}
+          chainName={CHAIN_IDS_TO_CHAINS[nft.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
+          collectionName={nft.collection_name}
+          tokenId={nft.token_id}
+          isVerified={true}
+          className='absolute left-2 top-2 z-10 w-12 h-12'
+        />
+        <img
+          src={nft?.image}
+          alt='NFT'
+          className='w-full h-auto object-cover md:object-contain md:max-h-[360px] rounded-t-lg'
+        />
+        <div className='absolute top-2 right-2'>
+          <NftOptions chainId={''} collectionContract={''} tokenId={''} />
+        </div>
+      </div>
+      <div className='py-4 flex items-center justify-center'>
+        <div className='flex items-center'>
+          <img
+            src={
+              process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + nft.user_profile.profile_pic_url
+            }
+            alt={nft.user_profile.username}
+            className='w-8 h-8 rounded-full'
+          />
+          <div className='text-xl font-bold ml-2'>{nft.user_profile.username}</div>
+        </div>
+      </div>
+    </div>
+    <ExternalLinks />
+    <ActionButtons className='hidden md:flex' />
+  </div>
+)
+
+const ExternalLinks: FC = () => (
+  <div className='flex flex-row md:flex-col gap-2 px-4 md:px-0 mb-4'>
+    <div className='flex-1 bg-white p-4 flex items-center shadow-md rounded-md cursor-pointer hover:bg-gray-50 transition-colors'>
+      <Opensea className='w-10 h-10' />
+      <div className='ml-3'>View On Opensea</div>
+    </div>
+    <div className='flex-1 bg-white p-4 flex items-center shadow-md rounded-md cursor-pointer hover:bg-gray-50 transition-colors'>
+      <Etherscan className='w-10 h-10' />
+      <div className='ml-3'>View On Etherscan</div>
+    </div>
+  </div>
+)
+
+const NFTTitle: FC = () => (
+  <div className='w-full bg-white p-4 flex items-center justify-center border border-gray-200 mb-4 rounded-md font-semibold text-xl'>
+    🤝 Offers for CryptoPunk #1658
+  </div>
+)
+
+const OffersGrid: FC<{ items: any[] }> = ({ items }) => (
+  <div className='md:overflow-y-auto hide-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0 md:pb-4'>
+    {items.map((item) => (
+      <OfferFeedItem key={item.id} item={item.user_offers} viewOffer={() => {}} />
+    ))}
+  </div>
+)
+
+const ActionButtons: FC<{ className?: string }> = ({ className }) => (
+  <div className={`flex gap-4 ${className}`}>
+    <ActionButton
+      emoji='📌'
+      text='Pin'
+      onClick={() => {}}
+      className='bg-red-50 hover:bg-red-100'
+    />
+    <ActionButton
+      emoji='🤝'
+      text='Offer'
+      onClick={() => {}}
+      className='bg-yellow-50 hover:bg-yellow-100'
+    />
+  </div>
+)
+
+const MobileActionButtons: FC = () => (
+  <div className='fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg md:hidden'>
+    <ActionButtons />
+  </div>
+)
+
+const ActionButton: FC<{
+  emoji: string
+  text: string
+  onClick: () => void
+  className: string
+}> = ({ emoji, text, onClick, className }) => (
+  <button
+    onClick={onClick}
+    className={`flex-1 py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center ${className}`}
+  >
+    <span className='text-2xl mr-2'>{emoji}</span>
+    <span className='text-gray-800 text-lg font-semibold'>{text}</span>
+  </button>
+)
 
 export default NFTComponent

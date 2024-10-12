@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC } from 'react'
 
 const AboutPage: FC = () => {
   return (
@@ -10,7 +10,7 @@ const AboutPage: FC = () => {
         <div>- mention whats coming</div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AboutPage;
+export default AboutPage
