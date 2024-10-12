@@ -87,6 +87,17 @@ const NFTGrid = ({
   </div>
 )
 
+const LoadMoreButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <div className='w-full flex items-center justify-center my-4'>
+    <button
+      onClick={onClick}
+      className='px-10 py-3 text-lg rounded-full bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition-colors duration-300'
+    >
+      Load More
+    </button>
+  </div>
+)
+
 const UserPage: FC<UserPageProps> = ({ params }) => {
   const { user, loading, profile } = useAuth()
   const { showToast } = useToast()
@@ -98,8 +109,8 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
 
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
   const [tabOption, setTabOption] = useState<UserTabOption>('yes_for_swap')
-  const [, setPage] = useState(1)
-  const [, setHasMore] = useState(true)
+  const [page, setPage] = useState(1)
+  const [hasMore, setHasMore] = useState(false)
 
   const fetchProfile = async () => {
     const { data, error } = await supabase
@@ -342,6 +353,19 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     }
   }
 
+  const handleTabChange = (newTabOption: UserTabOption) => {
+    setItems([])
+    setPage(1)
+    setHasMore(false)
+    setTabOption(newTabOption)
+  }
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1
+    setPage(nextPage)
+    fetchItems(tabOption, nextPage)
+  }
+
   return (
     <div className='absolute top-[75px] bottom-0 w-full flex justify-center'>
       <div className='w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar'>
@@ -356,15 +380,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
               />
             </div>
           </div>
-          <UserNavigation
-            tabOption={tabOption}
-            onNavigationChange={(newTabOption: UserTabOption) => {
-              setItems([])
-              setPage(1)
-              setHasMore(false)
-              setTabOption(newTabOption)
-            }}
-          />
+          <UserNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
           {tabOption === 'offers' ? (
             <OfferGrid items={items as OfferFeedItemType[]} expandOffer={expandOffer} />
           ) : (
@@ -374,6 +390,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
               pinItem={pinItem}
             />
           )}
+          {items.length > 0 && hasMore && <LoadMoreButton onClick={handleLoadMore} />}
         </div>
       </div>
       {makeOfferItem && (
@@ -382,6 +399,18 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
           offerId={null}
           initialNFT={makeOfferItem}
           closeModal={() => setMakeOfferItem(null)}
+        />
+      )}
+      {viewOfferItem && (
+        <Offer
+          type={
+            viewOfferItem.status === 'accepted' || viewOfferItem.status === 'completed'
+              ? 'transaction'
+              : 'view_offer'
+          }
+          offerId={viewOfferItem.id}
+          initialNFT={null}
+          closeModal={() => setViewOfferItem(null)}
         />
       )}
     </div>

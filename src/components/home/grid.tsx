@@ -223,8 +223,7 @@ const Grid: FC = () => {
       ) : (
         <NFTGrid items={items as NFTFeedItemType[]} makeOffer={makeOffer} pinItem={pinItem} />
       )}
-      {hasMore && <LoadMoreButton onClick={handleLoadMore} />}
-
+      {items.length > 0 && hasMore && <LoadMoreButton onClick={handleLoadMore} />}
       {makeOfferItem && (
         <Offer
           type='make_offer'
