@@ -64,7 +64,7 @@ export interface NFTFeedItem {
   nft_user_id_username: string
   nft_is_verified: boolean
   nft_verified_at: string | null
-  is_pinned: boolean
+  // is_pinned: boolean
   // add wallet address?
 }
 

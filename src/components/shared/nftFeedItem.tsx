@@ -55,9 +55,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
       <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-1 overflow-hidden'>
         <div className='flex w-full gap-x-2'>
           <button
-            className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md ${
-              item.is_pinned ? '' : 'bg-red-50 hover:bg-red-100'
-            }`}
+            className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md`}
             onClick={(e) => {
               e.preventDefault()
               pinItem(item)

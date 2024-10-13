@@ -2,6 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 
 import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
+import { Tag } from '@/icons'
 import { UserNFT } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
 
@@ -37,14 +38,12 @@ const SwapStatusButton: React.FC<{
 }> = ({ forSwap, onClick }) => (
   <div
     className={`${
-      forSwap ? 'bg-green-100 hover:bg-green-200' : 'bg-red-100 hover:bg-red-200'
+      forSwap ? 'bg-green-300 hover:bg-green-200' : 'bg-gray-100'
     } mt-3 flex gap-x-2 gap-y-2 w-full flex justify-center items-center overflow-hidden px-1 py-2.5 rounded-md transition-colors duration-200 shadow-md`}
     onClick={onClick}
   >
-    <span className='flex items-center mr-1 text-lg'>{forSwap ? '✅' : '❌'}</span>
-    <span className='text-lg font-semibold'>
-      {forSwap ? 'Ok To Trade' : 'Not Eager To Trade'}
-    </span>
+    <Tag className={`w-6 h-6 ${forSwap ? 'text-green-600' : 'text-gray-900'}`} />
+    <span className='text-lg font-semibold'>Ok To Trade</span>
   </div>
 )
 

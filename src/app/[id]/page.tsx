@@ -319,33 +319,20 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
       return
     }
 
-    if (nft.is_pinned) {
-      showToast(`✅ NFT already pinned`, 1500)
-      return
-    }
-
-    const updatedNFTs = (items as NFTFeedItemType[]).map((item: NFTFeedItemType) => {
-      if (item.nft_id === nft.nft_id) {
-        const isCurrentlyPinned = item.is_pinned
-        return {
-          ...item,
-          is_pinned: !isCurrentlyPinned,
-          nft_pins: isCurrentlyPinned ? item.nft_pins - 1 : item.nft_pins + 1,
-        }
-      }
-      return item
-    })
-
-    setItems(updatedNFTs)
     showToast(`✅ NFT pinned`, 1500)
 
-    const { error } = await supabase.from('user_pins').insert([
+    const { error } = await supabase.from('user_pins').upsert(
+      [
+        {
+          user_id: user?.id,
+          nft_id: nft.nft_id,
+        },
+      ],
       {
-        user_id: user?.id,
-        nft_id: nft.nft_id,
+        onConflict: 'user_id,nft_id',
+        ignoreDuplicates: true,
       },
-    ])
-
+    )
     if (error) {
       showToast(`⚠️ Error pinning NFT`, 2500)
       console.error('Error pinning NFT:', error)

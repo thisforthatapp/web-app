@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
+import { Add, Checkmark } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { UserNFT } from '@/types/supabase'
@@ -77,21 +78,21 @@ const useNFTs = () => {
 const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> = ({
   setModal,
 }) => (
-  <div className='flex justify-between items-center p-4'>
+  <div className='flex justify-between items-center px-4 py-6'>
     <div className='ml-2 text-2xl font-semibold'>My NFTs</div>
-    <div className='flex space-x-4'>
+    <div className='flex text-lg space-x-4'>
       <button
         onClick={() => setModal('add')}
-        className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center'
+        className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
       >
-        <span className='mr-2'>+</span>
+        <Add className='w-8 h-8 mr-1.5' />
         Add NFTs
       </button>
       <button
         onClick={() => setModal('verify')}
-        className='px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center'
+        className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
       >
-        <span className='mr-2'>✓</span>
+        <Checkmark className='w-8 h-8 mr-1.5' />
         Verify NFTs
       </button>
     </div>
