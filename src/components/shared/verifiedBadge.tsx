@@ -26,7 +26,7 @@ const VerifiedBadge: React.FC<VerifiedProps> = ({
     <b>${isVerified ? 'Verified' : 'Unverified'}</b>
     Chain: ${chainName}
     Collection: ${collectionName || '-'}
-    Token Id: ${tokenId.length > 8 ? `${tokenId.substring(0, 8)}... ` : tokenId}
+    ID: ${tokenId.length > 8 ? `${tokenId.substring(0, 8)}... ` : tokenId}
   `
     .trim()
     .replace(/\n/g, '<br>')

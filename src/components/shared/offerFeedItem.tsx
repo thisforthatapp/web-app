@@ -1,4 +1,5 @@
 import React, { FC } from 'react'
+
 import { NFTImage } from '@/components/shared'
 import { ArrowLeftRight, Clock } from '@/icons'
 import { NFTOfferMetadata, OfferFeedItem as OfferFeedItemType, Profile } from '@/types/supabase'
@@ -54,17 +55,16 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) =
 
   return (
     <div
-      className='flex flex-col shadow-lg overflow-hidden rounded-lg cursor-pointer relative bg-white'
+      className='flex flex-col shadow-lg overflow-hidden rounded-lg cursor-pointer relative'
       onClick={() => viewOffer(item)}
     >
-      <div className='flex justify-between items-center px-3 py-2 bg-gray-50 border-b border-gray-200'>
-        <div className='flex items-center space-x-4'>
+      <div className='flex justify-between items-center px-3 py-2 bg-white border-b border-gray-200'>
+        <div className='flex items-center space-x-2'>
           <UserInfo user={item.user} />
-          <ArrowLeftRight className='w-4 h-4 text-gray-400' />
+          <ArrowLeftRight className='w-4 h-4 text-gray-600' />
           <UserInfo user={item.counter_user} />
         </div>
-        <div className='flex items-center text-xs text-gray-500'>
-          {/* <Clock className='w-4 h-4 mr-1' /> */}
+        <div className='flex items-center text-sm font-semibold text-gray-600 mr-1'>
           {timeAgoShort(new Date(item.updated_at))}
         </div>
       </div>
@@ -72,9 +72,6 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) =
         <div className='w-1/2 flex flex-col'>
           <NFTGrid offerId={item.id} nfts={(item.offer as { user: NFTOfferMetadata[] }).user} />
         </div>
-        {/* <div className='absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-md'>
-          <ArrowLeftRight className='w-6 h-6 text-gray-600' />
-        </div> */}
         <div className='w-1/2 flex flex-col border-l border-gray-200'>
           <NFTGrid
             offerId={item.id}
@@ -82,8 +79,8 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) =
           />
         </div>
       </div>
-      <div className='bg-gray-50 text-gray-700 font-semibold py-2 px-3 text-sm text-center border-t border-gray-200'>
-        Waiting for {waitingForUser.username} to respond...
+      <div className='bg-yellow-100 text-gray-700 p-3 text-center flex-grow'>
+        Waiting for <b>{waitingForUser.username}</b> to respond...
       </div>
     </div>
   )

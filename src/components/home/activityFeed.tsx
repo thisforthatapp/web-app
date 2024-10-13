@@ -65,7 +65,7 @@ const FeedItem = ({ activity }: { activity: Activity }) => {
           className='w-full h-full rounded-full'
         />
       </div>
-      <div>
+      <div className='w-full'>
         <div className='flex items-center gap-x-2'>
           <div className='text-sm font-semibold'>{activity.username}</div>
           <div className='text-xs text-gray-400'>
@@ -76,22 +76,30 @@ const FeedItem = ({ activity }: { activity: Activity }) => {
           <div className='mt-1'>{renderMessageText(activity.content || '')}</div>
         )}
         {activity.activity_type === 'pin' && (
-          <div className='mt-1'>
-            <div>
-              📌 pinned{' '}
-              <span className='font-semibold'>
+          <div className='w-full mt-1'>
+            <div>pinned </div>
+            <div className='w-full flex items-center bg-gray-200 px-3 py-1.5 mt-2 rounded-md'>
+              <img
+                src={(activity.metadata as { nft_image: string }).nft_image}
+                className='w-8 h-8 rounded-md'
+                alt='NFT'
+              />
+              <span className='ml-2 text-sm font-semibold'>
                 {(activity.metadata as { nft_name: string }).nft_name}
               </span>
             </div>
-            <img
-              src={(activity.metadata as { nft_image: string }).nft_image}
-              className='mt-2 w-12 h-12 rounded-md'
-              alt='NFT'
-            />
           </div>
         )}
         {(activity.activity_type === 'offer_start' ||
-          activity.activity_type === 'offer_counter') && <NFTOfferDisplay item={activity} />}
+          activity.activity_type === 'offer_counter') && (
+          <div className='mt-1'>
+            <div>made an offer</div>
+            <NFTOfferDisplay
+              userAOffers={activity.metadata.offer.user}
+              userBOffers={activity.metadata.offer.userCounter}
+            />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -260,10 +268,13 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
       )}
       {!feedCollapsed && (
         <>
-          <div ref={chatContainerRef} className='flex-1 overflow-y-auto hide-scrollbar'>
+          <div
+            ref={chatContainerRef}
+            className='flex flex-col flex-1 overflow-y-auto hide-scrollbar'
+          >
             {activities.length > 0 && hasMore && (
               <button
-                className='bg-gray-200 py-2 text-gray-700 hover:bg-gray-300 transition-colors duration-300 text-center w-full'
+                className='bg-gray-200 py-2 px-6 text-gray-700 hover:bg-gray-300 transition-colors duration-300 text-center my-4 self-center rounded-full'
                 onClick={() => {
                   const nextPage = page + 1
                   setPage(nextPage)

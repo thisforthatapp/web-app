@@ -108,7 +108,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
   const [isFollowing, setIsFollowing] = useState<boolean>(false)
 
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
-  const [tabOption, setTabOption] = useState<UserTabOption>('yes_for_swap')
+  const [tabOption, setTabOption] = useState<UserTabOption>('nfts')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
 
@@ -212,7 +212,6 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
 
     const baseParams = {
       page_user_id: userPageProfile?.id,
-      current_user_id: user?.id,
       range_start: rangeStart,
       range_end: rangeEnd,
     }
@@ -220,11 +219,9 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     let query
 
     switch (tabOption) {
-      case 'yes_for_swap':
-      case 'no_for_swap':
+      case 'nfts':
         query = supabase.rpc('get_user_feed', {
           ...baseParams,
-          nft_for_swap: tabOption === 'yes_for_swap',
         })
         break
       case 'pinned':
@@ -243,7 +240,6 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
       default:
         query = supabase.rpc('get_user_feed', {
           ...baseParams,
-          nft_for_swap: true,
         })
         break
     }
@@ -288,11 +284,11 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
   }
 
   useEffect(() => {
-    if (tabOption && userPageProfile && !loading) {
+    if (tabOption && userPageProfile) {
       fetchItems(tabOption, 1)
       setPage(1)
     }
-  }, [tabOption, userPageProfile, loading])
+  }, [tabOption, userPageProfile])
 
   const makeOffer = async (nft: NFTFeedItemType) => {
     if (!user) {
@@ -312,7 +308,6 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     setViewOfferItem(offer)
   }
 
-  /* only allows pins for now. too many notifs if allow pin/unpin */
   const pinItem = async (nft: NFTFeedItemType) => {
     if (!user) {
       showToast(`⚠️ You have to login to use this`, 2500)

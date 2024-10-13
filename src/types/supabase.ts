@@ -64,6 +64,7 @@ export interface NFTFeedItem {
   nft_user_id_username: string
   nft_is_verified: boolean
   nft_verified_at: string | null
+  nft_for_swap: boolean
   // is_pinned: boolean
   // add wallet address?
 }
@@ -85,6 +86,7 @@ export interface OfferFeedItem {
   offer: unknown // JSON
   status: 'initiated' | 'negotiating' | 'denied' | 'accepted' | 'completed'
   created_at: string
+  updated_at: string
   user: Profile
   counter_user: Profile
 }

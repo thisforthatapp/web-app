@@ -1,6 +1,8 @@
 import React, { FC, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+
 import { NFTImage } from '@/components/shared'
+import { NFTOfferDisplay } from '@/components/shared'
 import { Close } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { formatDate, timeAgo } from '@/utils/helpers'
@@ -8,45 +10,12 @@ import { supabase } from '@/utils/supabaseClient'
 
 const ActivityItem = ({ item, user }: { item: any; user: any }) => {
   const MessageDisplay = ({ item }) => (
-    <div className='flex p-4 border-b border-gray-200 w-full hover:bg-gray-50 transition-colors duration-200'>
-      <div className='relative w-10 h-10 mr-4 shrink-0'>
-        <img
-          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
-          alt='Profile'
-          className='w-full h-full rounded-full object-cover shadow-sm'
-        />
-      </div>
-      <div className='flex-grow'>
-        <div className='flex items-center gap-x-2 mb-1'>
-          <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
-          <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
-        </div>
-        <div className='text-gray-700 text-sm'>{item.content}</div>
-      </div>
-    </div>
+    <div className='text-gray-700 text-sm'>{item.content}</div>
   )
 
-  const formatItems = (items, decoration) => {
-    return items.map((nft, index) => (
-      <React.Fragment key={nft.id}>
-        <span
-          className={`font-semibold text-gray-800 hover:underline cursor-pointer underline decoration-2 ${decoration}`}
-        >
-          {nft.name}
-        </span>
-        {index < items.length - 1 && ', '}
-      </React.Fragment>
-    ))
-  }
-
-  const NFTOfferDisplay = ({ item }) => {
-    const userItems = item.offer ? formatItems(item.offer.user, 'decoration-red-400') : null
-    const counterUserItems = item.offer
-      ? formatItems(item.offer.userCounter, 'decoration-blue-400')
-      : null
-
-    return (
-      <div className='flex items-start border-b border-gray-200 px-4 py-6 w-full hover:bg-gray-50 transition-colors duration-200'>
+  return (
+    <div className='w-full'>
+      <div className='flex p-4 border-b border-gray-200 w-full hover:bg-gray-50 transition-colors duration-200'>
         <div className='relative w-10 h-10 mr-4 shrink-0'>
           <img
             src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
@@ -55,40 +24,19 @@ const ActivityItem = ({ item, user }: { item: any; user: any }) => {
           />
         </div>
         <div className='flex-grow'>
-          <div className='flex items-center gap-x-2 mb-2'>
+          <div className='flex items-center gap-x-2 mb-1'>
             <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
             <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
           </div>
-          <div className='text-sm text-gray-700 mb-3'>
-            🤝 offering <span>{userItems}</span> for <span>{counterUserItems}</span>
-          </div>
-          <div className='flex flex-wrap gap-3'>
-            {item.offer.user.map((nft) => (
-              <div
-                key={nft.id}
-                className='w-16 h-16 rounded-md border-2 border-red-400 overflow-hidden shadow-sm'
-              >
-                <NFTImage src={nft.image} alt={nft.name} fallback={nft.name} />
-              </div>
-            ))}
-            {item.offer.userCounter.map((nft) => (
-              <div
-                key={nft.id}
-                className='w-16 h-16 rounded-md border-2 border-blue-400 overflow-hidden shadow-sm'
-              >
-                <NFTImage src={nft.image} alt={nft.name} fallback={nft.name} />
-              </div>
-            ))}
-          </div>
+          {item.item_type === 'message' && <MessageDisplay item={item} />}
+          {(item.item_type === 'offer' || item.item_type === 'counter_offer') && (
+            <NFTOfferDisplay
+              userAOffers={item.offer.user}
+              userBOffers={item.offer.userCounter}
+            />
+          )}
         </div>
       </div>
-    )
-  }
-
-  return (
-    <div className='w-full'>
-      {item.item_type === 'message' && <MessageDisplay item={item} />}
-      {item.item_type === 'offer' && <NFTOfferDisplay item={item} />}
     </div>
   )
 }

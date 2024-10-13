@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
+import { Tag } from '@/icons'
 import { NFTFeedItem as NFTFeedItemType } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
 
@@ -22,7 +23,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
 
   return (
     <Link href={`/nft/${item.nft_id}`}>
-      <div className='bg-white rounded-lg shadow-md overflow-hidden relative'>
+      <div className='bg-white rounded-lg shadow-md relative'>
         <div className='absolute top-1 right-1 z-10'>
           <NftOptions
             chainId={item.nft_chain_id.toString()}
@@ -40,7 +41,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
         />
         <NFTImage src={item.nft_image} alt={item.nft_name} fallback={item.nft_name} />
         <div className='flex justify-between px-3 py-3'>
-          <div className='flex items-center justify-center w-full' onClick={navigateToUser}>
+          <div className='flex items-center w-full' onClick={navigateToUser}>
             <img
               src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${item?.nft_user_id_profile_pic_url}`}
               alt={item?.nft_user_id_username}
@@ -49,6 +50,9 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             <span className='text-lg ml-2 text-gray-700 font-semibold'>
               {item?.nft_user_id_username}
             </span>
+            <Tag
+              className={`mr-1 w-6 h-6 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
+            />
           </div>
         </div>
       </div>

@@ -21,15 +21,14 @@ const NFTImage: FC<NFTImageProps> = ({
   const [error, setError] = useState<boolean>(false)
 
   const imageContent = error ? (
-    <div className='aspect-square flex items-center justify-center text-center p-4 bg-gray-200'>
+    <div className='aspect-square flex items-center justify-center text-center p-4 bg-gray-200 rounded-t-lg'>
       <span className='text-gray-600 font-semibold break-words'>{fallback}</span>
     </div>
   ) : (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}
       alt={alt}
-      className='aspect-square object-cover w-full h-full'
+      className='aspect-square object-cover w-full h-full rounded-t-lg'
       onError={() => setError(true)}
     />
   )
