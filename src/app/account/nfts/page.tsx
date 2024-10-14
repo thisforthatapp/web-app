@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
-import { Add, Checkmark } from '@/icons'
+import { Add, Checkmark, Wallet } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { UserNFT } from '@/types/supabase'
@@ -92,7 +92,7 @@ const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> =
         onClick={() => setModal('verify')}
         className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
       >
-        <Checkmark className='w-8 h-8 mr-1.5' />
+        <Wallet className='w-6 h-6 mr-2.5' />
         Verify NFTs
       </button>
     </div>

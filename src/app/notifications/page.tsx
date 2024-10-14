@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 const NotificationsPage: React.FC = () => {
   return (
@@ -6,7 +6,7 @@ const NotificationsPage: React.FC = () => {
       <h1>Notifications</h1>
       <p>No notifications available.</p>
     </div>
-  );
-};
+  )
+}
 
-export default NotificationsPage;
+export default NotificationsPage

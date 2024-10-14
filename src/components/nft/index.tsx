@@ -4,7 +4,7 @@ import React, { FC, useEffect, useState } from 'react'
 import Link from 'next/link'
 
 import { NftOptions, OfferFeedItem, VerifiedBadge } from '@/components/shared'
-import { Etherscan, Opensea } from '@/icons'
+import { Etherscan, Opensea, Tag } from '@/icons'
 import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -79,6 +79,7 @@ const NFTImage: FC<{ nft: any }> = ({ nft }) => (
           isVerified={true}
           className='absolute left-2 top-2 z-10 w-12 h-12'
         />
+        {/* use NFTImage */}
         <img
           src={nft?.image}
           alt='NFT'
@@ -89,7 +90,8 @@ const NFTImage: FC<{ nft: any }> = ({ nft }) => (
         </div>
       </div>
       <div className='py-4 flex items-center justify-center'>
-        <div className='flex items-center'>
+        {/* link to user page */}
+        <div className='flex items-center w-full px-4'>
           <img
             src={
               process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + nft.user_profile.profile_pic_url
@@ -98,6 +100,9 @@ const NFTImage: FC<{ nft: any }> = ({ nft }) => (
             className='w-8 h-8 rounded-full'
           />
           <div className='text-xl font-bold ml-2'>{nft.user_profile.username}</div>
+          <Tag
+            className={`mr-1 w-6 h-6 ml-auto ${nft.for_swap ? 'text-green-700' : 'text-gray-300'}`}
+          />
         </div>
       </div>
     </div>

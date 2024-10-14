@@ -6,7 +6,7 @@ import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { debounce } from 'lodash'
 
-import { AccountDropdown, NotificationDropdown } from '@/components'
+import { AccountDropdown, NotificationDropdown, TransactionsDropdown } from '@/components'
 import { Login as LoginModal, Onboard as OnboardModal } from '@/components/modals'
 import { useIsMobile } from '@/hooks'
 import { Close, Hamburger, Login, Search } from '@/icons'
@@ -107,6 +107,20 @@ const Navbar: FC = () => {
               </Link>
               <Link
                 className='flex items-center text-xl mb-4'
+                href='/transactions'
+                onClick={toggleMenu}
+              >
+                Transactions
+              </Link>
+              <Link
+                className='flex items-center text-xl mb-4'
+                href='/notifications'
+                onClick={toggleMenu}
+              >
+                Notifications
+              </Link>
+              <Link
+                className='flex items-center text-xl mb-4'
                 href='/account/profile'
                 onClick={toggleMenu}
               >
@@ -118,13 +132,6 @@ const Navbar: FC = () => {
                 onClick={toggleMenu}
               >
                 View Profile
-              </Link>
-              <Link
-                className='flex items-center text-xl mb-4'
-                href='/notifications'
-                onClick={toggleMenu}
-              >
-                Notifications
               </Link>
               <button
                 className='flex items-center text-xl mb-4'
@@ -138,6 +145,7 @@ const Navbar: FC = () => {
             </>
           ) : (
             <>
+              <TransactionsDropdown transactions={[]} />
               <NotificationDropdown notifications={notifications} />
               <AccountDropdown username={profile?.username || ''} />
             </>
