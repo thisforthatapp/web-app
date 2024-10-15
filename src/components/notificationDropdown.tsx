@@ -1,131 +1,44 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
-
 import { Notifications } from '@/icons'
 
 interface NotificationProps {
   notification: any
 }
 
-const FollowNotification: React.FC<NotificationProps> = ({ notification }) => (
-  <div className='flex items-center'>
-    <img
-      src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + notification.follower_profile_pic}
-      alt={notification.follower_username}
-      width={40}
-      height={40}
-      className='rounded-full mr-3'
-    />
-    <span>
-      <strong>{notification.follower_username}</strong> started following you
-    </span>
-  </div>
-)
+const SimpleNotification: React.FC<NotificationProps> = ({ notification }) => {
+  const getMessage = () => {
+    switch (notification.notification_type) {
+      case 'follow':
+        return `${notification.metadata.follower_username} started following you`
+      case 'new_offer':
+        return `${notification.metadata.offer.user[0].name} made you an offer`
+      case 'offer_update':
+        return `${notification.metadata.offer.user[0].name} sent an update`
+      case 'offer_accepted':
+        return `${notification.metadata.offer.user[0].name} accepted your offer`
+      default:
+        return 'Unknown notification'
+    }
+  }
 
-const NewOfferNotification: React.FC<NotificationProps> = ({ notification }) => (
-  <div>
-    <div className='font-semibold mb-2'>New offer received</div>
-    <div className='flex justify-between'>
-      <div className='flex items-center'>
-        <img
-          src={notification.offer.user[0].image}
-          alt={notification.offer.user[0].name}
-          width={30}
-          height={30}
-          className='rounded-md mr-2'
-        />
-        <span>{notification.offer.user[0].name}</span>
-      </div>
-      <span className='text-gray-500'>for</span>
-      <div className='flex items-center'>
-        <img
-          src={notification.offer.userCounter[0].image}
-          alt={notification.offer.userCounter[0].name}
-          width={30}
-          height={30}
-          className='rounded-md mr-2'
-        />
-        <span>{notification.offer.userCounter[0].name}</span>
-      </div>
+  return (
+    <div className='flex items-center'>
+      <img
+        src={
+          notification.metadata.follower_profile_pic ||
+          notification.metadata.offer.user[0].image
+        }
+        alt='User avatar'
+        width={40}
+        height={40}
+        className='rounded-full mr-3'
+      />
+      <span>{getMessage()}</span>
     </div>
-  </div>
-)
-
-const OfferUpdateNotification: React.FC<NotificationProps> = ({ notification }) => (
-  <div>
-    <div className='font-semibold mb-2'>Offer updated</div>
-    <div className='flex justify-between'>
-      <div className='flex flex-col items-center'>
-        {notification.offer.user.map((item: any) => (
-          <div key={item.id} className='flex items-center mb-1'>
-            <img
-              src={item.image}
-              alt={item.name}
-              width={30}
-              height={30}
-              className='rounded-md mr-2'
-            />
-            <span className='text-sm'>{item.name}</span>
-          </div>
-        ))}
-      </div>
-      <span className='text-gray-500 self-center'>for</span>
-      <div className='flex flex-col items-center'>
-        {notification.offer.userCounter.map((item: any) => (
-          <div key={item.id} className='flex items-center mb-1'>
-            <img
-              src={item.image}
-              alt={item.name}
-              width={30}
-              height={30}
-              className='rounded-md mr-2'
-            />
-            <span className='text-sm'>{item.name}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)
-
-const OfferAcceptedNotification: React.FC<NotificationProps> = ({ notification }) => (
-  <div>
-    <div className='font-semibold mb-2'>Offer accepted</div>
-    <div className='flex justify-between'>
-      <div className='flex flex-col items-center'>
-        {notification.offer.user.map((item: any) => (
-          <div key={item.id} className='flex items-center mb-1'>
-            <img
-              src={item.image}
-              alt={item.name}
-              width={30}
-              height={30}
-              className='rounded-md mr-2'
-            />
-            <span className='text-sm'>{item.name}</span>
-          </div>
-        ))}
-      </div>
-      <span className='text-gray-500 self-center'>for</span>
-      <div className='flex flex-col items-center'>
-        {notification.offer.userCounter.map((item: any) => (
-          <div key={item.id} className='flex items-center mb-1'>
-            <img
-              src={item.image}
-              alt={item.name}
-              width={30}
-              height={30}
-              className='rounded-md mr-2'
-            />
-            <span className='text-sm'>{item.name}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-)
+  )
+}
 
 const NotificationDropdown = ({ notifications }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -145,21 +58,6 @@ const NotificationDropdown = ({ notifications }) => {
   }, [])
 
   const toggleDropdown = () => setIsOpen(!isOpen)
-
-  const renderNotification = (notification: any) => {
-    switch (notification.notification_type) {
-      case 'follow':
-        return <FollowNotification notification={notification.metadata} />
-      case 'new_offer':
-        return <NewOfferNotification notification={notification.metadata} />
-      case 'offer_update':
-        return <OfferUpdateNotification notification={notification.metadata} />
-      case 'offer_accepted':
-        return <OfferAcceptedNotification notification={notification.metadata} />
-      default:
-        return <div>Unknown notification type</div>
-    }
-  }
 
   return (
     <div className='relative' ref={dropdownRef}>
@@ -184,7 +82,7 @@ const NotificationDropdown = ({ notifications }) => {
                   key={notification.id}
                   className='px-4 py-3 hover:bg-gray-50 border-b border-gray-200 w-full'
                 >
-                  {renderNotification(notification)}
+                  <SimpleNotification notification={notification} />
                 </div>
               ))
             ) : (

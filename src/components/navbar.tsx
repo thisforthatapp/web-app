@@ -19,6 +19,7 @@ const Navbar: FC = () => {
   const [modal, setModal] = useState<boolean | 'login' | 'onboard'>(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [notifications, setNotifications] = useState<any[]>([])
+  const [transactions, setTransactions] = useState<any[]>([])
 
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<{ nfts: any[]; users: any[] }>({
@@ -30,9 +31,9 @@ const Navbar: FC = () => {
   const searchRef = useRef<HTMLDivElement>(null)
 
   const performSearch = useCallback(async (term: string) => {
-    if (term.length < 3) {
+    if (term.length < 1) {
       setSearchResults({ nfts: [], users: [] })
-      setShowResults(false)
+      setIsSearching(false)
       return
     }
 
@@ -40,13 +41,13 @@ const Navbar: FC = () => {
 
     const nftResults = await supabase
       .from('nfts')
-      .select('id, name')
+      .select('id, name, image')
       .ilike('name', `%${term}%`)
       .limit(5)
 
     const userResults = await supabase
       .from('user_profile')
-      .select('id, username')
+      .select('id, username, profile_pic_url')
       .ilike('username', `%${term}%`)
       .limit(5)
 
@@ -69,6 +70,7 @@ const Navbar: FC = () => {
 
   const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value)
+    setShowResults(true)
   }
 
   useEffect(() => {
@@ -91,6 +93,8 @@ const Navbar: FC = () => {
   }, [user, loading, hasProfile])
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+
+  console.log('transactions', transactions)
 
   const renderButtons = (isMobileMenu = false) => (
     <>
@@ -145,7 +149,7 @@ const Navbar: FC = () => {
             </>
           ) : (
             <>
-              <TransactionsDropdown transactions={[]} />
+              <TransactionsDropdown transactions={transactions} />
               <NotificationDropdown notifications={notifications} />
               <AccountDropdown username={profile?.username || ''} />
             </>
@@ -187,9 +191,26 @@ const Navbar: FC = () => {
     setNotifications(data)
   }
 
+  const getLatestTransactions = async () => {
+    const { data, error } = await supabase
+      .from('user_offers')
+      .select('*')
+      .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
+      .neq('status', 'pending')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching transactions:', error)
+      return
+    }
+
+    setTransactions(data)
+  }
+
   useEffect(() => {
     if (user) {
       getLatestNotifications()
+      getLatestTransactions()
     }
   }, [user])
 
@@ -212,47 +233,70 @@ const Navbar: FC = () => {
             <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
               <Search />
             </div>
-            {showResults &&
-              (searchResults.nfts.length > 0 || searchResults.users.length > 0) && (
-                <div className='absolute mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10'>
-                  {searchResults.nfts.length > 0 && (
-                    <div className='p-2'>
-                      <h3 className='text-sm font-semibold mb-1'>NFTs</h3>
-                      {searchResults.nfts.map((nft) => (
-                        <Link
-                          key={nft.id}
-                          href={`/nft/${nft.id}`}
-                          className='block hover:bg-gray-100 p-2 rounded'
-                        >
-                          {nft.name}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                  {searchResults.users.length > 0 && (
-                    <div className='p-2'>
-                      <h3 className='text-sm font-semibold mb-1'>Users</h3>
-                      {searchResults.users.map((user) => (
-                        <Link
-                          key={user.id}
-                          href={`/${user.username}`}
-                          className='block hover:bg-gray-100 p-2 rounded'
-                        >
-                          {user.username}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                  <div className='p-2 text-center'>
-                    <Link
-                      href={`/search?q=${encodeURIComponent(searchTerm)}`}
-                      className='text-blue-500 hover:underline'
-                    >
-                      View all results
-                    </Link>
+            {showResults && (
+              <div className='absolute mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10'>
+                {isSearching ? (
+                  <div className='p-4 text-center'>
+                    <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto'></div>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <>
+                    {searchResults.nfts.length > 0 && (
+                      <div className='p-2'>
+                        <h3 className='text-sm font-semibold mb-1'>NFTs</h3>
+                        {searchResults.nfts.map((nft) => (
+                          <Link
+                            key={nft.id}
+                            href={`/nft/${nft.id}`}
+                            className='flex items-center hover:bg-gray-100 p-2 rounded'
+                          >
+                            <img src={nft.image} className='w-8 h-8 rounded-full' />
+                            <div className='ml-1'>{nft.name}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.users.length > 0 && (
+                      <div className='p-2'>
+                        <h3 className='text-sm font-semibold mb-1'>Users</h3>
+                        {searchResults.users.map((user) => (
+                          <Link
+                            key={user.id}
+                            href={`/${user.username}`}
+                            className='flex items-center hover:bg-gray-100 p-2 rounded'
+                          >
+                            <img
+                              src={
+                                process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+                                user.profile_pic_url
+                              }
+                              className='w-8 h-8 rounded-full'
+                            />
+                            <div className='ml-1'>{user.username}</div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {searchResults.nfts.length === 0 &&
+                      searchResults.users.length === 0 &&
+                      searchTerm.length > 0 && (
+                        <div className='p-4 text-center text-gray-500'>No results found</div>
+                      )}
+                    {/* TODO: implement search result page */}
+                    {/* {searchTerm.length > 0 && (
+                      <div className='p-2 text-center'>
+                        <Link
+                          href={`/search?q=${encodeURIComponent(searchTerm)}`}
+                          className='text-blue-500 hover:underline'
+                        >
+                          View all results
+                        </Link>
+                      </div>
+                    )} */}
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
         {isMobile ? (
