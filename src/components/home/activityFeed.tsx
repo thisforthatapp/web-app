@@ -188,7 +188,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
     if (!newMessage.trim()) return
 
     if (!user || !profile) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 

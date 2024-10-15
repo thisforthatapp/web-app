@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
-import { Add, Checkmark, Wallet } from '@/icons'
+import { Add, Checkmark } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { UserNFT } from '@/types/supabase'
@@ -18,10 +19,11 @@ const useNFTs = () => {
   const { showToast } = useToast()
 
   const fetchUserNfts = useCallback(
-    async (pageNum: number) => {
+    async (userId: string, pageNum: number) => {
       const { data, error } = await supabase
         .from('user_nfts')
         .select('*, nfts!user_nfts_nft_id_fkey(*)')
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .range((pageNum - 1) * GRID_ITEMS_PER_PAGE, pageNum * GRID_ITEMS_PER_PAGE - 1)
 
@@ -45,11 +47,14 @@ const useNFTs = () => {
     [showToast],
   )
 
-  const loadMore = useCallback(() => {
-    const nextPage = page + 1
-    setPage(nextPage)
-    fetchUserNfts(nextPage)
-  }, [page, fetchUserNfts])
+  const loadMore = useCallback(
+    (userId: string) => {
+      const nextPage = page + 1
+      setPage(nextPage)
+      fetchUserNfts(userId, nextPage)
+    },
+    [page, fetchUserNfts],
+  )
 
   const toggleForSwap = useCallback(
     async (item: UserNFT) => {
@@ -83,7 +88,7 @@ const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> =
     <div className='flex text-lg space-x-4'>
       <button
         onClick={() => setModal('add')}
-        className='px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+        className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
       >
         <Add className='w-8 h-8 mr-1.5' />
         Add NFTs
@@ -92,7 +97,7 @@ const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> =
         onClick={() => setModal('verify')}
         className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
       >
-        <Wallet className='w-6 h-6 mr-2.5' />
+        <Checkmark className='w-8 h-8 mr-1.5' />
         Verify NFTs
       </button>
     </div>
@@ -129,15 +134,20 @@ const NFTGrid: React.FC<{
 )
 
 const AccountNFTSPage: React.FC = () => {
-  const { user } = useAuth()
+  const router = useRouter()
+  const { user, loading } = useAuth()
   const [modal, setModal] = useState<'add' | 'verify' | null>(null)
   const { userNfts, hasMore, fetchUserNfts, loadMore, toggleForSwap } = useNFTs()
 
   useEffect(() => {
     if (user) {
-      fetchUserNfts(1)
+      fetchUserNfts(user?.id, 1)
     }
   }, [user, fetchUserNfts])
+
+  if (!loading && !user) {
+    router.push('/')
+  }
 
   return (
     <>
@@ -148,7 +158,7 @@ const AccountNFTSPage: React.FC = () => {
             userNfts={userNfts}
             toggleForSwap={toggleForSwap}
             hasMore={hasMore}
-            loadMore={loadMore}
+            loadMore={() => user?.id && loadMore(user.id)}
           />
         </div>
       </div>

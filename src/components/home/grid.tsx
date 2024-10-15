@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react'
 
 import { GridNavigation } from '@/components/home'
 import { Offer } from '@/components/modals'
-import { NFTFeedItem, OfferFeedItem } from '@/components/shared'
+import { NFTFeedItem, NFTOfferItem } from '@/components/shared'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { GridTabOption } from '@/types/main'
@@ -20,7 +20,7 @@ const OfferGrid: React.FC<{
 }> = ({ items, userId, viewOffer }) => (
   <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
     {items.map((item) => (
-      <OfferFeedItem key={item.id} item={item} viewOffer={viewOffer} currentUserId={userId} />
+      <NFTOfferItem key={item.id} item={item} viewOffer={viewOffer} currentUserId={userId} />
     ))}
   </div>
 )
@@ -141,7 +141,7 @@ const Grid: FC = () => {
 
   const makeOffer = async (nft: NFTFeedItemType) => {
     if (!user) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 
@@ -159,7 +159,7 @@ const Grid: FC = () => {
 
   const pinItem = async (nft: NFTFeedItemType) => {
     if (!user) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 
@@ -187,7 +187,7 @@ const Grid: FC = () => {
 
   const handleTabChange = (newTabOption: GridTabOption) => {
     if (newTabOption !== 'home' && !user) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 

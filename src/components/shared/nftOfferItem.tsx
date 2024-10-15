@@ -43,7 +43,7 @@ const UserInfo: FC<{ user: Profile }> = ({ user }) => (
   </div>
 )
 
-const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) => {
+const NFTOfferItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) => {
   const isMyTurn = item.offer_user_id !== currentUserId
   const waitingForUser = isMyTurn
     ? currentUserId === item.user_id
@@ -86,4 +86,4 @@ const OfferFeedItem: FC<OfferItemProps> = ({ item, viewOffer, currentUserId }) =
   )
 }
 
-export default OfferFeedItem
+export default NFTOfferItem

@@ -1,5 +1,6 @@
-import React, { FC, useEffect, useState, useCallback, useMemo } from 'react'
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
+
 import { NFTOfferMetadata, ProfileMinimal, UserNFT } from '@/types/supabase'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -95,10 +96,10 @@ const SelectNFT: FC<Props> = ({ user, selectedNFTs, onSelect, onClose }) => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className='w-full mt-auto pt-6 px-4 py-3 bg-yellow-400 text-gray-800 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-md flex justify-center items-center'
+          className='w-full mt-auto px-4 py-3 bg-yellow-400 text-gray-800 rounded-md hover:bg-yellow-500 transition-colors duration-200 shadow-md flex justify-center items-center'
           onClick={onClose}
         >
-          <span className='text-lg font-semibold'>Done</span>
+          <span className='text-xl font-semibold'>Done</span>
         </motion.button>
       </motion.div>
     </div>

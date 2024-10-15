@@ -243,7 +243,9 @@ const NftSelector: FC<{
         )}
       </div>
 
-      <div className='mt-4 flex flex-col sm:flex-row justify-between items-center gap-4'>
+      <div
+        className={`mt-4 flex flex-col sm:flex-row items-center gap-4 ${displaySkipOption ? 'justify-between' : 'justify-end'}`}
+      >
         {displaySkipOption && (
           <button
             className='w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-md hover:bg-gray-200 transition-colors'

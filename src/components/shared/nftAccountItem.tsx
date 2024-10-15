@@ -38,7 +38,7 @@ const SwapStatusButton: React.FC<{
 }> = ({ forSwap, onClick }) => (
   <div
     className={`${
-      forSwap ? 'bg-green-300 hover:bg-green-200' : 'bg-gray-100'
+      forSwap ? 'bg-green-300' : 'bg-gray-100'
     } mt-3 flex gap-x-2 gap-y-2 w-full flex justify-center items-center overflow-hidden px-1 py-2.5 rounded-md transition-colors duration-200 shadow-md`}
     onClick={onClick}
   >

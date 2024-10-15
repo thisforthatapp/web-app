@@ -14,8 +14,8 @@ interface UserNavigationProps {
 }
 
 const navItems: UserNavItem[] = [
-  { id: 'nfts', label: 'NFTS', emoji: '🖼️' },
-  { id: 'pinned', label: 'Pinned', emoji: '📌' },
+  { id: 'nfts', label: 'My NFTS', emoji: '🖼️' },
+  { id: 'pinned', label: 'My Pins', emoji: '📌' },
   { id: 'offers', label: 'Offers', emoji: '🤝' },
 ]
 

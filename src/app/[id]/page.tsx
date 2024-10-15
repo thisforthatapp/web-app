@@ -3,7 +3,7 @@
 import { FC, useEffect, useState } from 'react'
 
 import { Offer } from '@/components/modals'
-import { NFTFeedItem, OfferFeedItem } from '@/components/shared'
+import { NFTFeedItem, NFTOfferItem } from '@/components/shared'
 import { UserNavigation } from '@/components/user'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
@@ -66,7 +66,7 @@ const OfferGrid: React.FC<{
 }> = ({ items, expandOffer }) => (
   <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6'>
     {items.map((item) => (
-      <OfferFeedItem key={item.id} item={item} expandOffer={expandOffer} />
+      <NFTOfferItem key={item.id} item={item} expandOffer={expandOffer} />
     ))}
   </div>
 )
@@ -292,7 +292,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
 
   const makeOffer = async (nft: NFTFeedItemType) => {
     if (!user) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 
@@ -310,7 +310,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
 
   const pinItem = async (nft: NFTFeedItemType) => {
     if (!user) {
-      showToast(`⚠️ You have to login to use this`, 2500)
+      showToast(`⚠️ You have to login first`, 2500)
       return
     }
 

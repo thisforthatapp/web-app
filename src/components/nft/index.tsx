@@ -2,7 +2,7 @@
 
 import React, { FC, useEffect, useState } from 'react'
 
-import { NftOptions, OfferFeedItem, VerifiedBadge } from '@/components/shared'
+import { NFTOfferItem, NftOptions, VerifiedBadge } from '@/components/shared'
 import { Etherscan, Opensea, Tag } from '@/icons'
 import { NFT } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
@@ -156,7 +156,7 @@ const OffersGrid: FC<{ items: any[] }> = ({ items }) => (
   <div className='h-full overflow-y-auto pr-4 -mr-4'>
     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
       {items.map((item) => (
-        <OfferFeedItem
+        <NFTOfferItem
           key={item.id}
           item={item.user_offers}
           viewOffer={() => {}}
