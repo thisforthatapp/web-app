@@ -203,7 +203,7 @@ const Navbar: FC = () => {
           <div className='relative' ref={searchRef}>
             <input
               type='text'
-              placeholder='Search by NFT or User'
+              placeholder='Search NFT or User'
               className='w-full px-4 h-[44px] pl-10 pr-4 rounded-md bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
               value={searchTerm}
               onChange={handleSearchInputChange}

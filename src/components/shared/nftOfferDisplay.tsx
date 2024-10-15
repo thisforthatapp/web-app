@@ -56,7 +56,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   }
 
   return (
-    <div className={`w-full bg-gray-100 ${containerPadding[size]} rounded-xl shadow-lg`}>
+    <div className={`w-full bg-gray-100 ${containerPadding[size]} rounded-xl shadow-md`}>
       <div className='flex gap-x-3'>
         <OfferColumn name={userAName} offers={userAOffers} size={size} />
         <SwapDivider size={size} />
