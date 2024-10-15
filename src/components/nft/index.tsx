@@ -1,18 +1,19 @@
 'use client'
 
 import React, { FC, useEffect, useState } from 'react'
-import Link from 'next/link'
 
 import { NftOptions, OfferFeedItem, VerifiedBadge } from '@/components/shared'
 import { Etherscan, Opensea, Tag } from '@/icons'
+import { NFT } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
-interface NFTComponentProps {
-  nft: any
+interface NFTPageProps {
+  nft: NFT
+  isMobile: boolean
 }
 
-const NFTComponent: FC<NFTComponentProps> = ({ nft }) => {
+const NFTPage: FC<NFTPageProps> = ({ nft }) => {
   const [items, setItems] = useState<any[]>([])
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -53,12 +54,14 @@ const NFTComponent: FC<NFTComponentProps> = ({ nft }) => {
   }, [])
 
   return (
-    <div className='absolute top-[75px] bottom-0 w-full flex overflow-y-auto'>
+    <div className={`flex w-full h-full relative`}>
       <div className='mt-6 md:my-0 w-full bg-[#f9f9f9] flex flex-col md:flex-row justify-start md:justify-center md:gap-4 md:gap-8 p-0 md:p-8 pb-24 md:pb-8'>
         <NFTImage nft={nft} />
         <div className='flex flex-col flex-grow max-w-3xl px-4 md:px-0'>
           <NFTTitle nft={nft} />
-          <OffersGrid items={items} />
+          <div className='flex-grow overflow-hidden'>
+            <OffersGrid items={items} />
+          </div>
           <div className='h-[100px] md:hidden' />
         </div>
       </div>
@@ -150,15 +153,17 @@ const NFTTitle: FC<NFTTitleProps> = ({ nft }) => (
 )
 
 const OffersGrid: FC<{ items: any[] }> = ({ items }) => (
-  <div className='md:overflow-y-auto hide-scrollbar grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0 md:pb-4'>
-    {items.map((item) => (
-      <OfferFeedItem
-        key={item.id}
-        item={item.user_offers}
-        viewOffer={() => {}}
-        currentUserId={''}
-      />
-    ))}
+  <div className='h-full overflow-y-auto pr-4 -mr-4'>
+    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      {items.map((item) => (
+        <OfferFeedItem
+          key={item.id}
+          item={item.user_offers}
+          viewOffer={() => {}}
+          currentUserId={''}
+        />
+      ))}
+    </div>
   </div>
 )
 
@@ -200,4 +205,4 @@ const ActionButton: FC<{
   </button>
 )
 
-export default NFTComponent
+export default NFTPage

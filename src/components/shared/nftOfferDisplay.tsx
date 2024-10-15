@@ -17,9 +17,9 @@ const NFTItem: React.FC<{ nft: NFT }> = ({ nft }) => (
       <img
         src={nft.image}
         alt={nft.name}
-        layout='fill'
-        objectFit='cover'
-        className='rounded-md'
+        // layout='fill'
+        // objectFit='cover'
+        // className='rounded-md'
       />
     </div>
     <span className='text-sm font-semibold'>{nft.name}</span>

@@ -2,7 +2,11 @@
 
 import { FC, useEffect, useState } from 'react'
 
-import NFTComponent from '@/components/nft'
+import { Footer } from '@/components'
+import NFTPage from '@/components/nft'
+import { useIsMobile } from '@/hooks'
+import { useToast } from '@/providers/toastProvider'
+import { NFT as NFTType } from '@/types/supabase'
 import { supabase } from '@/utils/supabaseClient'
 
 interface NFTPageProps {
@@ -11,8 +15,10 @@ interface NFTPageProps {
   }
 }
 
-const NFTPage: FC<NFTPageProps> = ({ params }) => {
-  const [nftInfo, setNftInfo] = useState<any | null>(null)
+const NFT: FC<NFTPageProps> = ({ params }) => {
+  const isMobile = useIsMobile()
+  const { showToast } = useToast()
+  const [nftInfo, setNftInfo] = useState<NFTType | null>(null)
 
   const fetchNftInfo = async () => {
     try {
@@ -23,6 +29,7 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
         .single()
 
       if (error) {
+        showToast('⚠️ Failed to fetch NFT', 2500)
         throw error
       }
 
@@ -30,7 +37,8 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
         setNftInfo(data)
       }
     } catch (error) {
-      console.error('Failed to fetch offer info', error)
+      showToast('⚠️ Failed to fetch NFT', 2500)
+      console.error('Failed to fetch NFT', error)
     }
   }
 
@@ -40,13 +48,14 @@ const NFTPage: FC<NFTPageProps> = ({ params }) => {
     }
   }, [params.id])
 
-  console.log('nftInfo', nftInfo)
-
-  if (!nftInfo) {
-    return <div>Loading...</div>
-  }
-
-  return <NFTComponent nft={nftInfo} />
+  return (
+    <div
+      className={`absolute top-[75px] bottom-0 w-full ${isMobile ? 'overflow-y-auto hide-scrollbar' : ''}`}
+    >
+      {nftInfo && <NFTPage nft={nftInfo} isMobile={isMobile} />}
+      {!isMobile && <Footer />}
+    </div>
+  )
 }
 
-export default NFTPage
+export default NFT

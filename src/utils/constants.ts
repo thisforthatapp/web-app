@@ -19,7 +19,7 @@ export const SUPPORTED_CHAINS = [
 
 export const CHAIN_LABELS = {
   ethereum: 'Ethereum',
-  base: 'Ethereum',
+  base: 'Base',
   arbitrum: 'Arbitrum',
   optimism: 'Optimism',
   polygon: 'Polygon',
