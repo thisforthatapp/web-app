@@ -197,24 +197,31 @@ const Main: FC<{
             </p>
           </div>
         ) : (
-          <>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className='bg-yellow-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-              onClick={counterOffer}
-            >
-              🤝 Counter
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className='bg-green-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-              onClick={acceptOffer}
-            >
-              ✅ Accept
-            </motion.button>
-          </>
+          <div className='flex flex-col w-full'>
+            <div className='flex w-full gap-x-4'>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className='w-full bg-yellow-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                onClick={counterOffer}
+              >
+                🤝 Counter
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className='w-full bg-green-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                onClick={acceptOffer}
+              >
+                ✅ Accept
+              </motion.button>
+            </div>
+            <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
+              Accepting the offer will start the trade process on-chain.
+              <br />
+              Learn more about the process here.
+            </div>
+          </div>
         )}
       </div>
     </div>

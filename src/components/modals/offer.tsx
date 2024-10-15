@@ -1,13 +1,25 @@
 'use client'
 
-import { FC, useEffect, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import Modal from 'react-modal'
+import { useModal } from 'connectkit'
+import { Address, ContractFunctionExecutionError, decodeEventLog } from 'viem'
+import {
+  useAccount,
+  usePublicClient,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from 'wagmi'
 
-import { Main, Select, Transaction } from '@/components/offer'
+import { Main, Select, Transaction, TransactionFeedback } from '@/components/offer'
+import ABI from '@/contracts/abi.json'
 import { useIsMobile } from '@/hooks'
 import { useAuth } from '@/providers/authProvider'
+import { useToast } from '@/providers/toastProvider'
 import { getModalStyles } from '@/styles'
 import { NFTFeedItem } from '@/types/supabase'
+import { CONTRACT_ADDRESSES } from '@/utils/contracts'
+import { prepareAllAssets } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
 interface BaseProps {
@@ -38,8 +50,72 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
   const { user, profile } = useAuth()
   const isMobile = useIsMobile()
   const customStyles = getModalStyles(isMobile)
+  const { showToast } = useToast()
 
-  const [view, setView] = useState<'main' | 'select' | 'transaction' | null>(
+  const { setOpen } = useModal()
+  const { address, isConnected } = useAccount()
+  const publicClient = usePublicClient()
+
+  const {
+    writeContract,
+    data: hash,
+    status: transactionStatus,
+    error: writeError,
+  } = useWriteContract()
+
+  const {
+    data: txReceipt,
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: confirmError,
+  } = useWaitForTransactionReceipt({ hash })
+
+  // Effect to handle successful transaction confirmation
+  useEffect(() => {
+    const updateOffer = async (hash: string, tradeId: bigint) => {
+      try {
+        const { data, error } = await supabase.rpc('accept_offer', {
+          p_offer_id: offerId,
+          p_user_id: user?.id,
+          p_trade_id: Number(tradeId),
+          p_tx_id: hash,
+        })
+        console.log('accept_offer', data, error)
+      } catch (error) {
+        console.error('Error updating Supabase:', error)
+      }
+    }
+
+    if (isConfirmed && txReceipt) {
+      const decodedLog = decodeEventLog({
+        abi: [
+          {
+            type: 'event',
+            name: 'TradeCreated',
+            inputs: [
+              { name: 'tradeId', type: 'uint256', indexed: true, internalType: 'uint256' },
+              {
+                name: 'participants',
+                type: 'address[]',
+                indexed: false,
+                internalType: 'address[]',
+              },
+            ],
+            anonymous: false,
+          },
+        ],
+        data: txReceipt.logs[0].data,
+        topics: txReceipt.logs[0].topics,
+      })
+
+      const tradeId = decodedLog.args.tradeId
+      console.log('trade id:', tradeId)
+      // Update Supabase
+      updateOffer(hash!, tradeId)
+    }
+  }, [hash, isConfirmed, txReceipt])
+
+  const [view, setView] = useState<'main' | 'select' | 'create_trade' | null>(
     type === 'make_offer' ? 'select' : type === 'view_offer' ? 'main' : 'transaction',
   )
   const [offerInfo, setOfferInfo] = useState<any | null>(null)
@@ -72,21 +148,43 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
     }
   }, [offerId])
 
+  const createTradeOnChain = useCallback(async () => {
+    if (!address || !publicClient) return
+
+    try {
+      const { request } = await publicClient.simulateContract({
+        address: CONTRACT_ADDRESSES[31337],
+        abi: ABI,
+        functionName: 'createTrade',
+        args: [
+          [offerInfo.user.wallet as Address, offerInfo.counter_user.wallet as Address],
+          prepareAllAssets(offerInfo),
+        ],
+        account: address,
+      })
+      writeContract(request)
+    } catch (err) {
+      console.log('err', err)
+      if (err instanceof ContractFunctionExecutionError) {
+        const errorMessage = err.message.toLowerCase()
+        showToast('⚠️ ' + errorMessage, 2500)
+      } else {
+        showToast('⚠️ Transaction failed. Please try again', 2500)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, offerInfo, publicClient])
+
   const acceptOffer = async () => {
-    console.log('Accepting offer...')
-    if (!user) return
-
-    const { data, error } = await supabase.rpc('accept_offer', {
-      p_offer_id: offerId,
-      p_user_id: user.id,
-    })
-
-    console.log('Accepted!')
+    if (!isConnected) {
+      setOpen(true)
+    } else {
+      // setView('create_trade')
+      createTradeOnChain()
+    }
   }
 
   const counterOffer = async () => {
-    console.log('Counter offering...')
-    // present choice screen
     setView('select')
   }
 
@@ -110,6 +208,7 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             closeModal={closeModal}
           />
         )}
+        {/* {view === 'create_trade' && <TransactionFeedback status={transactionStatus} />} */}
         {view === 'select' && (
           <Select
             type={type === 'make_offer' ? 'initial_offer' : 'counter_offer'}
@@ -158,7 +257,8 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             }
           />
         )}
-        {view === 'transaction' && <Transaction info={offerInfo} closeModal={closeModal} />}
+        {/* {view === 'transaction' && <Transaction info={offerInfo} closeModal={closeModal} />} */}
+        <TransactionFeedback status={transactionStatus} />
       </Modal>
     </div>
   )

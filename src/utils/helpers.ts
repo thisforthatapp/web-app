@@ -1,3 +1,5 @@
+import { Asset, assetTypeMap, OfferInfo, PreparedAsset } from '@/types/main'
+
 interface ChainInfo {
   id: string
   name: string
@@ -203,4 +205,23 @@ export const getBlockExplorerUrl = (
 ): string => {
   const chain = getChainInfo(chainId)
   return `${chain.blockExplorerUrl}/nft/${collectionContract}/${tokenId}`
+}
+
+const prepareAssetData = (asset: Asset, recipient: string): PreparedAsset => ({
+  token: asset.collection_contract as `0x${string}`,
+  tokenId: BigInt(asset.token_id),
+  amount: 1n,
+  assetType: assetTypeMap[asset.token_type] ?? 0n,
+  recipient: recipient as `0x${string}`,
+  isDeposited: false,
+})
+
+export const prepareAllAssets = (offerInfo: OfferInfo): PreparedAsset[][] => {
+  const userWallet = offerInfo.user.wallet as `0x${string}`
+  const counterUserWallet = offerInfo.counter_user.wallet as `0x${string}`
+
+  return [
+    offerInfo.offer.user.map((asset) => prepareAssetData(asset, counterUserWallet)),
+    offerInfo.offer.userCounter.map((asset) => prepareAssetData(asset, userWallet)),
+  ]
 }

@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useState } from 'react'
 
-import Toast from '@/components/toast'
+import { Toast } from '@/components'
 
 interface ToastProps {
   message: string

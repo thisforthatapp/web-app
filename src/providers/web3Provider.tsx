@@ -4,14 +4,24 @@ import React, { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ConnectKitProvider, getDefaultConfig } from 'connectkit'
 import { createConfig, http, WagmiProvider } from 'wagmi'
-import { arbitrum, base, mainnet, optimism, polygon, zkSync } from 'wagmi/chains'
+import {
+  anvil,
+  arbitrum,
+  base,
+  foundry,
+  mainnet,
+  optimism,
+  polygon,
+  zkSync,
+} from 'wagmi/chains'
 
 interface Web3ProviderProps {
   children: ReactNode
 }
 
 // Define the supported chains
-const supportedChains = [mainnet, base, arbitrum, optimism, polygon, zkSync]
+// const supportedChains = [mainnet, base, arbitrum, optimism, polygon, zkSync, foundry]
+const supportedChains = [anvil]
 
 // Function to get RPC URL for a chain
 const getRpcUrl = (chainId: number) => {
