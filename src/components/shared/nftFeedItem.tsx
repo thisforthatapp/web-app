@@ -23,7 +23,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
 
   return (
     <Link href={`/nft/${item.nft_id}`}>
-      <div className='bg-white rounded-lg shadow-md relative'>
+      <div className='bg-white rounded-lg shadow-md relative hover:shadow-lg'>
         <div className='absolute top-1 right-1 z-10'>
           <NftOptions
             chainId={item.nft_chain_id.toString()}

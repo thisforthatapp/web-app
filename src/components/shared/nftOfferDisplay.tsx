@@ -2,15 +2,12 @@ import React from 'react'
 
 interface NFT {
   id: string
-  name: string
   image: string
 }
 
 interface NFTOfferDisplayProps {
   userAOffers: NFT[]
   userBOffers: NFT[]
-  userAName: string
-  userBName: string
   size?: 'small' | 'medium' | 'large'
 }
 
@@ -45,8 +42,6 @@ const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large' }> = ({ n
 const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   userAOffers,
   userBOffers,
-  userAName,
-  userBName,
   size = 'small',
 }) => {
   const containerPadding = {
@@ -58,28 +53,20 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   return (
     <div className={`w-full bg-gray-100 ${containerPadding[size]} rounded-xl shadow-md`}>
       <div className='flex gap-x-3'>
-        <OfferColumn name={userAName} offers={userAOffers} size={size} />
+        <OfferColumn offers={userAOffers} size={size} />
         <SwapDivider size={size} />
-        <OfferColumn name={userBName} offers={userBOffers} size={size} />
+        <OfferColumn offers={userBOffers} size={size} />
       </div>
     </div>
   )
 }
 
 const OfferColumn: React.FC<{
-  name: string
   offers: NFT[]
   size: 'small' | 'medium' | 'large'
-}> = ({ name, offers, size }) => {
-  const headerSizeClasses = {
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base',
-  }
-
+}> = ({ offers, size }) => {
   return (
     <div className='w-full'>
-      <h2 className={`${headerSizeClasses[size]} font-bold mb-2 text-gray-800`}>{name}</h2>
       <div className='space-y-2'>
         {offers.map((nft) => (
           <NFTItem key={nft.id} nft={nft} size={size} />
@@ -99,7 +86,7 @@ const SwapDivider: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size })
   return (
     <div className='flex items-center justify-center py-1'>
       <div
-        className={`${sizeClasses[size]} rounded-full bg-blue-500 flex items-center justify-center shadow-md`}
+        className={`${sizeClasses[size]} rounded-full bg-gray-800 flex items-center justify-center shadow-md`}
       >
         <svg
           className={`w-${size === 'small' ? '4' : '5'} h-${size === 'small' ? '4' : '5'} text-white`}

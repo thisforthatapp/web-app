@@ -25,12 +25,19 @@ const NFTImage: FC<NFTImageProps> = ({
       <span className='text-gray-600 font-semibold break-words'>{fallback}</span>
     </div>
   ) : (
-    <img
-      src={src}
-      alt={alt}
-      className='aspect-square object-cover w-full h-full rounded-t-lg'
-      onError={() => setError(true)}
-    />
+    <div className='w-full aspect-square rounded-md overflow-hidden shadow-sm relative group'>
+      <img
+        src={src}
+        alt={alt}
+        className='w-full h-full object-cover transition-transform duration-200 group-hover:scale-110'
+        onError={() => setError(true)}
+      />
+      <div className='absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center p-2'>
+        <span className='text-white text-sm font-semibold break-words text-center'>
+          {fallback}
+        </span>
+      </div>
+    </div>
   )
 
   if (showTooltip) {

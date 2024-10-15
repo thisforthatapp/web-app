@@ -76,12 +76,19 @@ const FeedItem = ({ activity }: { activity: Activity }) => {
           <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
         )}
         {(activity.activity_type === 'offer_start' ||
+          activity.activity_type === 'offer_accepted' ||
           activity.activity_type === 'offer_counter') && (
           <div className='mt-1'>
-            <div className='text-sm'>made an offer</div>
+            <div className='text-sm mb-1'>
+              {activity.activity_type === 'offer_start'
+                ? '🤝 made an offer'
+                : activity.activity_type === 'offer_counter'
+                  ? '🤝 made a counter offer'
+                  : '✅ accepted an offer'}
+            </div>
             <NFTOfferDisplay
-              userAOffers={activity.metadata.offer.user}
-              userBOffers={activity.metadata.offer.userCounter}
+              userAOffers={(activity.metadata as any).offer.user}
+              userBOffers={(activity.metadata as any).offer.userCounter}
             />
           </div>
         )}
@@ -90,7 +97,7 @@ const FeedItem = ({ activity }: { activity: Activity }) => {
   )
 }
 
-type FilterType = 'all' | 'messages' | 'offers'
+type FilterType = 'all' | 'messages' | 'swaps'
 
 const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab = true }) => {
   const { user, profile } = useAuth()
@@ -125,7 +132,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
 
           const shouldScroll = isNearBottom()
           if (filter === 'messages' && payload.new.activity_type !== 'message') return
-          if (filter === 'offers' && payload.new.activity_type === 'message') return
+          if (filter === 'swaps' && payload.new.activity_type === 'message') return
           setActivities((prevActivities) => [...prevActivities, payload.new as Activity])
           if (shouldScroll) {
             scrollToBottom()
@@ -155,8 +162,8 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
 
       if (currentFilter === 'messages') {
         query = query.eq('activity_type', 'message')
-      } else if (currentFilter === 'offers') {
-        query = query.or('activity_type.eq.offer_start,activity_type.eq.offer_counter')
+      } else if (currentFilter === 'swaps') {
+        query = query.neq('activity_type', 'message')
       }
 
       const { data, error } = await query.range(
@@ -245,10 +252,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
   const filteredActivities = activities.filter((activity) => {
     if (filter === 'all') return true
     if (filter === 'messages') return activity.activity_type === 'message'
-    if (filter === 'offers')
-      return (
-        activity.activity_type === 'offer_start' || activity.activity_type === 'offer_counter'
-      )
+    if (filter === 'swaps') return activity.activity_type !== 'message'
     return true
   })
 
@@ -280,7 +284,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
                 <span className='ml-2 font-semibold'>Latest Activity</span>
               </div>
               <div className='flex space-x-1 ml-auto mr-4'>
-                {(['all', 'messages', 'offers'] as FilterType[]).map((filterType) => (
+                {(['all', 'messages', 'swaps'] as FilterType[]).map((filterType) => (
                   <button
                     key={filterType}
                     onClick={(e) => {
@@ -322,27 +326,6 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
             {filteredActivities.map((activity: Activity) => (
               <FeedItem key={activity.id} activity={activity} />
             ))}
-            {filteredActivities.length === 0 && (
-              <div className='text-center text-gray-500 py-12 px-4'>
-                <svg
-                  className='mx-auto h-12 w-12 text-gray-400'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'
-                  aria-hidden='true'
-                >
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4'
-                  />
-                </svg>
-                <h3 className='mt-2 text-sm font-medium text-gray-900'>
-                  No {filter === 'all' ? 'activities' : filter}
-                </h3>
-              </div>
-            )}
           </div>
           <div className='p-4 bg-gray-50 border-t border-gray-100'>
             <form onSubmit={submitMessage} className='flex items-center gap-x-2'>

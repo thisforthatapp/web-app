@@ -8,14 +8,18 @@ import { useAuth } from '@/providers/authProvider'
 import { formatDate, timeAgo } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
-const ActivityItem = ({ item, user }: { item: any; user: any }) => {
-  const MessageDisplay = ({ item }) => (
+const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
+  item,
+  user,
+  isLastItem,
+}) => {
+  const MessageDisplay: FC<{ item: any }> = ({ item }) => (
     <div className='text-gray-700 text-sm'>{item.content}</div>
   )
 
   return (
-    <div className='w-full'>
-      <div className='flex p-4 border-b border-gray-200 w-full hover:bg-gray-50 transition-colors duration-200'>
+    <div className={`w-full ${!isLastItem ? 'border-b border-gray-100' : ''}`}>
+      <div className='flex p-4 w-full'>
         <div className='relative w-10 h-10 mr-4 shrink-0'>
           <img
             src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
@@ -30,10 +34,15 @@ const ActivityItem = ({ item, user }: { item: any; user: any }) => {
           </div>
           {item.item_type === 'message' && <MessageDisplay item={item} />}
           {(item.item_type === 'offer' || item.item_type === 'counter_offer') && (
-            <NFTOfferDisplay
-              userAOffers={item.offer.user}
-              userBOffers={item.offer.userCounter}
-            />
+            <>
+              <div className='text-sm font-medium text-gray-600 mb-2'>
+                {item.item_type === 'offer' ? 'Made an offer' : 'Countered the offer'}
+              </div>
+              <NFTOfferDisplay
+                userAOffers={item.offer.user}
+                userBOffers={item.offer.userCounter}
+              />
+            </>
           )}
         </div>
       </div>
@@ -44,9 +53,9 @@ const ActivityItem = ({ item, user }: { item: any; user: any }) => {
 const Main: FC<{
   offerId: string
   info: any
-  acceptOffer: any
-  counterOffer: any
-  closeModal: any
+  acceptOffer: () => void
+  counterOffer: () => void
+  closeModal: () => void
 }> = ({ offerId, info, acceptOffer, counterOffer, closeModal }) => {
   const { user, profile, hasProfile } = useAuth()
   const [newMessage, setNewMessage] = useState<string>('')
@@ -121,7 +130,7 @@ const Main: FC<{
 
   if (!isLoggedIn || !isParticipant) {
     return (
-      <div className='flex flex-col items-center justify-center h-full bg-gray-100 p-4'>
+      <div className='flex flex-col items-center justify-center h-full bg-gray-50 p-4'>
         <p className='text-lg text-gray-700'>
           Waiting for{' '}
           {info?.offer_user_id === info?.user_id ? info?.user?.username : 'counter user'} to
@@ -133,20 +142,8 @@ const Main: FC<{
 
   return (
     <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
-      <div className='flex items-center justify-between py-4 px-6 bg-gray-50 border-b border-gray-200'>
-        <div className='flex items-center'>
-          <img
-            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + info?.user?.profile_pic_url}
-            alt={info?.user?.username}
-            className='w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm'
-          />
-          <div className='ml-3'>
-            <div className='font-semibold text-gray-800'>{info?.user?.username}</div>
-            <div className='text-sm text-gray-500'>
-              made an offer {timeAgo(new Date(info?.created_at))}
-            </div>
-          </div>
-        </div>
+      <div className='flex items-center justify-between py-4 px-6 bg-white border-b border-gray-100'>
+        <div className='text-xl font-bold text-gray-800'>🤝 Swap Offer</div>
         <motion.div
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -157,31 +154,32 @@ const Main: FC<{
         </motion.div>
       </div>
 
-      <div className='flex-grow overflow-y-auto bg-white'>
+      <div className='flex-grow overflow-y-auto bg-gray-50'>
         {info &&
-          offerActivityItems.map((item: any) => (
+          offerActivityItems.map((item: any, index: number) => (
             <ActivityItem
               key={item.id}
               item={item}
               user={item.user_id === info?.user_id ? info.user : info.counter_user}
+              isLastItem={index === offerActivityItems.length - 1}
             />
           ))}
       </div>
 
-      <div className='p-4 bg-gray-50 border-t border-gray-200'>
+      <div className='p-4 border-t border-gray-100'>
         <form onSubmit={submitMessage} className='flex gap-x-2'>
           <input
             type='text'
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder='Send a message...'
-            className='flex-grow px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
+            className='flex-grow px-4 py-2 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
           />
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             type='submit'
-            className='bg-blue-500 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
+            className='bg-gray-800 text-white px-6 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200'
             disabled={!newMessage.trim() || !hasProfile}
           >
             Send
@@ -189,7 +187,7 @@ const Main: FC<{
         </form>
       </div>
 
-      <div className='flex items-center justify-between p-4 bg-gray-100 border-t border-gray-200'>
+      <div className='flex items-center justify-between p-4'>
         {isLatestOfferUser ? (
           <div className='text-center w-full'>
             <p className='text-gray-700 font-semibold'>
@@ -202,7 +200,7 @@ const Main: FC<{
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className='w-full bg-yellow-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                className='w-full bg-yellow-400 text-gray-800 py-2 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={counterOffer}
               >
                 🤝 Counter
@@ -210,7 +208,7 @@ const Main: FC<{
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className='w-full bg-green-400 text-gray-800 py-2 px-6 rounded-md shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                className='w-full bg-green-400 text-gray-800 py-2 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={acceptOffer}
               >
                 ✅ Accept
@@ -219,7 +217,9 @@ const Main: FC<{
             <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
               Accepting the offer will start the trade process on-chain.
               <br />
-              Learn more about the process here.
+              <a href='#' className='text-blue-500 hover:underline'>
+                Learn more about the process here.
+              </a>
             </div>
           </div>
         )}
