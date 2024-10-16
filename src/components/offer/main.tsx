@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
-import { NFTImage } from '@/components/shared'
 import { NFTOfferDisplay } from '@/components/shared'
 import { Close } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
@@ -135,18 +134,6 @@ const Main: FC<{
   const isLoggedIn = !!user
   const isParticipant = isInitialOfferUser || isCounterUser
 
-  if (!isLoggedIn || !isParticipant) {
-    return (
-      <div className='flex flex-col items-center justify-center h-full bg-gray-50 p-4'>
-        <p className='text-lg text-gray-700'>
-          Waiting for{' '}
-          {info?.offer_user_id === info?.user_id ? info?.user?.username : 'counter user'} to
-          respond...
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
       <div className='flex items-center justify-between py-4 px-6 bg-white border-b border-gray-100'>
@@ -195,7 +182,15 @@ const Main: FC<{
       </div>
 
       <div className='flex items-center justify-between p-4 pt-0'>
-        {isLatestOfferUser ? (
+        {!isLoggedIn || !isParticipant ? (
+          <div className='flex flex-col items-center justify-center h-full bg-gray-50 p-4'>
+            <p className='text-lg text-gray-700'>
+              Waiting for{' '}
+              {info?.offer_user_id === info?.user_id ? info?.user?.username : 'counter user'} to
+              respond...
+            </p>
+          </div>
+        ) : isLatestOfferUser ? (
           <div className='text-center w-full'>
             <p className='text-gray-700 font-semibold'>
               Waiting for a response from the other user...
@@ -210,7 +205,7 @@ const Main: FC<{
                 className='w-full bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={counterOffer}
               >
-                🤝 Counter
+                Counter
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -218,7 +213,7 @@ const Main: FC<{
                 className='w-full bg-green-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={acceptOffer}
               >
-                ✅ Accept
+                Accept
               </motion.button>
             </div>
             <div className='mt-4 text-gray-500 text-sm text-center mx-8'>

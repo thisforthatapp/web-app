@@ -24,20 +24,15 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
   return (
     <Link href={`/nft/${item.nft_id}`}>
       <div className='bg-white rounded-lg shadow-md relative hover:shadow-lg'>
-        <div className='absolute top-1 right-1 z-10'>
-          <NftOptions
-            chainId={item.nft_chain_id.toString()}
-            collectionContract={item.nft_collection_contract}
-            tokenId={item.nft_token_id}
-          />
-        </div>
         <VerifiedBadge
           id={item.nft_id}
           chainName={CHAIN_IDS_TO_CHAINS[item.nft_chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
           collectionName={item.nft_collection_name}
           tokenId={item.nft_token_id}
           isVerified={item.nft_is_verified}
-          className='absolute left-1 top-1 z-10 w-10 h-10'
+          className='inline-block absolute right-0 top-2 z-10 w-12 h-12'
+          chainId={item.nft_chain_id.toString()}
+          collectionContract={item.nft_collection_contract}
         />
         <NFTImage
           src={item.nft_image}
@@ -56,7 +51,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
               {item?.nft_user_id_username}
             </span>
             <Tag
-              className={`mr-1 w-5 h-5 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
+              className={`mr-1.5 w-5 h-5 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
             />
           </div>
         </div>

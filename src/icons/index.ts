@@ -1,6 +1,5 @@
 export { default as Verified } from './verified'
 export { default as Activity } from './activity'
-export { default as Options } from './options'
 export { default as Close } from './close'
 export { default as Google } from './google'
 export { default as User } from './user'

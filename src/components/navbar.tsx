@@ -102,8 +102,6 @@ const Navbar: FC = () => {
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
-  console.log('transactions', transactions)
-
   const renderButtons = (isMobileMenu = false) => (
     <>
       {(user || loading) && (

@@ -1,4 +1,6 @@
 import React from 'react'
+import { NFTImage } from '@/components/shared'
+import Link from 'next/link'
 
 interface NFT {
   id: string
@@ -24,18 +26,29 @@ const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large' }> = ({ n
   }
 
   return (
-    <div className='flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'>
+    <Link
+      href={`/nft/${nft.id}`}
+      target='_blank'
+      className='flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200'
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         className={`${imageSizeClasses[size]} relative rounded-md overflow-hidden flex-shrink-0`}
       >
-        <img src={nft.image} alt={nft.name} className='w-full h-full object-cover' />
+        <NFTImage
+          src={nft.image}
+          alt={nft.name}
+          rounded='all'
+          hoverOn={false}
+          fallback={nft.name}
+        />
       </div>
       <span
         className={`${textSizeClasses[size]} font-medium text-gray-800 break-words flex-grow`}
       >
         {nft.name}
       </span>
-    </div>
+    </Link>
   )
 }
 
@@ -51,7 +64,9 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   }
 
   return (
-    <div className={`w-full bg-[#fbc01b] ${containerPadding[size]} rounded-xl shadow-md`}>
+    <div
+      className={`w-full bg-[#05a3ff] ${containerPadding[size]} rounded-xl shadow-md overflow-x-auto hide-scrollbar overflow-y-hidden`}
+    >
       <div className='flex gap-x-3'>
         <OfferColumn offers={userAOffers} size={size} />
         <SwapDivider size={size} />

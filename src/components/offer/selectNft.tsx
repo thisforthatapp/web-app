@@ -22,7 +22,7 @@ const SelectNFT: FC<Props> = ({ chainId, user, selectedNFTs, onSelect, onClose }
   const [availableNFTs, setAvailableNFTs] = useState<UserNFT[]>([])
   const [selectedItems, setSelectedItems] = useState(selectedNFTs)
   const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
   const [hasOtherChainNFTs, setHasOtherChainNFTs] = useState(false)
 
   useEffect(() => {

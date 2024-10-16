@@ -1,7 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 
-import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
+import { NFTImage, VerifiedBadge } from '@/components/shared'
 import { Tag } from '@/icons'
 import { UserNFT } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
@@ -13,20 +13,15 @@ interface NFTItemProps {
 
 const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
   <div className='flex flex-col bg-white rounded-lg shadow-md overflow-hidden relative'>
-    <div className='absolute top-1 right-1 z-10'>
-      <NftOptions
-        chainId={item.nfts.chain_id.toString()}
-        collectionContract={item.nfts.collection_contract}
-        tokenId={item.nfts.token_id}
-      />
-    </div>
     <VerifiedBadge
       id={item.nft_id}
       chainName={CHAIN_IDS_TO_CHAINS[item.nfts.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
       collectionName={item.nfts.collection_name}
       tokenId={item.nfts.token_id}
       isVerified={item.nfts.is_verified && item.nfts.user_id === item.user_id}
-      className='absolute left-1 top-1 z-10 w-10 h-10'
+      className='inline-block absolute right-0 top-2 z-10 w-12 h-12'
+      chainId={item.nfts.chain_id.toString()}
+      collectionContract={item.nfts.collection_contract}
     />
     <NFTImage src={item.nfts.image} alt={item.nfts.name} fallback={item.nfts.name} />
   </div>

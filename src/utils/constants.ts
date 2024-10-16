@@ -5,6 +5,7 @@ export const BLOCKED_USERNAMES = [
   'contact',
   'legal',
   'nft',
+  'offer',
   'notifications',
 ]
 

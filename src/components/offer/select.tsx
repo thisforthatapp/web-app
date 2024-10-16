@@ -102,7 +102,10 @@ const Select: FC<Props> = ({
 
         if (error) throw error
 
-        showToast(`🎉 Counter offer sent to ${userB.username}`, 2500)
+        showToast(
+          `🎉 Counter offer sent to ${user.id === userA.id ? userB.username : userA.username}`,
+          2500,
+        )
       }
 
       onClose()
@@ -258,7 +261,6 @@ const Footer: FC<{ type: 'initial_offer' | 'counter_offer'; makeOffer: () => voi
       className='w-full mt-auto bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-md cursor-pointer font-semibold text-lg transition-all duration-200 flex items-center justify-center'
       onClick={makeOffer}
     >
-      <span className='mr-2'>🤝</span>
       {type === 'initial_offer' ? 'Make Offer' : 'Counter Offer'}
     </motion.button>
   </div>

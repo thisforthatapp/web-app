@@ -4,19 +4,28 @@ interface NFTImageProps {
   src: string
   alt: string
   fallback: string
+  rounded?: 'top' | 'all'
   hoverOn?: boolean
 }
 
-const NFTImage: FC<NFTImageProps> = ({ src, alt, fallback, hoverOn = false }) => {
+const NFTImage: FC<NFTImageProps> = ({
+  src,
+  alt,
+  fallback,
+  rounded = 'top',
+  hoverOn = false,
+}) => {
   const [error, setError] = useState<boolean>(false)
 
   const imageContent = error ? (
-    <div className='aspect-square flex items-center justify-center text-center p-4 bg-gray-200 rounded-t-lg'>
+    <div
+      className={`aspect-square flex items-center justify-center text-center p-4 bg-gray-200 ${rounded === 'top' ? 'rounded-t-lg' : 'rounded-lg'}`}
+    >
       <span className='text-gray-600 font-semibold break-words'>{fallback}</span>
     </div>
   ) : (
     <div
-      className={`w-full aspect-square rounded-md overflow-hidden shadow-sm relative ${hoverOn ? 'group' : ''}`}
+      className={`w-full aspect-square ${rounded === 'top' ? 'rounded-t-lg' : 'rounded-lg'} overflow-hidden shadow-sm relative ${hoverOn ? 'group' : ''}`}
     >
       <img
         src={src}

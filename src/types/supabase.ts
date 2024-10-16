@@ -66,8 +66,6 @@ export interface NFTFeedItem {
   nft_is_verified: boolean
   nft_verified_at: string | null
   nft_for_swap: boolean
-  // is_pinned: boolean
-  // add wallet address?
 }
 
 export interface NFTOfferMetadata {
@@ -84,18 +82,23 @@ export interface OfferFeedItem {
   id: string
   user_id: string
   user_id_counter: string
+  offer_user_id: string
   offer: unknown // JSON
-  status: 'initiated' | 'negotiating' | 'denied' | 'accepted' | 'completed'
+  status: 'pending' | 'accepted' | 'cancelled' | 'completed'
   created_at: string
   updated_at: string
   user: Profile
   counter_user: Profile
+  chain_id: Number
+  onchain_trade_id: string | null
+  onchain_done: boolean
+  onchain_tx: string | null
 }
 
 export interface Activity {
   id: string
   user_id: string
-  activity_type: 'message' | 'offer_start' | 'offer_counter' | 'offer_accepted' | 'pin'
+  activity_type: 'message' | 'offer_start' | 'offer_counter' | 'offer_accepted'
   content: string | null
   metadata: unknown // JSON | null
   username: string
