@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
@@ -86,20 +87,24 @@ const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> =
   <div className='flex justify-between items-center px-4 py-6'>
     <div className='ml-2 text-2xl font-semibold'>My NFTs</div>
     <div className='flex text-lg space-x-4'>
-      <button
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setModal('add')}
-        className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+        className='flex items-center px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
       >
         <Add className='w-8 h-8 mr-1.5' />
         Add NFTs
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={() => setModal('verify')}
-        className='px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl transform hover:-translate-y-1'
+        className='flex items-center px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
       >
         <Checkmark className='w-8 h-8 mr-1.5' />
         Verify NFTs
-      </button>
+      </motion.button>
     </div>
   </div>
 )

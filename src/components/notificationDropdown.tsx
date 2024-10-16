@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+
 import { Notifications } from '@/icons'
 
 interface NotificationProps {
@@ -13,11 +14,11 @@ const SimpleNotification: React.FC<NotificationProps> = ({ notification }) => {
       case 'follow':
         return `${notification.metadata.follower_username} started following you`
       case 'new_offer':
-        return `${notification.metadata.offer.user[0].name} made you an offer`
+        return `${notification.metadata.offer.user[0].username} made you an offer`
       case 'offer_update':
-        return `${notification.metadata.offer.user[0].name} sent an update`
+        return `${notification.metadata.offer.user[0].username} sent an update`
       case 'offer_accepted':
-        return `${notification.metadata.offer.user[0].name} accepted your offer`
+        return `${notification.metadata.offer.user[0].username} accepted your offer`
       default:
         return 'Unknown notification'
     }

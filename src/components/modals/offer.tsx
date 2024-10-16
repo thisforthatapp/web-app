@@ -212,6 +212,7 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
         {view === 'select' && (
           <Select
             type={type === 'make_offer' ? 'initial_offer' : 'counter_offer'}
+            chainId={type === 'make_offer' ? initialNFT.nft_chain_id : offerInfo.chain_id}
             offerId={offerId}
             userA={
               type === 'make_offer'
@@ -255,6 +256,7 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
                   ]
                 : offerInfo.offer.userCounter
             }
+            onClose={closeModal}
           />
         )}
         {/* {view === 'transaction' && <Transaction info={offerInfo} closeModal={closeModal} />} */}

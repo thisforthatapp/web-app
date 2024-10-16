@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { Chain } from '@/icons'
 import { formatDistanceToNow } from 'date-fns'
 
+import { Chain } from '@/icons'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
 
 interface Transaction {
