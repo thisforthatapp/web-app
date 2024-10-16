@@ -24,7 +24,7 @@ const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large' }> = ({ n
   }
 
   return (
-    <div className='flex items-start space-x-2 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'>
+    <div className='flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200'>
       <div
         className={`${imageSizeClasses[size]} relative rounded-md overflow-hidden flex-shrink-0`}
       >
@@ -51,7 +51,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   }
 
   return (
-    <div className={`w-full bg-gray-100 ${containerPadding[size]} rounded-xl shadow-md`}>
+    <div className={`w-full bg-[#fbc01b] ${containerPadding[size]} rounded-xl shadow-md`}>
       <div className='flex gap-x-3'>
         <OfferColumn offers={userAOffers} size={size} />
         <SwapDivider size={size} />

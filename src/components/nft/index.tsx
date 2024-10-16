@@ -89,7 +89,7 @@ const NFTImage: FC<{ nft: any }> = ({ nft }) => (
           className='w-full h-auto object-cover md:object-contain md:max-h-[360px] rounded-t-lg'
         />
         <div className='absolute top-2 right-2'>
-          <NftOptions chainId={''} collectionContract={''} tokenId={''} />
+          <NftOptions chainId={nft?.chain_id} collectionContract={''} tokenId={''} />
         </div>
       </div>
       <div className='py-4 flex items-center justify-center'>

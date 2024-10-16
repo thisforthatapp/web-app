@@ -1,5 +1,3 @@
-// TODO: refactor + finish up search implmentation
-
 'use client'
 
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
@@ -7,7 +5,11 @@ import Link from 'next/link'
 import { debounce } from 'lodash'
 
 import { AccountDropdown, NotificationDropdown, TransactionsDropdown } from '@/components'
-import { Login as LoginModal, Onboard as OnboardModal } from '@/components/modals'
+import {
+  Login as LoginModal,
+  Offer as OfferModal,
+  Onboard as OnboardModal,
+} from '@/components/modals'
 import { useIsMobile } from '@/hooks'
 import { Close, Hamburger, Login, Search } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
@@ -16,10 +18,16 @@ import { supabase } from '@/utils/supabaseClient'
 const Navbar: FC = () => {
   const { user, loading, profile, hasProfile } = useAuth()
   const isMobile = useIsMobile()
-  const [modal, setModal] = useState<boolean | 'login' | 'onboard'>(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+
   const [notifications, setNotifications] = useState<any[]>([])
   const [transactions, setTransactions] = useState<any[]>([])
+
+  const [modal, setModal] = useState<boolean | 'login' | 'onboard' | 'offer'>(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [offerModalInfo, setOfferModalInfo] = useState<{
+    type: 'transaction' | 'view_offer'
+    id: string
+  } | null>(null)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<{ nfts: any[]; users: any[] }>({
@@ -149,8 +157,21 @@ const Navbar: FC = () => {
             </>
           ) : (
             <>
-              <TransactionsDropdown transactions={transactions} />
-              <NotificationDropdown notifications={notifications} />
+              <TransactionsDropdown
+                transactions={transactions}
+                userId={user?.id}
+                selectOffer={(offerId) => {
+                  setOfferModalInfo({ type: 'transaction', id: offerId })
+                  setModal('offer')
+                }}
+              />
+              <NotificationDropdown
+                notifications={notifications}
+                selectOffer={(offerId) => {
+                  setOfferModalInfo({ type: 'view_offer', id: offerId })
+                  setModal('offer')
+                }}
+              />
               <AccountDropdown username={profile?.username || ''} />
             </>
           )}
@@ -328,6 +349,14 @@ const Navbar: FC = () => {
       )}
       {modal === 'login' && <LoginModal closeModal={() => setModal(false)} />}
       {modal === 'onboard' && <OnboardModal closeModal={() => setModal(false)} />}
+      {modal === 'offer' && offerModalInfo && (
+        <OfferModal
+          type={offerModalInfo.type}
+          offerId={offerModalInfo.id}
+          closeModal={() => setModal(false)}
+          initialNFT={null}
+        />
+      )}
     </>
   )
 }

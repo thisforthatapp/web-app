@@ -3,44 +3,51 @@ import { Asset, assetTypeMap, OfferInfo, PreparedAsset } from '@/types/main'
 interface ChainInfo {
   id: string
   name: string
+  explorerName: string
   openSeaSlug: string
   blockExplorerUrl: string
 }
 
-const chainInfoMap: { [key: string]: ChainInfo } = {
+export const chainInfoMap: { [key: string]: ChainInfo } = {
   '1': {
     id: '1',
     name: 'Ethereum',
+    explorerName: 'Etherscan',
     openSeaSlug: 'ethereum',
     blockExplorerUrl: 'https://etherscan.io',
   },
   '8453': {
     id: '8453',
     name: 'Base',
+    explorerName: 'BaseScan',
     openSeaSlug: 'base',
     blockExplorerUrl: 'https://basescan.org',
   },
   '42161': {
     id: '42161',
     name: 'Arbitrum',
+    explorerName: 'Arbiscan',
     openSeaSlug: 'arbitrum',
     blockExplorerUrl: 'https://arbiscan.io',
   },
   '10': {
     id: '10',
     name: 'Optimism',
+    explorerName: 'OP Etherscan',
     openSeaSlug: 'optimism',
     blockExplorerUrl: 'https://optimistic.etherscan.io',
   },
   '137': {
     id: '137',
     name: 'Polygon',
+    explorerName: 'Polygonscan',
     openSeaSlug: 'matic',
     blockExplorerUrl: 'https://polygonscan.com',
   },
   '324': {
     id: '324',
     name: 'ZkSync',
+    explorerName: 'Zkscan',
     openSeaSlug: 'zksync',
     blockExplorerUrl: 'https://explorer.zksync.io',
   },

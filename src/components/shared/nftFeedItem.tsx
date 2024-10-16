@@ -39,7 +39,12 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           isVerified={item.nft_is_verified}
           className='absolute left-1 top-1 z-10 w-10 h-10'
         />
-        <NFTImage src={item.nft_image} alt={item.nft_name} fallback={item.nft_name} />
+        <NFTImage
+          src={item.nft_image}
+          alt={item.nft_name}
+          fallback={item.nft_name}
+          hoverOn={true}
+        />
         <div className='flex justify-between px-3 py-3'>
           <div className='flex items-center w-full' onClick={navigateToUser}>
             <img
@@ -51,7 +56,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
               {item?.nft_user_id_username}
             </span>
             <Tag
-              className={`mr-1 w-6 h-6 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
+              className={`mr-1 w-5 h-5 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
             />
           </div>
         </div>
@@ -59,24 +64,24 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
       <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-1 overflow-hidden'>
         <div className='flex w-full gap-x-2'>
           <button
-            className={`w-full flex justify-center items-center bg-red-50 px-3 py-2 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md`}
+            className={`w-full flex justify-center items-center bg-red-50 px-3 py-1 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md`}
             onClick={(e) => {
               e.preventDefault()
               pinItem(item)
             }}
           >
-            <span className='flex items-center mr-1 text-2xl'>📌</span>
-            <span className='text-lg font-semibold'>Pin</span>
+            <span className='flex items-center mr-2 text-lg'>📌</span>
+            <span className='font-semibold'>Pin</span>
           </button>
           <button
-            className='w-full flex justify-center items-center bg-yellow-50 px-3 py-2 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'
+            className='w-full flex justify-center items-center bg-yellow-50 px-3 py-1 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'
             onClick={(e) => {
               e.preventDefault()
               makeOffer(item)
             }}
           >
-            <span className='flex items-center mr-1 text-2xl'>🤝</span>
-            <span className='text-gray-800 text-lg font-semibold'>Offer</span>
+            <span className='flex items-center mr-2 text-2xl'>🤝</span>
+            <span className='text-gray-800 font-semibold'>Offer</span>
           </button>
         </div>
       </div>

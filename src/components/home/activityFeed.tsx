@@ -55,44 +55,51 @@ function renderMessageText(text: string) {
   return <>{parts}</>
 }
 
-const FeedItem = ({ activity }: { activity: Activity }) => {
+const FeedItem: React.FC<{ activity: Activity }> = ({ activity }) => {
   return (
-    <div key={activity.id} className='flex items-start border-b border-gray-100 p-4'>
-      <div className='relative w-10 h-10 mr-2 shrink-0'>
-        <img
-          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
-          alt='Profile'
-          className='w-full h-full rounded-full'
-        />
-      </div>
-      <div className='w-full'>
-        <div className='flex items-center gap-x-2'>
-          <div className='text-sm font-semibold'>{activity.username}</div>
-          <div className='text-xs text-gray-400'>
-            {formatDate(new Date(activity.created_at))}
-          </div>
+    <div key={activity.id} className='border-b border-gray-100 p-4'>
+      <div className='flex items-start'>
+        <div className='relative w-10 h-10 mr-2 shrink-0'>
+          <img
+            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
+            alt='Profile'
+            className='w-full h-full rounded-full'
+          />
         </div>
-        {activity.activity_type === 'message' && (
-          <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
-        )}
-        {(activity.activity_type === 'offer_start' ||
-          activity.activity_type === 'offer_accepted' ||
-          activity.activity_type === 'offer_counter') && (
-          <div className='mt-1'>
-            <div className='text-sm mb-1'>
+        <div className='flex-grow'>
+          <div className='flex items-center gap-x-2'>
+            <div className='text-sm font-semibold'>{activity.username}</div>
+            <div className='text-xs text-gray-400'>
+              {formatDate(new Date(activity.created_at))}
+            </div>
+          </div>
+          {activity.activity_type === 'message' && (
+            <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
+          )}
+          {(activity.activity_type === 'offer_start' ||
+            activity.activity_type === 'offer_accepted' ||
+            activity.activity_type === 'offer_counter') && (
+            <div className='text-sm mt-1'>
               {activity.activity_type === 'offer_start'
                 ? '🤝 made an offer'
                 : activity.activity_type === 'offer_counter'
                   ? '🤝 made a counter offer'
                   : '✅ accepted an offer'}
             </div>
-            <NFTOfferDisplay
-              userAOffers={(activity.metadata as any).offer.user}
-              userBOffers={(activity.metadata as any).offer.userCounter}
-            />
-          </div>
-        )}
+          )}
+        </div>
       </div>
+      {(activity.activity_type === 'offer_start' ||
+        activity.activity_type === 'offer_accepted' ||
+        activity.activity_type === 'offer_counter') && (
+        <div className='mt-4 w-full'>
+          <NFTOfferDisplay
+            userAOffers={(activity.metadata as any).offer.user}
+            userBOffers={(activity.metadata as any).offer.userCounter}
+            size='medium'
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -128,7 +135,8 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
         },
         (payload) => {
           // Ignore own messages
-          if (payload.new.user_id === user?.id) return
+          if (payload.new.user_id === user?.id && payload.new.activity_type === 'message')
+            return
 
           const shouldScroll = isNearBottom()
           if (filter === 'messages' && payload.new.activity_type !== 'message') return

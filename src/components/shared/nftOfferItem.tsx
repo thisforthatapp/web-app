@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { NFTOfferMetadata, OfferFeedItem, Profile } from '@/types/supabase'
 import { timeAgoShort } from '@/utils/helpers'
 
@@ -84,14 +85,22 @@ const NFTOfferItem: React.FC<NFTOfferItemProps> = ({ item, viewOffer, currentUse
           />
         </div>
       </div>
-      <div className='bg-white text-gray-700 p-3 flex items-center justify-between'>
+      <div
+        className={`p-3 flex items-center justify-between ${isMyTurn ? 'bg-blue-50' : 'bg-white'}`}
+      >
         <div className='flex items-center space-x-2'>
-          🕒
-          <span className='ml-1'>
-            Waiting for <span className='font-semibold'>{waitingForUser.username}</span>
+          <div
+            className={`w-2 h-2 rounded-full ${isMyTurn ? 'bg-blue-500 animate-pulse' : 'bg-gray-300'}`}
+          ></div>
+          <span className={`font-semibold ${isMyTurn ? 'text-blue-700' : 'text-gray-700'}`}>
+            {isMyTurn ? 'Your turn to respond' : `Waiting for ${waitingForUser.username}`}
           </span>
         </div>
-        <span className='text-sm text-gray-500'>{timeAgoShort(new Date(item.updated_at))}</span>
+        <div className='flex items-center space-x-2'>
+          <span className='text-sm text-gray-500'>
+            {timeAgoShort(new Date(item.updated_at))}
+          </span>
+        </div>
       </div>
     </div>
   )

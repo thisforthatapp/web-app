@@ -3,7 +3,7 @@
 import { FC, useEffect, useRef, useState } from 'react'
 
 import { Etherscan, Opensea, Options as OptionsIcon } from '@/icons'
-import { getBlockExplorerUrl, getOpenSeaUrl } from '@/utils/helpers'
+import { chainInfoMap, getBlockExplorerUrl, getOpenSeaUrl } from '@/utils/helpers'
 
 interface OptionsProps {
   chainId: string
@@ -44,7 +44,7 @@ const NftOptions: FC<OptionsProps> = ({ chainId, collectionContract, tokenId }) 
       getUrl: () => getOpenSeaUrl(chainId, collectionContract, tokenId),
     },
     {
-      label: 'Etherscan',
+      label: chainId ? chainInfoMap[chainId].explorerName : '',
       logo: Etherscan,
       getUrl: () => getBlockExplorerUrl(chainId, collectionContract, tokenId),
     },
@@ -57,7 +57,7 @@ const NftOptions: FC<OptionsProps> = ({ chainId, collectionContract, tokenId }) 
       </button>
 
       {isOpen && (
-        <div className='absolute mt-[-4px] right-[-8px] w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10'>
+        <div className='absolute mt-[-4px] right-[-8px] w-44 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10'>
           <div className='py-1' role='menu' aria-orientation='vertical'>
             {options.map((option) => (
               <button

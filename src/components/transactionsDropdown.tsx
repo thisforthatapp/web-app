@@ -21,14 +21,16 @@ interface Transaction {
 
 interface TransactionsProps {
   transactions: Transaction[]
-  currentUserId: string
+  userId: string
+  selectOffer: (id: string) => void
 }
 
-const TransactionItem: React.FC<{ transaction: Transaction; currentUserId: string }> = ({
-  transaction,
-  currentUserId,
-}) => {
-  const isCurrentUserInitiator = transaction.user_id === currentUserId
+const TransactionItem: React.FC<{
+  transaction: Transaction
+  userId: string
+  selectOffer: (id: string) => void
+}> = ({ transaction, userId, selectOffer }) => {
+  const isCurrentUserInitiator = transaction.user_id === userId
   const tradingPartner = isCurrentUserInitiator
     ? transaction.offer.userCounter[0]
     : transaction.offer.user[0]
@@ -37,7 +39,10 @@ const TransactionItem: React.FC<{ transaction: Transaction; currentUserId: strin
     : transaction.offer.userCounter[0]
 
   return (
-    <div className='px-4 py-3 hover:bg-gray-50 border-b border-gray-200'>
+    <div
+      className='px-4 py-3 hover:bg-gray-50 border-b border-gray-200'
+      onClick={() => selectOffer(transaction.id)}
+    >
       <div className='flex items-center justify-between'>
         <div className='flex items-center'>
           <img src={userNft.image} alt={userNft.name} className='w-8 h-8 rounded-full mr-2' />
@@ -63,7 +68,11 @@ const TransactionItem: React.FC<{ transaction: Transaction; currentUserId: strin
   )
 }
 
-const TransactionsDropdown: React.FC<TransactionsProps> = ({ transactions, currentUserId }) => {
+const TransactionsDropdown: React.FC<TransactionsProps> = ({
+  transactions,
+  userId,
+  selectOffer,
+}) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -90,26 +99,34 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({ transactions, curre
       >
         <Chain className='w-[40px] h-[40px]' />
         {transactions.length > 0 && (
-          <span className='z-10 absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-500 rounded-full'>
+          <span className='z-10 absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
             {transactions.length}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className='absolute max-h-96 right-[-105px] mt-[10px] w-96 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden z-10 flex flex-col'>
-          <div className='min-h-[350px] flex flex-col flex-grow w-full overflow-y-auto hide-scrollbar'>
+        <div className='absolute max-h-96 right-0 mt-2 w-96 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden z-10 flex flex-col'>
+          <div
+            className={`min-h-[350px] flex flex-col flex-grow w-full overflow-y-auto hide-scrollbar ${transactions.length === 0 ? 'justify-center' : ''}`}
+          >
             {transactions.length > 0 ? (
               transactions.map((transaction) => (
                 <TransactionItem
                   key={transaction.id}
                   transaction={transaction}
-                  currentUserId={currentUserId}
+                  userId={userId}
+                  selectOffer={selectOffer}
                 />
               ))
             ) : (
-              <div className='flex flex-grow items-center justify-center px-4 py-3 text-sm text-gray-500'>
-                No new transactions
+              <div className='flex flex-col items-center justify-center h-full p-6 text-center'>
+                <Chain className='w-12 h-12' />
+                <h3 className='text-lg font-semibold my-2'>No Swaps</h3>
+                <p className='text-sm text-gray-500 px-6'>
+                  This is where you&apos;ll see all your on-chain activity. When you agree to a
+                  swap, it will show up here.
+                </p>
               </div>
             )}
           </div>

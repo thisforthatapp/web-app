@@ -8,43 +8,50 @@ import { useAuth } from '@/providers/authProvider'
 import { formatDate, timeAgo } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
+const MessageDisplay: FC<{ item: any }> = ({ item }) => (
+  <div className='text-gray-700 text-sm'>{item.content}</div>
+)
+
 const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
   item,
   user,
   isLastItem,
 }) => {
-  const MessageDisplay: FC<{ item: any }> = ({ item }) => (
-    <div className='text-gray-700 text-sm'>{item.content}</div>
-  )
-
   return (
     <div className={`w-full ${!isLastItem ? 'border-b border-gray-100' : ''}`}>
-      <div className='flex p-4 w-full'>
-        <div className='relative w-10 h-10 mr-4 shrink-0'>
-          <img
-            src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
-            alt='Profile'
-            className='w-full h-full rounded-full object-cover shadow-sm'
-          />
-        </div>
-        <div className='flex-grow'>
-          <div className='flex items-center gap-x-2 mb-1'>
-            <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
-            <div className='text-xs text-gray-400'>{formatDate(new Date(item.created_at))}</div>
+      <div className='p-4'>
+        <div className='flex items-start mb-2'>
+          <div className='relative w-10 h-10 mr-2 shrink-0'>
+            <img
+              src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
+              alt='Profile'
+              className='w-full h-full rounded-full object-cover shadow-sm'
+            />
           </div>
-          {item.item_type === 'message' && <MessageDisplay item={item} />}
-          {(item.item_type === 'offer' || item.item_type === 'counter_offer') && (
-            <>
-              <div className='text-sm font-medium text-gray-600 mb-2'>
-                {item.item_type === 'offer' ? 'Made an offer' : 'Countered the offer'}
+          <div className='flex-grow'>
+            <div className='flex items-center gap-x-2 mb-1'>
+              <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
+              <div className='text-xs text-gray-400'>
+                {formatDate(new Date(item.created_at))}
               </div>
-              <NFTOfferDisplay
-                userAOffers={item.offer.user}
-                userBOffers={item.offer.userCounter}
-              />
-            </>
-          )}
+            </div>
+            {item.item_type === 'message' && <MessageDisplay item={item} />}
+            {(item.item_type === 'offer' || item.item_type === 'counter_offer') && (
+              <div className='text-sm'>
+                {item.item_type === 'offer' ? '🤝 Made an offer' : '🤝 Countered the offer'}
+              </div>
+            )}
+          </div>
         </div>
+        {(item.item_type === 'offer' || item.item_type === 'counter_offer') && (
+          <div className='mt-4 w-full'>
+            <NFTOfferDisplay
+              userAOffers={item.offer.user}
+              userBOffers={item.offer.userCounter}
+              size='medium'
+            />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -187,7 +194,7 @@ const Main: FC<{
         </form>
       </div>
 
-      <div className='flex items-center justify-between p-4'>
+      <div className='flex items-center justify-between p-4 pt-0'>
         {isLatestOfferUser ? (
           <div className='text-center w-full'>
             <p className='text-gray-700 font-semibold'>
@@ -200,7 +207,7 @@ const Main: FC<{
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className='w-full bg-yellow-400 text-gray-800 py-2 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                className='w-full bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={counterOffer}
               >
                 🤝 Counter
@@ -208,17 +215,17 @@ const Main: FC<{
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className='w-full bg-green-400 text-gray-800 py-2 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                className='w-full bg-green-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
                 onClick={acceptOffer}
               >
                 ✅ Accept
               </motion.button>
             </div>
             <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
-              Accepting the offer will start the trade process on-chain.
+              Accepting the offer will start the on-chain swap.
               <br />
-              <a href='#' className='text-blue-500 hover:underline'>
-                Learn more about the process here.
+              <a href='#' className='text-gray-500 font-semibold underline'>
+                Learn more about swapping here.
               </a>
             </div>
           </div>
