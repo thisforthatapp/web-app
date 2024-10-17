@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 import { NFTOfferDisplay } from '@/components/shared'
-import { Close } from '@/icons'
+import { Close, Share } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
+import { useToast } from '@/providers/toastProvider'
 import { formatDate } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -69,6 +70,7 @@ const Main: FC<{
   counterOffer: () => void
   closeModal: () => void
 }> = ({ offerId, info, acceptOffer, counterOffer, closeModal }) => {
+  const { showToast } = useToast()
   const { user, profile, hasProfile } = useAuth()
   const [newMessage, setNewMessage] = useState<string>('')
   const [offerActivityItems, setOfferActivityItems] = useState<any[]>([])
@@ -88,6 +90,19 @@ const Main: FC<{
     } catch (error) {
       console.error('Failed to fetch activities', error)
     }
+  }
+
+  const copyOfferLink = () => {
+    const offerUrl = `${window.location.origin}/offer/${offerId}`
+    navigator.clipboard
+      .writeText(offerUrl)
+      .then(() => {
+        showToast('✅ Link copied ', 2500)
+      })
+      .catch((err) => {
+        console.error('Failed to copy link:', err)
+        showToast('⚠️ Error copying link', 2500)
+      })
   }
 
   const submitMessage = async (event: React.FormEvent) => {
@@ -132,6 +147,7 @@ const Main: FC<{
 
   useEffect(() => {
     if (offerId) fetchOfferActivity()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offerId])
 
   const isInitialOfferUser = user?.id === info?.user_id
@@ -144,14 +160,23 @@ const Main: FC<{
     <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
       <div className='flex items-center justify-between py-4 px-6 bg-white border-b border-gray-100'>
         <div className='text-xl font-bold text-gray-800'>🤝 Swap Offer</div>
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          className='cursor-pointer text-gray-500 hover:text-gray-700'
-          onClick={closeModal}
-        >
-          <Close className='w-6 h-6' />
-        </motion.div>
+        <div className='flex gap-x-4 items-center'>
+          <div
+            className='flex items-center px-3 py-1.5 bg-gray-100 cursor-pointer hover:bg-gray-200 rounded-md'
+            onClick={copyOfferLink}
+          >
+            <Share className='w-4 h-4' />
+            <div className='text-sm font-semibold ml-1'>Share</div>
+          </div>
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className='cursor-pointer text-gray-500 hover:text-gray-700'
+            onClick={closeModal}
+          >
+            <Close className='w-6 h-6' />
+          </motion.div>
+        </div>
       </div>
 
       <div className='flex-grow overflow-y-auto bg-gray-50'>

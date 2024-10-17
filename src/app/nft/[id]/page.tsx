@@ -3,11 +3,12 @@
 import { FC, useEffect, useState } from 'react'
 
 import { Footer } from '@/components'
-import NFTPage from '@/components/nft'
 import { useIsMobile } from '@/hooks'
 import { useToast } from '@/providers/toastProvider'
 import { NFT as NFTType } from '@/types/supabase'
 import { supabase } from '@/utils/supabaseClient'
+
+import NFTPage from './nftPage'
 
 interface NFTPageProps {
   params: {
@@ -46,6 +47,7 @@ const NFT: FC<NFTPageProps> = ({ params }) => {
     if (params.id) {
       fetchNftInfo()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   return (
