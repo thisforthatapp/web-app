@@ -235,7 +235,7 @@ const Navbar: FC = () => {
 
   return (
     <>
-      <nav className='z-[20] top-0 fixed w-full bg-white flex justify-between items-center px-2 h-[75px] border-b border-gray-200'>
+      <nav className='z-[55] top-0 fixed w-full bg-white flex justify-between items-center px-2 h-[75px] border-b border-gray-200'>
         <Link href='/'>
           <img src='/logo.png' className='w-[70px] h-[70px] p-2' alt='Logo' />
         </Link>
@@ -327,7 +327,7 @@ const Navbar: FC = () => {
         )}
       </nav>
       {isMobile && isMenuOpen && (
-        <div className='fixed inset-0 bg-white z-50 flex flex-col'>
+        <div className='fixed inset-0 bg-white z-[60] flex flex-col'>
           <div className='flex justify-end p-4'>
             <button onClick={toggleMenu} className='p-2'>
               <Close className='w-8 h-8' />

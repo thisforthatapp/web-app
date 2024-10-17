@@ -2,13 +2,11 @@ import React from 'react'
 import Link from 'next/link'
 
 import { NFTImage, VerifiedBadge } from '@/components/shared'
-import { Tag } from '@/icons'
 import { UserNFT } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
 
 interface NFTItemProps {
   item: UserNFT
-  toggleForSwap: () => void
 }
 
 const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
@@ -32,31 +30,10 @@ const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
   </div>
 )
 
-const SwapStatusButton: React.FC<{
-  forSwap: boolean
-  onClick: (e: React.MouseEvent) => void
-}> = ({ forSwap, onClick }) => (
-  <div
-    className={`${
-      forSwap ? 'bg-green-300' : 'bg-gray-100'
-    } mt-3 flex gap-x-2 gap-y-2 w-full flex justify-center items-center overflow-hidden px-1 py-2.5 rounded-md transition-colors duration-200 shadow-md`}
-    onClick={onClick}
-  >
-    <Tag className={`w-6 h-6 ${forSwap ? 'text-green-600' : 'text-gray-900'}`} />
-    <span className='text-lg font-semibold'>Let&apos;s Trade</span>
-  </div>
-)
-
-const NFTAccountItem: React.FC<NFTItemProps> = ({ item, toggleForSwap }) => {
-  const handleSwapToggle = (e: React.MouseEvent) => {
-    e.preventDefault()
-    toggleForSwap()
-  }
-
+const NFTAccountItem: React.FC<NFTItemProps> = ({ item }) => {
   return (
     <Link href={`/nft/${item.nfts.id}`}>
       <NFTImageWrapper item={item} />
-      <SwapStatusButton forSwap={item.for_swap} onClick={handleSwapToggle} />
     </Link>
   )
 }

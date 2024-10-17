@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react'
+import React, { FC, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
 import { NFTOfferDisplay } from '@/components/shared'
@@ -57,6 +57,13 @@ function renderMessageText(text: string) {
   return <>{parts}</>
 }
 
+type FilterType = 'all' | 'messages' | 'swaps'
+
+interface ActivityFeedToggleProps {
+  filter: FilterType
+  setFilter: (filter: FilterType) => void
+}
+
 const FeedItem: React.FC<{
   activity: Activity
   setViewOfferItem: (item: SimplifiedOfferItem) => void
@@ -86,7 +93,7 @@ const FeedItem: React.FC<{
           href={`/${activity.username}`}
           target='_blank'
           onClick={(e) => e.stopPropagation()}
-          className='relative w-10 h-10 mr-2 shrink-0'
+          className='relative w-10 h-10 mr-3 shrink-0'
         >
           <img
             src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
@@ -94,44 +101,45 @@ const FeedItem: React.FC<{
             className='w-full h-full rounded-full'
           />
         </Link>
-        <div className='flex-grow'>
-          <div className='flex items-center justify-between'>
+        <div className='flex-grow flex items-start justify-between'>
+          <div className='flex-grow'>
             <div className='flex items-center gap-x-2'>
               <div className='text-sm font-semibold'>{activity.username}</div>
               <div className='text-xs text-gray-400'>
                 {formatDate(new Date(activity.created_at))}
               </div>
             </div>
-            {isClickable && (
-              <div className='flex items-center text-blue-500'>
-                <span className='text-sm mr-1'>View details</span>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-4 w-4'
-                  viewBox='0 0 20 20'
-                  fill='currentColor'
-                >
-                  <path
-                    fillRule='evenodd'
-                    d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
-                    clipRule='evenodd'
-                  />
-                </svg>
+            {activity.activity_type === 'message' && (
+              <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
+            )}
+            {(activity.activity_type === 'offer_start' ||
+              activity.activity_type === 'offer_accepted' ||
+              activity.activity_type === 'offer_counter') && (
+              <div className='text-sm mt-1'>
+                {activity.activity_type === 'offer_start'
+                  ? '🤝 made an offer'
+                  : activity.activity_type === 'offer_counter'
+                    ? '🤝 made a counter offer'
+                    : '✅ accepted an offer'}
               </div>
             )}
           </div>
-          {activity.activity_type === 'message' && (
-            <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
-          )}
-          {(activity.activity_type === 'offer_start' ||
-            activity.activity_type === 'offer_accepted' ||
-            activity.activity_type === 'offer_counter') && (
-            <div className='text-sm mt-1'>
-              {activity.activity_type === 'offer_start'
-                ? '🤝 made an offer'
-                : activity.activity_type === 'offer_counter'
-                  ? '🤝 made a counter offer'
-                  : '✅ accepted an offer'}
+          {isClickable && (
+            <div className='flex items-center text-blue-500 ml-2'>
+              <span className='text-xs mr-1'>Expand</span>
+              <svg
+                fill='none'
+                height='14'
+                stroke='currentColor'
+                stroke-linecap='round'
+                stroke-linejoin='round'
+                stroke-width='2'
+                viewBox='0 0 24 24'
+                width='14'
+              >
+                <line x1='7' x2='17' y1='17' y2='7' />
+                <polyline points='7 7 17 7 17 17' />
+              </svg>
             </div>
           )}
         </div>
@@ -153,7 +161,100 @@ const FeedItem: React.FC<{
   )
 }
 
-type FilterType = 'all' | 'messages' | 'swaps'
+const ActivityFeedToggle: React.FC<ActivityFeedToggleProps> = ({ filter, setFilter }) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  const filterOptions: FilterType[] = ['all', 'messages', 'swaps']
+
+  const getFilterEmoji = (filterType: FilterType) => {
+    switch (filterType) {
+      case 'all':
+        return '🔄'
+      case 'messages':
+        return '💬'
+      case 'swaps':
+        return '🤝'
+    }
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  return (
+    <div ref={dropdownRef} className='z-[50] mr-2.5 relative inline-block text-left'>
+      <div>
+        <button
+          type='button'
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setIsOpen(!isOpen)
+          }}
+          className='inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-3 py-1.5 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'
+          id='options-menu'
+          aria-haspopup='true'
+          aria-expanded='true'
+        >
+          {getFilterEmoji(filter)} {filter.charAt(0).toUpperCase() + filter.slice(1)}
+          <svg
+            className='-mr-1 ml-2 h-5 w-5'
+            xmlns='http://www.w3.org/2000/svg'
+            viewBox='0 0 20 20'
+            fill='currentColor'
+            aria-hidden='true'
+          >
+            <path
+              fillRule='evenodd'
+              d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
+              clipRule='evenodd'
+            />
+          </svg>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className='origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5'>
+          <div
+            className='py-1'
+            role='menu'
+            aria-orientation='vertical'
+            aria-labelledby='options-menu'
+          >
+            {filterOptions.map((option) => (
+              <button
+                key={option}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setFilter(option)
+                  setIsOpen(false)
+                }}
+                className={`${
+                  filter === option ? 'bg-gray-100 text-gray-900' : 'text-gray-700'
+                } group flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 hover:text-gray-900`}
+                role='menuitem'
+              >
+                <span className='mr-2'>{getFilterEmoji(option)}</span>
+                {option.charAt(0).toUpperCase() + option.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const ActivityFeed: FC<{
   showCollapsibleTab: boolean
@@ -328,7 +429,7 @@ const ActivityFeed: FC<{
     >
       {showCollapsibleTab && (
         <div
-          className={`bg-white cursor-pointer flex items-center justify-between ${feedCollapsed ? 'h-full flex-col' : ''}`}
+          className={`bg-white cursor-pointer flex items-center justify-between ${feedCollapsed ? 'h-full flex-col' : 'border-b border-gray-100'}`}
           onClick={toggleFeed}
         >
           {feedCollapsed ? (
@@ -340,28 +441,11 @@ const ActivityFeed: FC<{
             </div>
           ) : (
             <>
-              <div className='flex items-center py-3 px-4 bg-white'>
+              <div className='flex items-center p-4 bg-white'>
                 <CollapsibleIcon collapsed={feedCollapsed} />
                 <span className='ml-2 font-semibold'>Latest Activity</span>
               </div>
-              <div className='flex space-x-1 ml-auto mr-4'>
-                {(['all', 'messages', 'swaps'] as FilterType[]).map((filterType) => (
-                  <button
-                    key={filterType}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setFilter(filterType)
-                    }}
-                    className={`px-3 py-1 rounded-md text-xs transition-all duration-200 ${
-                      filter === filterType
-                        ? 'bg-black text-gray-200'
-                        : 'text-black hover:bg-gray-100'
-                    }`}
-                  >
-                    {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <ActivityFeedToggle filter={filter} setFilter={setFilter} />
             </>
           )}
         </div>

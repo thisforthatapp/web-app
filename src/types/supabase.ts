@@ -21,7 +21,6 @@ export interface UserNFT {
   id: string
   user_id: string
   nft_id: string
-  for_swap: boolean
   nfts: NFT
 }
 
@@ -46,7 +45,6 @@ export interface NFT {
   user_id: string
   possible_spam?: boolean
   pins: number // not being used
-  for_swap: boolean
   user_profile: Profile
 }
 
@@ -67,7 +65,6 @@ export interface NFTFeedItem {
   nft_user_id_username: string
   nft_is_verified: boolean
   nft_verified_at: string | null
-  nft_for_swap: boolean
 }
 
 export interface NFTOffers {

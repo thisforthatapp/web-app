@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 import { Offer } from '@/components/modals'
 import { NFTImage, NFTOfferItem, VerifiedBadge } from '@/components/shared'
-import { ChainLogo, Etherscan, Opensea, Tag } from '@/icons'
+import { ChainLogo, Etherscan, Opensea } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import {
@@ -92,7 +92,6 @@ const NFTPage: FC<NFTPageProps> = ({ nft }) => {
       nft_thumbnail: nft.thumbnail,
       nft_is_verified: nft.is_verified,
       nft_verified_at: nft.verified_at,
-      nft_for_swap: nft.for_swap,
       nft_pins: nft.pins,
       nft_user_id: nft.user_id,
       nft_user_id_username: nft.user_profile.username,
@@ -224,43 +223,10 @@ const NFTSidebar: FC<{
             className='w-8 h-8 rounded-full'
           />
           <div className='text-xl font-bold ml-2'>{nft.user_profile.username}</div>
-          <Tag
-            className={`mr-1 w-6 h-6 ml-auto ${nft.for_swap ? 'text-green-700' : 'text-gray-300'}`}
-          />
         </Link>
       </div>
     </div>
-    <ExternalLinks
-      chainId={nft.chain_id.toString()}
-      collectionContract={nft.collection_contract}
-      tokenId={nft.token_id}
-    />
     <ActionButtons className='hidden lg:flex' makeOffer={makeOffer} pinItem={pinItem} />
-  </div>
-)
-
-const ExternalLinks: FC<{ chainId: string; collectionContract: string; tokenId: string }> = ({
-  chainId,
-  collectionContract,
-  tokenId,
-}) => (
-  <div className='flex flex-row lg:flex-col gap-2 px-4 lg:px-0 mb-4'>
-    <Link
-      href={getOpenSeaUrl(chainId, collectionContract, tokenId)}
-      target='_blank'
-      className='flex-1 bg-white p-4 flex items-center shadow-md rounded-md cursor-pointer hover:bg-gray-50 transition-colors'
-    >
-      <Opensea className='w-10 h-10' />
-      <div className='ml-3'>View On Opensea</div>
-    </Link>
-    <Link
-      href={getBlockExplorerUrl(chainId, collectionContract, tokenId)}
-      target='_blank'
-      className='flex-1 bg-white p-4 flex items-center shadow-md rounded-md cursor-pointer hover:bg-gray-50 transition-colors'
-    >
-      <Etherscan className='w-10 h-10' />
-      <div className='ml-3'>View On Etherscan</div>
-    </Link>
   </div>
 )
 

@@ -57,28 +57,7 @@ const useNFTs = () => {
     [page, fetchUserNfts],
   )
 
-  const toggleForSwap = useCallback(
-    async (item: UserNFT) => {
-      const newForSwapValue = !item.for_swap
-
-      setUserNfts((prev) =>
-        prev.map((nft) => (nft.id === item.id ? { ...nft, for_swap: newForSwapValue } : nft)),
-      )
-
-      const { error } = await supabase
-        .from('user_nfts')
-        .update({ for_swap: newForSwapValue })
-        .eq('id', item.id)
-
-      if (error) {
-        showToast(`⚠️ Error updating NFT`, 2500)
-        console.error('Error updating NFT:', error)
-      }
-    },
-    [showToast],
-  )
-
-  return { userNfts, hasMore, fetchUserNfts, loadMore, toggleForSwap }
+  return { userNfts, hasMore, fetchUserNfts, loadMore }
 }
 
 const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> = ({
@@ -111,18 +90,13 @@ const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> =
 
 const NFTGrid: React.FC<{
   userNfts: UserNFT[]
-  toggleForSwap: (item: UserNFT) => void
   hasMore: boolean
   loadMore: () => void
-}> = ({ userNfts, toggleForSwap, hasMore, loadMore }) => (
+}> = ({ userNfts, hasMore, loadMore }) => (
   <div className='flex-grow overflow-y-auto p-5 pt-2 hide-scrollbar'>
     <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
       {userNfts.map((userNft) => (
-        <NFTAccountItem
-          key={userNft.id}
-          item={userNft}
-          toggleForSwap={() => toggleForSwap(userNft)}
-        />
+        <NFTAccountItem key={userNft.id} item={userNft} />
       ))}
     </div>
     {userNfts.length > 0 && hasMore && (
@@ -142,7 +116,7 @@ const AccountNFTSPage: React.FC = () => {
   const router = useRouter()
   const { user, loading } = useAuth()
   const [modal, setModal] = useState<'add' | 'verify' | null>(null)
-  const { userNfts, hasMore, fetchUserNfts, loadMore, toggleForSwap } = useNFTs()
+  const { userNfts, hasMore, fetchUserNfts, loadMore } = useNFTs()
 
   useEffect(() => {
     if (user) {
@@ -161,7 +135,6 @@ const AccountNFTSPage: React.FC = () => {
         <div className='flex flex-col flex-grow overflow-hidden'>
           <NFTGrid
             userNfts={userNfts}
-            toggleForSwap={toggleForSwap}
             hasMore={hasMore}
             loadMore={() => user?.id && loadMore(user.id)}
           />

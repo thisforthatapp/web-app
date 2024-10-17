@@ -206,7 +206,7 @@ const Grid: FC<{
 
   return (
     <div className='w-full overflow-y-auto hide-scrollbar'>
-      <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
+      {user && <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />}
       {user && tabOption === 'offers' ? (
         <OfferGrid
           items={items as OfferFeedItemType[]}
