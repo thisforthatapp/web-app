@@ -1,7 +1,6 @@
 import { FC, useEffect, useState } from 'react'
 
 import { GridNavigation } from '@/components/home'
-import { Offer } from '@/components/modals'
 import { NFTFeedItem, NFTOfferItem } from '@/components/shared'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
@@ -48,11 +47,12 @@ const LoadMoreButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
   </div>
 )
 
-const Grid: FC = () => {
+const Grid: FC<{
+  setMakeOfferItem: (item: NFTFeedItemType) => void
+  setViewOfferItem: (item: OfferFeedItemType) => void
+}> = ({ setMakeOfferItem, setViewOfferItem }) => {
   const { user, loading } = useAuth()
   const { showToast } = useToast()
-  const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
-  const [viewOfferItem, setViewOfferItem] = useState<OfferFeedItemType | null>(null)
 
   const [items, setItems] = useState<(NFTFeedItemType | OfferFeedItemType)[]>([])
   const [tabOption, setTabOption] = useState<GridTabOption>('home')
@@ -137,6 +137,7 @@ const Grid: FC = () => {
       fetchItems(tabOption, 1)
       setPage(1)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabOption, loading])
 
   const makeOffer = async (nft: NFTFeedItemType) => {
@@ -206,36 +207,16 @@ const Grid: FC = () => {
   return (
     <div className='w-full overflow-y-auto hide-scrollbar'>
       <GridNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
-      {tabOption === 'offers' ? (
+      {user && tabOption === 'offers' ? (
         <OfferGrid
           items={items as OfferFeedItemType[]}
-          userId={user.id!}
+          userId={user.id}
           viewOffer={viewOffer}
         />
       ) : (
         <NFTGrid items={items as NFTFeedItemType[]} makeOffer={makeOffer} pinItem={pinItem} />
       )}
       {items.length > 0 && hasMore && <LoadMoreButton onClick={handleLoadMore} />}
-      {makeOfferItem && (
-        <Offer
-          type='make_offer'
-          offerId={null}
-          initialNFT={makeOfferItem}
-          closeModal={() => setMakeOfferItem(null)}
-        />
-      )}
-      {viewOfferItem && (
-        <Offer
-          type={
-            viewOfferItem.status === 'accepted' || viewOfferItem.status === 'completed'
-              ? 'transaction'
-              : 'view_offer'
-          }
-          offerId={viewOfferItem.id}
-          initialNFT={null}
-          closeModal={() => setViewOfferItem(null)}
-        />
-      )}
     </div>
   )
 }

@@ -43,7 +43,7 @@ const SwapStatusButton: React.FC<{
     onClick={onClick}
   >
     <Tag className={`w-6 h-6 ${forSwap ? 'text-green-600' : 'text-gray-900'}`} />
-    <span className='text-lg font-semibold'>Ok to Trade</span>
+    <span className='text-lg font-semibold'>Let&apos;s Trade</span>
   </div>
 )
 

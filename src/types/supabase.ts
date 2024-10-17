@@ -116,3 +116,5 @@ export interface Activity {
   profile_pic_url: string
   created_at: string
 }
+
+export type SimplifiedOfferItem = Pick<OfferFeedItem, 'id' | 'status'>

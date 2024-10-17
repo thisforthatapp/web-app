@@ -95,11 +95,11 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({
     <div className='relative' ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center'
+        className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors'
       >
         <Chain className='w-[40px] h-[40px]' />
         {transactions.length > 0 && (
-          <span className='z-10 absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
+          <span className='z-10 absolute top-[4px] right-[4px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
             {transactions.length}
           </span>
         )}

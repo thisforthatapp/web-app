@@ -1,16 +1,14 @@
-import React from 'react'
+import React, { type SVGProps } from 'react'
 
-interface ChainLogoProps {
+interface ChainLogoProps extends SVGProps<SVGSVGElement> {
   chainId: number
-  size?: number
-  className?: string
 }
 
-const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '' }) => {
-  const logos: { [key: number]: JSX.Element } = {
+const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, ...props }) => {
+  const logos: { [key: number]: React.ReactElement } = {
     // Ethereum
     1: (
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none'>
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='none' {...props}>
         <path fill='#8A92B2' d='M16 0L6 16L16 21.5L26 16L16 0Z' />
         <path fill='#62688F' d='M16 0L6 16L16 21.5V0Z' />
         <path fill='#8A92B2' d='M16 23.4L6 17.9L16 32L26 17.9L16 23.4Z' />
@@ -19,7 +17,7 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '
     ),
     // Base
     8453: (
-      <svg width='32' height='32' viewBox='0 0 30 30' fill='none'>
+      <svg width='32' height='32' viewBox='0 0 30 30' fill='none' {...props}>
         <g clip-path='url(#clip0_11060_16750)'>
           <path
             fillRule='evenodd'
@@ -37,7 +35,7 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '
     ),
     // Arbitrum
     42161: (
-      <svg width='32' height='32' viewBox='0 0 238 238' fill='none'>
+      <svg width='32' height='32' viewBox='0 0 238 238' fill='none' {...props}>
         <g clip-path='url(#clip0_4057_1924)'>
           <path
             d='M25.668 74.3076V163.693C25.668 169.4 28.7167 174.676 33.6545 177.52L111.032 222.222C115.969 225.066 122.048 225.066 126.986 222.222L204.363 177.52C209.301 174.676 212.35 169.4 212.35 163.693V74.3076C212.35 68.6005 209.301 63.3239 204.363 60.4797L126.986 15.7779C122.048 12.9337 115.969 12.9337 111.032 15.7779L33.6357 60.4797C28.698 63.3239 25.668 68.6005 25.668 74.3076Z'
@@ -77,7 +75,7 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '
     ),
     // Optimism
     10: (
-      <svg width='32' height='32' viewBox='0 0 122 122'>
+      <svg width='32' height='32' viewBox='0 0 122 122' {...props}>
         <circle id='Ellipse_11' data-name='Ellipse 11' cx='61' cy='61' r='61' fill='#ff0420' />
         <path
           id='Path_139'
@@ -97,41 +95,22 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '
     ),
     // Polygon
     137: (
-      <svg width='32' height='32' viewBox='0 0 252 252' fill='none'>
-        <mask x='0' y='0' width='252' height='252'>
-          <path
-            d='M125.999 251.394C195.253 251.394 251.393 195.253 251.393 126C251.393 56.7468 195.253 0.606079 125.999 0.606079C56.7462 0.606079 0.605469 56.7468 0.605469 126C0.605469 195.253 56.7462 251.394 125.999 251.394Z'
-            fill='white'
-          />
-        </mask>
-        <g mask='url(#mask0_4864_1939)'>
-          <path
-            d='M263.267 -11.2672H-11.2676V263.267H263.267V-11.2672Z'
-            fill='url(#paint0_linear_4864_1939)'
-          />
-        </g>
+      <svg
+        x='0px'
+        y='0px'
+        viewBox='0 0 38.4 33.5'
+        enableBackground='new 0 0 38.4 33.5;'
+        {...props}
+      >
         <path
-          d='M162.264 153.059L197.741 132.574C199.62 131.489 200.782 129.471 200.782 127.301V86.3354C200.782 84.1696 199.615 82.1472 197.741 81.0618L162.264 60.5767C160.385 59.4912 158.056 59.4964 156.177 60.5767L120.7 81.0618C118.821 82.1472 117.659 84.1696 117.659 86.3354V159.546L92.781 173.908L67.9029 159.546V130.818L92.781 116.456L109.191 125.928V106.657L95.8222 98.9408C94.9006 98.4084 93.8459 98.1268 92.7758 98.1268C91.7058 98.1268 90.651 98.4084 89.7346 98.9408L54.2581 119.426C52.379 120.511 51.2168 122.529 51.2168 124.7V165.665C51.2168 167.83 52.3842 169.853 54.2581 170.938L89.7346 191.423C91.6085 192.504 93.9432 192.504 95.8222 191.423L131.299 170.943C133.178 169.858 134.34 167.836 134.34 165.67V92.4589L134.791 92.2029L159.218 78.0973L184.096 92.4589V121.187L159.218 135.549L142.834 126.087V145.359L156.177 153.064C158.056 154.145 160.385 154.145 162.264 153.064V153.059Z'
-          fill='white'
+          fill='#8247E5'
+          d='M29,10.2c-0.7-0.4-1.6-0.4-2.4,0L21,13.5l-3.8,2.1l-5.5,3.3c-0.7,0.4-1.6,0.4-2.4,0L5,16.3   c-0.7-0.4-1.2-1.2-1.2-2.1v-5c0-0.8,0.4-1.6,1.2-2.1l4.3-2.5c0.7-0.4,1.6-0.4,2.4,0L16,7.2c0.7,0.4,1.2,1.2,1.2,2.1v3.3l3.8-2.2V7   c0-0.8-0.4-1.6-1.2-2.1l-8-4.7c-0.7-0.4-1.6-0.4-2.4,0L1.2,5C0.4,5.4,0,6.2,0,7v9.4c0,0.8,0.4,1.6,1.2,2.1l8.1,4.7   c0.7,0.4,1.6,0.4,2.4,0l5.5-3.2l3.8-2.2l5.5-3.2c0.7-0.4,1.6-0.4,2.4,0l4.3,2.5c0.7,0.4,1.2,1.2,1.2,2.1v5c0,0.8-0.4,1.6-1.2,2.1   L29,28.8c-0.7,0.4-1.6,0.4-2.4,0l-4.3-2.5c-0.7-0.4-1.2-1.2-1.2-2.1V21l-3.8,2.2v3.3c0,0.8,0.4,1.6,1.2,2.1l8.1,4.7   c0.7,0.4,1.6,0.4,2.4,0l8.1-4.7c0.7-0.4,1.2-1.2,1.2-2.1V17c0-0.8-0.4-1.6-1.2-2.1L29,10.2z'
         />
-        <defs>
-          <linearGradient
-            id='paint0_linear_4864_1939'
-            x1='-61.4385'
-            y1='11.2966'
-            x2='221.974'
-            y2='184.732'
-            gradientUnits='userSpaceOnUse'
-          >
-            <stop stop-color='#A229C5' />
-            <stop offset='1' stop-color='#7B3FE4' />
-          </linearGradient>
-        </defs>
       </svg>
     ),
     // Zksync
     324: (
-      <svg viewBox='0 0 400 400' fill='none'>
+      <svg viewBox='0 0 400 400' fill='none' {...props}>
         <g clip-path='url(#clip0_10983_56502)'>
           <path
             d='M200 400C310.457 400 400 310.457 400 200C400 89.5431 310.457 0 200 0C89.5431 0 0 89.5431 0 200C0 310.457 89.5431 400 200 400Z'
@@ -168,11 +147,7 @@ const ChainLogo: React.FC<ChainLogoProps> = ({ chainId, size = 24, className = '
     </svg>
   )
 
-  return (
-    <div style={{ width: size, height: size }} className={className}>
-      {logos[chainId] || DefaultLogo}
-    </div>
-  )
+  return <>{logos[chainId] || DefaultLogo}</>
 }
 
 export default ChainLogo

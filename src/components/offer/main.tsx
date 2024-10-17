@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 import { NFTOfferDisplay } from '@/components/shared'
 import { Close } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
-import { formatDate, timeAgo } from '@/utils/helpers'
+import { formatDate } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
 const MessageDisplay: FC<{ item: any }> = ({ item }) => (
@@ -20,13 +21,18 @@ const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
     <div className={`w-full ${!isLastItem ? 'border-b border-gray-100' : ''}`}>
       <div className='p-4'>
         <div className='flex items-start mb-2'>
-          <div className='relative w-10 h-10 mr-2 shrink-0'>
+          <Link
+            href={`/${user?.username}`}
+            target='_blank'
+            onClick={(e) => e.stopPropagation()}
+            className='relative w-10 h-10 mr-2 shrink-0'
+          >
             <img
               src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user?.profile_pic_url}
               alt='Profile'
               className='w-full h-full rounded-full object-cover shadow-sm'
             />
-          </div>
+          </Link>
           <div className='flex-grow'>
             <div className='flex items-center gap-x-2 mb-1'>
               <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>

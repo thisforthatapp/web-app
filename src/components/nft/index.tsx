@@ -264,7 +264,7 @@ const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
   <div className='w-full bg-white p-6 mb-4 rounded-lg shadow-md'>
     <div className='flex items-center justify-between'>
       <div className='flex items-center'>
-        <ChainLogo chainId={nft.chain_id} className='w-12 h-12 mr-2' />
+        <ChainLogo chainId={nft.chain_id} className='w-10 h-10 mr-4' />
         <div>
           <h2 className='text-2xl font-bold text-gray-800'>{nft.name}</h2>
           <p className='text-sm text-gray-500'>{nft.collection_name}</p>

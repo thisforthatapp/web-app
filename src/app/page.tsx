@@ -4,8 +4,10 @@ import { useState } from 'react'
 
 import { Footer } from '@/components'
 import { ActivityFeed, Grid } from '@/components/home'
+import { Offer } from '@/components/modals'
 import { useIsMobile } from '@/hooks'
 import { Activity, Image as ImageIcon } from '@/icons'
+import { NFTFeedItem as NFTFeedItemType, SimplifiedOfferItem } from '@/types/supabase'
 
 type Tab = 'grid' | 'feed'
 
@@ -13,15 +15,43 @@ export default function Home() {
   const isMobile = useIsMobile()
   const [activeTab, setActiveTab] = useState<Tab>('grid')
 
+  const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
+  const [viewOfferItem, setViewOfferItem] = useState<SimplifiedOfferItem | null>(null)
+
   return (
     <div className='absolute top-[75px] bottom-0 w-full flex'>
       <div className={`w-full relative bg-[#f9f9f9] flex ${isMobile ? 'mb-16' : 'mb-[50px]'}`}>
-        <ContentArea activeTab={activeTab} isMobile={isMobile} />
+        <ContentArea
+          activeTab={activeTab}
+          isMobile={isMobile}
+          setMakeOfferItem={setMakeOfferItem}
+          setViewOfferItem={setViewOfferItem}
+        />
       </div>
       {isMobile ? (
         <MobileFooter activeTab={activeTab} setActiveTab={setActiveTab} />
       ) : (
         <Footer />
+      )}
+      {makeOfferItem && (
+        <Offer
+          type='make_offer'
+          offerId={null}
+          initialNFT={makeOfferItem}
+          closeModal={() => setMakeOfferItem(null)}
+        />
+      )}
+      {viewOfferItem && (
+        <Offer
+          type={
+            viewOfferItem.status === 'accepted' || viewOfferItem.status === 'completed'
+              ? 'transaction'
+              : 'view_offer'
+          }
+          offerId={viewOfferItem.id}
+          initialNFT={null}
+          closeModal={() => setViewOfferItem(null)}
+        />
       )}
     </div>
   )
@@ -30,12 +60,23 @@ export default function Home() {
 interface ContentAreaProps {
   activeTab: Tab
   isMobile: boolean
+  setMakeOfferItem: (item: NFTFeedItemType) => void
+  setViewOfferItem: (item: SimplifiedOfferItem) => void
 }
 
-const ContentArea: React.FC<ContentAreaProps> = ({ activeTab, isMobile }) => (
+const ContentArea: React.FC<ContentAreaProps> = ({
+  activeTab,
+  isMobile,
+  setMakeOfferItem,
+  setViewOfferItem,
+}) => (
   <>
-    {(!isMobile || activeTab === 'grid') && <Grid />}
-    {(!isMobile || activeTab === 'feed') && <ActivityFeed showCollapsibleTab={!isMobile} />}
+    {(!isMobile || activeTab === 'grid') && (
+      <Grid setMakeOfferItem={setMakeOfferItem} setViewOfferItem={setViewOfferItem} />
+    )}
+    {(!isMobile || activeTab === 'feed') && (
+      <ActivityFeed showCollapsibleTab={!isMobile} setViewOfferItem={setViewOfferItem} />
+    )}
   </>
 )
 

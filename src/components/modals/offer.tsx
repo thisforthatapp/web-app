@@ -116,7 +116,7 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
   }, [hash, isConfirmed, txReceipt])
 
   const [view, setView] = useState<'main' | 'select' | 'create_trade' | null>(
-    type === 'make_offer' ? 'select' : type === 'view_offer' ? 'main' : 'transaction',
+    type === 'make_offer' ? 'select' : type === 'view_offer' ? 'main' : 'create_trade',
   )
   const [offerInfo, setOfferInfo] = useState<any | null>(null)
 

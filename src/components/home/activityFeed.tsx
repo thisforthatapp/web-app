@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useState } from 'react'
+import Link from 'next/link'
 
 import { NFTOfferDisplay } from '@/components/shared'
 import { useChatScroll } from '@/hooks'
@@ -6,6 +7,7 @@ import { CollapsibleIcon } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { Activity } from '@/types/supabase'
+import { SimplifiedOfferItem } from '@/types/supabase'
 import { FEED_ITEMS_PER_PAGE } from '@/utils/constants'
 import { formatDate } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
@@ -55,23 +57,68 @@ function renderMessageText(text: string) {
   return <>{parts}</>
 }
 
-const FeedItem: React.FC<{ activity: Activity }> = ({ activity }) => {
+const FeedItem: React.FC<{
+  activity: Activity
+  setViewOfferItem: (item: SimplifiedOfferItem) => void
+}> = ({ activity, setViewOfferItem }) => {
+  const isClickable = activity.activity_type !== 'message'
+
   return (
-    <div key={activity.id} className='border-b border-gray-100 p-4'>
+    <div
+      key={activity.id}
+      className={`border-b border-gray-100 p-4 ${
+        isClickable
+          ? 'cursor-pointer hover:bg-gray-100 transition-colors duration-200 group'
+          : ''
+      }`}
+      onClick={() => {
+        if (isClickable) {
+          const viewOfferItem: SimplifiedOfferItem = {
+            id: (activity.metadata as { offer_id: string }).offer_id,
+            status: activity.activity_type === 'offer_accepted' ? 'accepted' : 'pending',
+          }
+          setViewOfferItem(viewOfferItem)
+        }
+      }}
+    >
       <div className='flex items-start'>
-        <div className='relative w-10 h-10 mr-2 shrink-0'>
+        <Link
+          href={`/${activity.username}`}
+          target='_blank'
+          onClick={(e) => e.stopPropagation()}
+          className='relative w-10 h-10 mr-2 shrink-0'
+        >
           <img
             src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + activity.profile_pic_url}
             alt='Profile'
             className='w-full h-full rounded-full'
           />
-        </div>
+        </Link>
         <div className='flex-grow'>
-          <div className='flex items-center gap-x-2'>
-            <div className='text-sm font-semibold'>{activity.username}</div>
-            <div className='text-xs text-gray-400'>
-              {formatDate(new Date(activity.created_at))}
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center gap-x-2'>
+              <div className='text-sm font-semibold'>{activity.username}</div>
+              <div className='text-xs text-gray-400'>
+                {formatDate(new Date(activity.created_at))}
+              </div>
             </div>
+            {isClickable && (
+              <div className='flex items-center text-blue-500'>
+                <span className='text-sm mr-1'>View details</span>
+                <svg
+                  xmlns='http://www.w3.org/2000/svg'
+                  className='h-4 w-4'
+                  viewBox='0 0 20 20'
+                  fill='currentColor'
+                >
+                  <path
+                    fillRule='evenodd'
+                    d='M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z'
+                    clipRule='evenodd'
+                  />
+                </svg>
+              </div>
+            )}
           </div>
           {activity.activity_type === 'message' && (
             <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
@@ -94,8 +141,10 @@ const FeedItem: React.FC<{ activity: Activity }> = ({ activity }) => {
         activity.activity_type === 'offer_counter') && (
         <div className='mt-4 w-full'>
           <NFTOfferDisplay
-            userAOffers={(activity.metadata as any).offer.user}
-            userBOffers={(activity.metadata as any).offer.userCounter}
+            userAOffers={(activity.metadata as { offer: { user: never } }).offer.user}
+            userBOffers={
+              (activity.metadata as { offer: { userCounter: never } }).offer.userCounter
+            }
             size='medium'
           />
         </div>
@@ -106,7 +155,10 @@ const FeedItem: React.FC<{ activity: Activity }> = ({ activity }) => {
 
 type FilterType = 'all' | 'messages' | 'swaps'
 
-const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab = true }) => {
+const ActivityFeed: FC<{
+  showCollapsibleTab: boolean
+  setViewOfferItem: (item: SimplifiedOfferItem) => void
+}> = ({ showCollapsibleTab = true, setViewOfferItem }) => {
   const { user, profile } = useAuth()
   const { showToast } = useToast()
 
@@ -156,6 +208,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
     return () => {
       supabase.channel('activities').unsubscribe()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id])
 
   const fetchActivities = async (page: number, currentFilter: FilterType) => {
@@ -275,11 +328,11 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
     >
       {showCollapsibleTab && (
         <div
-          className={`bg-gray-800 cursor-pointer flex items-center justify-between ${feedCollapsed ? 'h-full flex-col' : ''}`}
+          className={`bg-white cursor-pointer flex items-center justify-between ${feedCollapsed ? 'h-full flex-col' : ''}`}
           onClick={toggleFeed}
         >
           {feedCollapsed ? (
-            <div className='w-full h-full flex flex-col items-center justify-between p-4 text-white'>
+            <div className='w-full h-full flex flex-col items-center justify-between p-4'>
               <div className='writing-vertical-lr transform rotate-180 text-lg font-semibold flex-grow flex items-center'>
                 Latest Activity
               </div>
@@ -287,7 +340,7 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
             </div>
           ) : (
             <>
-              <div className='text-white flex items-center py-3 px-4'>
+              <div className='flex items-center py-3 px-4 bg-white'>
                 <CollapsibleIcon collapsed={feedCollapsed} />
                 <span className='ml-2 font-semibold'>Latest Activity</span>
               </div>
@@ -299,10 +352,10 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
                       e.stopPropagation()
                       setFilter(filterType)
                     }}
-                    className={`px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 ${
+                    className={`px-3 py-1 rounded-md text-xs transition-all duration-200 ${
                       filter === filterType
-                        ? 'bg-white text-gray-800'
-                        : 'text-white hover:bg-gray-700'
+                        ? 'bg-black text-gray-200'
+                        : 'text-black hover:bg-gray-100'
                     }`}
                   >
                     {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
@@ -332,7 +385,11 @@ const ActivityFeed: FC<{ showCollapsibleTab: boolean }> = ({ showCollapsibleTab 
               </button>
             )}
             {filteredActivities.map((activity: Activity) => (
-              <FeedItem key={activity.id} activity={activity} />
+              <FeedItem
+                key={activity.id}
+                activity={activity}
+                setViewOfferItem={setViewOfferItem}
+              />
             ))}
           </div>
           <div className='p-4 bg-gray-50 border-t border-gray-100'>

@@ -1,8 +1,7 @@
 import { FC } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
-import { NFTImage, NftOptions, VerifiedBadge } from '@/components/shared'
+import { NFTImage, VerifiedBadge } from '@/components/shared'
 import { Tag } from '@/icons'
 import { NFTFeedItem as NFTFeedItemType } from '@/types/supabase'
 import { CHAIN_IDS_TO_CHAINS } from '@/utils/constants'
@@ -14,11 +13,9 @@ interface NFTItemProps {
 }
 
 const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
-  const router = useRouter()
-
   const navigateToUser = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault()
-    router.push(`/${item.nft_user_id_username}`)
+    window.open(`/${item.nft_user_id_username}`, '_blank')
   }
 
   return (
@@ -41,11 +38,12 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           hoverOn={true}
         />
         <div className='flex justify-between px-3 py-3'>
-          <div className='flex items-center w-full' onClick={navigateToUser}>
+          <div className='flex items-center w-full'>
             <img
               src={`${process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL}${item?.nft_user_id_profile_pic_url}`}
               alt={item?.nft_user_id_username}
               className='w-6 h-6 rounded-full'
+              onClick={navigateToUser}
             />
             <span className='text-lg ml-2 text-gray-700 font-semibold'>
               {item?.nft_user_id_username}

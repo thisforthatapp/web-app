@@ -1,4 +1,5 @@
 import React from 'react'
+import Link from 'next/link'
 
 import { NFTImage } from '@/components/shared'
 import { NFTOfferMetadata, OfferFeedItem, Profile } from '@/types/supabase'
@@ -10,16 +11,26 @@ interface NFTOfferItemProps {
   viewOffer: (offer: OfferFeedItem) => void
 }
 
-const UserInfo: React.FC<{ user: Profile }> = ({ user }) => (
-  <div className='flex items-center space-x-2'>
-    <div className='relative w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm'>
+const UserInfo: React.FC<{ user: Profile; isRight?: boolean }> = ({
+  user,
+  isRight = false,
+}) => (
+  <div className={`flex items-center space-x-2 ${isRight ? 'flex-row-reverse' : ''}`}>
+    <Link
+      href={`/${user.username}`}
+      target='_blank'
+      onClick={(e) => e.stopPropagation()}
+      className={`relative w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm ${isRight ? 'ml-2' : ''}`}
+    >
       <img
         src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user.profile_pic_url}
         alt={user.username}
         className='w-full h-full object-cover'
       />
-    </div>
-    <span className='font-semibold text-sm text-gray-800'>{user.username}</span>
+    </Link>
+    <span className={`font-semibold text-sm text-gray-800 ${isRight ? 'mr-2' : ''}`}>
+      {user.username}
+    </span>
   </div>
 )
 
@@ -56,7 +67,7 @@ const NFTOfferItem: React.FC<NFTOfferItemProps> = ({ item, userId, viewOffer }) 
           <UserInfo user={item.user} />
         </div>
         <div className='flex-1 flex justify-end'>
-          <UserInfo user={item.counter_user} />
+          <UserInfo user={item.counter_user} isRight />
         </div>
       </div>
       <div className='flex w-full bg-gray-100'>

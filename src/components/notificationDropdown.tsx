@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 import { Notifications } from '@/icons'
@@ -41,18 +42,24 @@ const SimpleNotification: React.FC<NotificationProps> = ({ notification }) => {
   }
 
   return (
-    <div className='flex items-center'>
-      <img
-        src={
-          process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + notification.metadata.profile_pic_url
-        }
-        alt='Profile Picture'
-        width={40}
-        height={40}
-        className='rounded-full mr-3'
-      />
+    <div className='flex items-center text-sm'>
+      <Link
+        href={`/${notification.metadata.username}`}
+        target='_blank'
+        onClick={(e) => e.stopPropagation()}
+        className='relative w-10 h-10 rounded-full mr-2'
+      >
+        <img
+          src={
+            process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL +
+            notification.metadata.profile_pic_url
+          }
+          alt='Profile Picture'
+          className='w-full h-full rounded-full'
+        />
+      </Link>
       <span>{getMessage()}</span>
-      <span className='ml-auto text-sm font-semibold text-gray-600'>
+      <span className='ml-auto text-xs text-gray-600'>
         {timeAgoShort(new Date(notification.updated_at))}
       </span>
     </div>
@@ -91,11 +98,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     <div className='relative' ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
-        className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors'
+        className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-100 transition-colors'
       >
         <Notifications className='w-[22px] h-[22px]' />
         {notifications.length > 0 && (
-          <span className='z-10 absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
+          <span className='z-10 absolute top-[4px] right-[4px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
             {notifications.length}
           </span>
         )}
@@ -110,13 +117,14 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
               notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className='px-4 py-3 hover:bg-gray-50 border-b border-gray-200 w-full cursor-pointer'
+                  className='px-4 py-2 hover:bg-gray-50 border-b border-gray-100 w-full cursor-pointer'
                   onClick={() => {
                     if (notification.notification_type !== 'follow') {
                       selectOffer(notification.metadata.offer_id!)
                     } else {
                       router.push(`/${notification.metadata.username}`)
                     }
+                    toggleDropdown()
                   }}
                 >
                   <SimpleNotification notification={notification} />
