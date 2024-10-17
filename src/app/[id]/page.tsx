@@ -62,11 +62,11 @@ const UserInfo = ({ username, bio }: { username: string | null; bio: string | nu
 
 const OfferGrid: React.FC<{
   items: OfferFeedItemType[]
-  expandOffer: (item: OfferFeedItemType) => void
-}> = ({ items, expandOffer }) => (
+  viewOffer: (item: OfferFeedItemType) => void
+}> = ({ items, viewOffer }) => (
   <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6'>
     {items.map((item) => (
-      <NFTOfferItem key={item.id} item={item} expandOffer={expandOffer} />
+      <NFTOfferItem key={item.id} item={item} viewOffer={viewOffer} />
     ))}
   </div>
 )
@@ -304,7 +304,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     setMakeOfferItem(nft)
   }
 
-  const expandOffer = async (offer: OfferFeedItemType) => {
+  const viewOffer = async (offer: OfferFeedItemType) => {
     setViewOfferItem(offer)
   }
 
@@ -364,7 +364,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
           </div>
           <UserNavigation tabOption={tabOption} onNavigationChange={handleTabChange} />
           {tabOption === 'offers' ? (
-            <OfferGrid items={items as OfferFeedItemType[]} expandOffer={expandOffer} />
+            <OfferGrid items={items as OfferFeedItemType[]} viewOffer={viewOffer} />
           ) : (
             <NFTGrid
               items={items as NFTFeedItemType[]}

@@ -1,16 +1,22 @@
-// pin, offer, load more, view offer
-
 'use client'
 
 import React, { FC, useEffect, useState } from 'react'
-
-import { NFTOfferItem, NFTImage, VerifiedBadge } from '@/components/shared'
-import { ChainLogo, Etherscan, Opensea, Tag } from '@/icons'
-import { NFT } from '@/types/supabase'
-import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
-import { supabase } from '@/utils/supabaseClient'
 import Link from 'next/link'
+
+import { Offer } from '@/components/modals'
+import { NFTImage, NFTOfferItem, VerifiedBadge } from '@/components/shared'
+import { ChainLogo, Etherscan, Opensea, Tag } from '@/icons'
+import { useAuth } from '@/providers/authProvider'
+import { useToast } from '@/providers/toastProvider'
+import {
+  NFT,
+  NFTFeedItem as NFTFeedItemType,
+  NFTOffers,
+  OfferFeedItem as OfferFeedItemType,
+} from '@/types/supabase'
+import { CHAIN_IDS_TO_CHAINS, GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { getBlockExplorerUrl, getOpenSeaUrl } from '@/utils/helpers'
+import { supabase } from '@/utils/supabaseClient'
 
 interface NFTPageProps {
   nft: NFT
@@ -18,9 +24,14 @@ interface NFTPageProps {
 }
 
 const NFTPage: FC<NFTPageProps> = ({ nft }) => {
-  const [items, setItems] = useState<any[]>([])
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
+  const [viewOfferItem, setViewOfferItem] = useState<OfferFeedItemType | null>(null)
+
+  const [items, setItems] = useState<NFTOffers[]>([])
   const [page, setPage] = useState(1)
-  const [hasMore, setHasMore] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
 
   const fetchItems = async (page: number) => {
     const { data, error } = await supabase
@@ -42,8 +53,8 @@ const NFTPage: FC<NFTPageProps> = ({ nft }) => {
     } else {
       setItems((prevOffers) => {
         const newOffers = data.filter(
-          (newOffer: any) =>
-            !(prevOffers as any[]).some((prevOffer) => prevOffer.id === newOffer.id),
+          (newOffer: NFTOffers) =>
+            !(prevOffers as NFTOffers[]).some((prevOffer) => prevOffer.id === newOffer.id),
         )
         return [...prevOffers, ...newOffers]
       })
@@ -57,26 +68,131 @@ const NFTPage: FC<NFTPageProps> = ({ nft }) => {
     setPage(1)
   }, [])
 
+  const makeOffer = async (nft: NFT) => {
+    if (!user) {
+      showToast(`⚠️ You have to login first`, 2500)
+      return
+    }
+
+    if (nft.user_id === user.id) {
+      showToast(`⚠️ You can't make an offer on your own NFT`, 2500)
+      return
+    }
+
+    const initialNFTOfferItem: NFTFeedItemType = {
+      nft_id: nft.id,
+      nft_name: nft.name,
+      nft_image: nft.image,
+      nft_chain_id: nft.chain_id,
+      nft_collection_contract: nft.collection_contract,
+      nft_token_id: nft.token_id,
+      nft_token_type: nft.token_type,
+      nft_collection_name: nft.collection_name,
+      nft_created_at: nft.created_at,
+      nft_thumbnail: nft.thumbnail,
+      nft_is_verified: nft.is_verified,
+      nft_verified_at: nft.verified_at,
+      nft_for_swap: nft.for_swap,
+      nft_pins: nft.pins,
+      nft_user_id: nft.user_id,
+      nft_user_id_username: nft.user_profile.username,
+      nft_user_id_profile_pic_url: nft.user_profile.profile_pic_url,
+    }
+
+    setMakeOfferItem(initialNFTOfferItem)
+  }
+
+  const viewOffer = async (offer: OfferFeedItemType) => {
+    setViewOfferItem(offer)
+  }
+
+  const pinItem = async (nft: NFT) => {
+    if (!user) {
+      showToast(`⚠️ You have to login first`, 2500)
+      return
+    }
+
+    showToast(`✅ NFT pinned`, 1500)
+
+    const { error } = await supabase.from('user_pins').upsert(
+      [
+        {
+          user_id: user?.id,
+          nft_id: nft.id,
+        },
+      ],
+      {
+        onConflict: 'user_id,nft_id',
+        ignoreDuplicates: true,
+      },
+    )
+    if (error) {
+      showToast(`⚠️ Error pinning NFT`, 2500)
+      console.error('Error pinning NFT:', error)
+      return
+    }
+  }
+
   return (
-    <div className={`flex w-full h-full relative`}>
-      <div className='mt-6 md:my-0 w-full bg-[#f9f9f9] flex flex-col md:flex-row justify-start md:justify-center md:gap-4 md:gap-8 p-0 md:p-8 pb-24 md:pb-8'>
-        <NFTSidebar nft={nft} />
-        <div className='flex flex-col flex-grow max-w-3xl px-4 md:px-0'>
-          <NFTTitle nft={nft} offerCount={items.length} hasMore={hasMore} />
-          <div className='flex-grow overflow-hidden'>
-            <OffersGrid items={items} />
+    <>
+      <div className={`flex w-full h-full relative`}>
+        <div className='mt-6 lg:my-0 w-full bg-[#f9f9f9] flex flex-col lg:flex-row justify-start lg:justify-center lg:gap-4 lg:gap-8 p-0 lg:p-8 pb-24 lg:pb-8'>
+          <NFTSidebar nft={nft} makeOffer={() => makeOffer(nft)} pinItem={() => pinItem(nft)} />
+          <div className='flex flex-col flex-grow w-full lg:max-w-3xl px-4 lg:px-0'>
+            <NFTTitle nft={nft} offerCount={items.length} hasMore={hasMore} />
+            <div className='flex-grow overflow-hidden'>
+              <div className='h-full overflow-y-auto pr-4 -mr-4'>
+                <OffersGrid items={items} viewOffer={viewOffer} />
+                {items.length > 0 && hasMore && (
+                  <button
+                    className='bg-gray-100 py-2 px-6 text-gray-600 hover:bg-gray-200 transition-colors duration-300 text-sm font-medium my-4 mx-auto rounded-full shadow-sm flex items-center'
+                    onClick={() => {
+                      const nextPage = page + 1
+                      setPage(nextPage)
+                      fetchItems(nextPage)
+                    }}
+                  >
+                    Load more
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className='h-[100px] lg:hidden' />
           </div>
-          <div className='h-[100px] md:hidden' />
         </div>
+        <MobileActionButtons makeOffer={() => makeOffer(nft)} pinItem={() => pinItem(nft)} />
       </div>
-      <MobileActionButtons />
-    </div>
+      {makeOfferItem && (
+        <Offer
+          type='make_offer'
+          offerId={null}
+          initialNFT={makeOfferItem}
+          closeModal={() => setMakeOfferItem(null)}
+        />
+      )}
+      {viewOfferItem && (
+        <Offer
+          type={
+            viewOfferItem.status === 'accepted' || viewOfferItem.status === 'completed'
+              ? 'transaction'
+              : 'view_offer'
+          }
+          offerId={viewOfferItem.id}
+          initialNFT={null}
+          closeModal={() => setViewOfferItem(null)}
+        />
+      )}
+    </>
   )
 }
 
-const NFTSidebar: FC<{ nft: any }> = ({ nft }) => (
-  <div className='w-full md:w-[360px] flex flex-col md:sticky md:top-8 md:overflow-y-auto hide-scrollbar'>
-    <div className='bg-white rounded-lg shadow-md mb-4 mx-4 md:mx-0'>
+const NFTSidebar: FC<{
+  nft: NFT
+  makeOffer: () => void
+  pinItem: () => void
+}> = ({ nft, makeOffer, pinItem }) => (
+  <div className='w-full lg:w-[360px] flex flex-col lg:sticky lg:top-8 lg:overflow-y-auto hide-scrollbar'>
+    <div className='bg-white rounded-lg shadow-md mb-4 mx-4 lg:mx-0 max-w-[260px] self-center lg:self-auto lg:max-w-none'>
       <div className='relative'>
         <VerifiedBadge
           id={nft.id}
@@ -85,8 +201,8 @@ const NFTSidebar: FC<{ nft: any }> = ({ nft }) => (
           tokenId={nft.token_id}
           isVerified={true}
           className='inline-block absolute right-0 top-2 z-10 w-12 h-12'
-          chainId={nft.chain_id}
-          collectionContract={nft.nft_collection_contract}
+          chainId={nft.chain_id.toString()}
+          collectionContract={nft.collection_contract}
         />
         <NFTImage src={nft?.image} alt={nft?.name} fallback={nft?.name} />
       </div>
@@ -107,11 +223,11 @@ const NFTSidebar: FC<{ nft: any }> = ({ nft }) => (
       </div>
     </div>
     <ExternalLinks
-      chainId={nft.chain_id}
+      chainId={nft.chain_id.toString()}
       collectionContract={nft.collection_contract}
       tokenId={nft.token_id}
     />
-    <ActionButtons className='hidden md:flex' />
+    <ActionButtons className='hidden lg:flex' makeOffer={makeOffer} pinItem={pinItem} />
   </div>
 )
 
@@ -120,7 +236,7 @@ const ExternalLinks: FC<{ chainId: string; collectionContract: string; tokenId: 
   collectionContract,
   tokenId,
 }) => (
-  <div className='flex flex-row md:flex-col gap-2 px-4 md:px-0 mb-4'>
+  <div className='flex flex-row lg:flex-col gap-2 px-4 lg:px-0 mb-4'>
     <Link
       href={getOpenSeaUrl(chainId, collectionContract, tokenId)}
       target='_blank'
@@ -140,7 +256,7 @@ const ExternalLinks: FC<{ chainId: string; collectionContract: string; tokenId: 
   </div>
 )
 
-const NFTTitle: FC<{ nft: any; offerCount: number; hasMore: boolean }> = ({
+const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
   nft,
   offerCount,
   hasMore,
@@ -162,41 +278,44 @@ const NFTTitle: FC<{ nft: any; offerCount: number; hasMore: boolean }> = ({
   </div>
 )
 
-const OffersGrid: FC<{ items: any[] }> = ({ items }) => (
-  <div className='h-full overflow-y-auto pr-4 -mr-4'>
-    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-      {items.map((item) => (
-        <NFTOfferItem
-          key={item.id}
-          item={item.user_offers}
-          viewOffer={() => {}}
-          userId={null}
-        />
-      ))}
-    </div>
+const OffersGrid: FC<{ items: NFTOffers[]; viewOffer: (offer: OfferFeedItemType) => void }> = ({
+  items,
+  viewOffer,
+}) => (
+  <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+    {items.map((item) => (
+      <NFTOfferItem key={item.id} item={item.user_offers} viewOffer={viewOffer} userId={null} />
+    ))}
   </div>
 )
 
-const ActionButtons: FC<{ className?: string }> = ({ className }) => (
-  <div className={`flex gap-4 ${className} md:mb-8`}>
+const ActionButtons: FC<{
+  className?: string
+  makeOffer: () => void
+  pinItem: () => void
+}> = ({ className, makeOffer, pinItem }) => (
+  <div className={`flex gap-4 ${className} lg:mb-8`}>
     <ActionButton
       emoji='📌'
       text='Pin'
-      onClick={() => {}}
+      onClick={pinItem}
       className='bg-red-50 hover:bg-red-100'
     />
     <ActionButton
       emoji='🤝'
       text='Offer'
-      onClick={() => {}}
+      onClick={makeOffer}
       className='bg-yellow-50 hover:bg-yellow-100'
     />
   </div>
 )
 
-const MobileActionButtons: FC = () => (
-  <div className='fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg md:hidden'>
-    <ActionButtons />
+const MobileActionButtons: FC<{ makeOffer: () => void; pinItem: () => void }> = ({
+  makeOffer,
+  pinItem,
+}) => (
+  <div className='fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg lg:hidden'>
+    <ActionButtons makeOffer={makeOffer} pinItem={pinItem} />
   </div>
 )
 

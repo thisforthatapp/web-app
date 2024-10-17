@@ -12,7 +12,7 @@ interface NFTItemProps {
 }
 
 const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
-  <div className='flex flex-col bg-white rounded-lg shadow-md overflow-hidden relative'>
+  <div className='flex flex-col bg-white shadow-md overflow-hidden relative'>
     <VerifiedBadge
       id={item.nft_id}
       chainName={CHAIN_IDS_TO_CHAINS[item.nfts.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
@@ -23,7 +23,12 @@ const NFTImageWrapper: React.FC<{ item: UserNFT }> = ({ item }) => (
       chainId={item.nfts.chain_id.toString()}
       collectionContract={item.nfts.collection_contract}
     />
-    <NFTImage src={item.nfts.image} alt={item.nfts.name} fallback={item.nfts.name} />
+    <NFTImage
+      src={item.nfts.image}
+      alt={item.nfts.name}
+      rounded='all'
+      fallback={item.nfts.name}
+    />
   </div>
 )
 

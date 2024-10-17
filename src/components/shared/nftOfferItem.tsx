@@ -1,9 +1,8 @@
 import React from 'react'
 
+import { NFTImage } from '@/components/shared'
 import { NFTOfferMetadata, OfferFeedItem, Profile } from '@/types/supabase'
 import { timeAgoShort } from '@/utils/helpers'
-import { NFTImage } from '@/components/shared'
-import Link from 'next/link'
 
 interface NFTOfferItemProps {
   item: OfferFeedItem
@@ -31,6 +30,7 @@ const NFTGrid: React.FC<{ nfts: NFTOfferMetadata[] }> = ({ nfts }) => {
     <div className={`grid ${gridClass} gap-1 p-2 h-full`}>
       {nfts.map((nft) => (
         <NFTImage
+          key={nft.id}
           src={nft.image}
           alt={nft.name}
           fallback={nft.name}

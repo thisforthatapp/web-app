@@ -45,6 +45,8 @@ export interface NFT {
   verified_at: string
   user_id: string
   possible_spam?: boolean
+  pins: number // not being used
+  for_swap: boolean
   user_profile: Profile
 }
 
@@ -55,7 +57,7 @@ export interface NFTFeedItem {
   nft_created_at: string
   nft_id: string
   nft_name: string
-  nft_pins: number
+  nft_pins: number // not being used
   nft_image: string
   nft_thumbnail: string
   nft_token_id: string
@@ -66,6 +68,15 @@ export interface NFTFeedItem {
   nft_is_verified: boolean
   nft_verified_at: string | null
   nft_for_swap: boolean
+}
+
+export interface NFTOffers {
+  id: string
+  nft_id: string
+  offer_id: string
+  created_at: string
+  updated_at: string
+  user_offers: OfferFeedItem
 }
 
 export interface NFTOfferMetadata {
@@ -89,7 +100,7 @@ export interface OfferFeedItem {
   updated_at: string
   user: Profile
   counter_user: Profile
-  chain_id: Number
+  chain_id: number
   onchain_trade_id: string | null
   onchain_done: boolean
   onchain_tx: string | null
