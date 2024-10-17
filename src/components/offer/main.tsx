@@ -19,7 +19,7 @@ const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
   isLastItem,
 }) => {
   return (
-    <div className={`w-full ${!isLastItem ? 'border-b border-gray-100' : ''}`}>
+    <div className={`w-full ${!isLastItem ? 'border-b border-gray-200' : ''}`}>
       <div className='p-4'>
         <div className='flex items-start mb-2'>
           <Link
@@ -153,8 +153,9 @@ const Main: FC<{
   const isInitialOfferUser = user?.id === info?.user_id
   const isCounterUser = user?.id === info?.user_id_counter
   const isLatestOfferUser = user?.id === info?.offer_user_id
-  const isLoggedIn = !!user
+
   const isParticipant = isInitialOfferUser || isCounterUser
+  const userToAct = info?.offer_user_id === info?.user_id ? info?.counter_user : info?.user
 
   return (
     <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
@@ -191,72 +192,64 @@ const Main: FC<{
           ))}
       </div>
 
-      <div className='p-4 border-t border-gray-100'>
-        <form onSubmit={submitMessage} className='flex gap-x-2'>
-          <input
-            type='text'
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder='Send a message...'
-            className='flex-grow px-4 py-2 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
-          />
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            type='submit'
-            className='bg-gray-800 text-white px-6 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200'
-            disabled={!newMessage.trim() || !hasProfile}
-          >
-            Send
-          </motion.button>
-        </form>
-      </div>
-
-      <div className='flex items-center justify-between p-4 pt-0'>
-        {!isLoggedIn || !isParticipant ? (
-          <div className='flex flex-col items-center justify-center h-full bg-gray-50 p-4'>
-            <p className='text-lg text-gray-700'>
-              Waiting for{' '}
-              {info?.offer_user_id === info?.user_id ? info?.user?.username : 'counter user'} to
-              respond...
-            </p>
-          </div>
-        ) : isLatestOfferUser ? (
-          <div className='text-center w-full'>
-            <p className='text-gray-700 font-semibold'>
-              Waiting for a response from the other user...
-            </p>
-          </div>
-        ) : (
-          <div className='flex flex-col w-full'>
-            <div className='flex w-full gap-x-4'>
+      {isParticipant && (
+        <>
+          <div className='p-4 border-t border-gray-100'>
+            <form onSubmit={submitMessage} className='flex gap-x-2'>
+              <input
+                type='text'
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder='Send a message...'
+                className='flex-grow px-4 py-2 bg-white border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200'
+              />
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className='w-full bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-                onClick={counterOffer}
+                type='submit'
+                className='bg-gray-800 text-white px-6 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200'
+                disabled={!newMessage.trim() || !hasProfile}
               >
-                Counter
+                Send
               </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className='w-full bg-green-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-                onClick={acceptOffer}
-              >
-                Accept
-              </motion.button>
-            </div>
-            <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
-              Accepting the offer will start the on-chain swap.
-              <br />
-              <a href='#' className='text-gray-500 font-semibold underline'>
-                Learn more about swapping here.
-              </a>
-            </div>
+            </form>
           </div>
-        )}
-      </div>
+          <div className='flex items-center justify-between p-4 pt-0'>
+            {!isParticipant || isLatestOfferUser ? (
+              <div className='text-lg text-gray-700 text-center w-full'>
+                Waiting for <b>{userToAct?.username}</b> to respond
+              </div>
+            ) : (
+              <div className='flex flex-col w-full'>
+                <div className='flex w-full gap-x-4'>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className='w-full bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                    onClick={counterOffer}
+                  >
+                    Counter
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className='w-full bg-green-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
+                    onClick={acceptOffer}
+                  >
+                    Accept
+                  </motion.button>
+                </div>
+                <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
+                  Accepting creates an on-chain swap.{' '}
+                  <a href='#' className='ml-0.5 text-gray-500 font-semibold underline'>
+                    Learn more
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

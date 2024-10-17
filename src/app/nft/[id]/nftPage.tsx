@@ -136,13 +136,17 @@ const NFTPage: FC<NFTPageProps> = ({ nft }) => {
   return (
     <>
       <div className={`flex w-full h-full relative`}>
-        <div className='mt-6 lg:my-0 w-full bg-[#f9f9f9] flex flex-col lg:flex-row justify-start lg:justify-center lg:gap-4 lg:gap-8 p-0 lg:p-8 pb-24 lg:pb-8'>
+        <div className='mt-6 lg:my-0 w-full bg-[#f9f9f9] flex flex-col lg:flex-row justify-start lg:justify-center lg:gap-4 lg:gap-8 p-0 lg:p-8 pb-24 lg:pb-16'>
           <NFTSidebar nft={nft} makeOffer={() => makeOffer(nft)} pinItem={() => pinItem(nft)} />
           <div className='flex flex-col flex-grow w-full lg:max-w-3xl px-4 lg:px-0'>
             <NFTTitle nft={nft} offerCount={items.length} hasMore={hasMore} />
             <div className='flex-grow overflow-hidden'>
-              <div className='h-full overflow-y-auto pr-4 -mr-4'>
-                <OffersGrid items={items} viewOffer={viewOffer} />
+              <div className='h-full overflow-y-auto hide-scrollbar'>
+                <OffersGrid
+                  items={items}
+                  viewOffer={viewOffer}
+                  userId={user ? user.id : null}
+                />
                 {items.length > 0 && hasMore && (
                   <button
                     className='bg-gray-100 py-2 px-6 text-gray-600 hover:bg-gray-200 transition-colors duration-300 text-sm font-medium my-4 mx-auto rounded-full shadow-sm flex items-center'
@@ -207,7 +211,11 @@ const NFTSidebar: FC<{
         <NFTImage src={nft?.image} alt={nft?.name} fallback={nft?.name} />
       </div>
       <div className='py-4 flex items-center justify-center'>
-        <Link href={`/${nft.user_profile.username}`} className='flex items-center w-full px-4'>
+        <Link
+          href={`/${nft.user_profile.username}`}
+          target='_blank'
+          className='flex items-center w-full px-4'
+        >
           <img
             src={
               process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + nft.user_profile.profile_pic_url
@@ -278,13 +286,19 @@ const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
   </div>
 )
 
-const OffersGrid: FC<{ items: NFTOffers[]; viewOffer: (offer: OfferFeedItemType) => void }> = ({
-  items,
-  viewOffer,
-}) => (
-  <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
+const OffersGrid: FC<{
+  items: NFTOffers[]
+  viewOffer: (offer: OfferFeedItemType) => void
+  userId: string | null
+}> = ({ items, viewOffer, userId }) => (
+  <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mb-2'>
     {items.map((item) => (
-      <NFTOfferItem key={item.id} item={item.user_offers} viewOffer={viewOffer} userId={null} />
+      <NFTOfferItem
+        key={item.id}
+        item={item.user_offers}
+        viewOffer={viewOffer}
+        userId={userId}
+      />
     ))}
   </div>
 )
@@ -294,7 +308,7 @@ const ActionButtons: FC<{
   makeOffer: () => void
   pinItem: () => void
 }> = ({ className, makeOffer, pinItem }) => (
-  <div className={`flex gap-4 ${className} lg:mb-8`}>
+  <div className={`flex gap-4 ${className} lg:mb-2`}>
     <ActionButton
       emoji='📌'
       text='Pin'

@@ -1,237 +1,190 @@
-// TODO: this needs lot of work
-
-import { FC, useState } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 
-import { Close } from '@/icons'
-import { Checkmark } from '@/icons'
+import { ChainLogo, Checkmark, ChevronDown, ChevronUp, Close } from '@/icons'
+
+interface Asset {
+  id: string
+  name: string
+  image: string
+  uploaded: boolean
+}
+
+interface User {
+  username: string
+  profile_pic_url: string
+}
+
+interface Offer {
+  user: Asset[]
+  userCounter: Asset[]
+}
+
+interface TradeInfo {
+  user: User
+  counter_user: User
+  offer: Offer
+}
 
 interface Props {
-  info: any
+  info: TradeInfo
   closeModal: () => void
+  onUpload: (assetId: string) => Promise<void>
+  onBackToChat: () => void
+  onCancelTrade: () => void
 }
 
-interface DealParty {
-  id: string
-  name: string
-  avatar: string
-}
+const Transaction: React.FC<Props> = ({
+  info,
+  closeModal,
+  onUpload,
+  onBackToChat,
+  onCancelTrade,
+}) => {
+  const [uploading, setUploading] = useState<string | null>(null)
+  const [isMessageExpanded, setIsMessageExpanded] = useState(false)
 
-interface DealAsset {
-  type: 'NFT' | 'Token'
-  name: string
-  image?: string
-  amount?: string
-}
-
-interface DealInteraction {
-  id: string
-  type: 'message' | 'offer' | 'counterOffer' | 'rejection'
-  sender: string
-  content: string
-  timestamp: Date
-  offer?: {
-    giving: DealAsset[]
-    receiving: DealAsset[]
-  }
-}
-
-interface DealStatus {
-  stage: 'negotiation' | 'accepted' | 'deposit' | 'confirmation' | 'execution' | 'completed'
-  party1Completed?: boolean
-  party2Completed?: boolean
-}
-
-interface DealStage {
-  key: 'accepted' | 'deposit' | 'confirmation' | 'execution' | 'completed'
-  label: string
-  description: string
-}
-
-const Transaction: FC<Props> = ({ info, closeModal }) => {
-  const [dealStatus, setDealStatus] = useState<DealStatus>({
-    stage: 'deposit',
-  })
-
-  const [showAcceptanceOverlay, setShowAcceptanceOverlay] = useState(false)
-  const [currentStage, setCurrentStage] = useState<DealStage['key']>('deposit')
-
-  // Mock data
-  const offeror: DealParty = {
-    id: '1',
-    name: 'Alice',
-    avatar: '/temp/alice-avatar.png',
+  const handleUpload = async (assetId: string) => {
+    setUploading(assetId)
+    await onUpload(assetId)
+    setUploading(null)
   }
 
-  const initialOffer: DealInteraction = {
-    id: '1',
-    type: 'offer',
-    sender: offeror.id,
-    content: 'Initial offer',
-    timestamp: new Date(),
-    offer: {
-      giving: [{ type: 'Token', name: 'ETH', amount: '2.5' }],
-      receiving: [
-        {
-          type: 'NFT',
-          name: 'CryptoPunk #1234',
-          image: '/temp/cryptopunk.png',
-        },
-      ],
-    },
-  }
+  const allUploaded = [...info.offer.user, ...info.offer.userCounter].every(
+    (asset) => asset.uploaded,
+  )
 
-  const dealStages: DealStage[] = [
-    {
-      key: 'deposit',
-      label: 'Deposit',
-      description: 'Deposit your assets to the smart contract.',
-    },
-    {
-      key: 'confirmation',
-      label: 'Confirm',
-      description: 'Verify that both parties have deposited the correct assets.',
-    },
-    {
-      key: 'execution',
-      label: 'Execute',
-      description: 'The smart contract is executing the asset swap.',
-    },
-  ]
-
-  return (
-    <div className='flex flex-col h-full'>
-      {/* Top bar */}
-      <div className='border-b p-4 flex justify-between items-center'>
-        <div className='flex items-center'>
-          <img
-            src={offeror.avatar}
-            alt={offeror.name}
-            className='w-10 h-10 rounded-full mr-3'
-          />
-          <div>
-            <p className='font-semibold'>{offeror.name}</p>
-            <p className='text-sm text-gray-500'>
-              Offer made {initialOffer.timestamp.toLocaleString()}
-            </p>
-          </div>
-        </div>
-        <div className='text-sm font-semibold bg-yellow-100 text-yellow-800 px-2 py-1 rounded'>
-          {dealStatus.stage.charAt(0).toUpperCase() + dealStatus.stage.slice(1)}
-        </div>
-        <Link href={`/nft/1`} onClick={closeModal}>
-          <Close className='w-6 h-6' />
-        </Link>
+  const renderAssetGrid = (assets: Asset[], user: User) => (
+    <div className='space-y-4'>
+      <div className='flex items-center space-x-4'>
+        <img
+          src={user.profile_pic_url}
+          alt={user.username}
+          className='w-12 h-12 rounded-full border-2 border-blue-500'
+        />
+        <h3 className='text-xl font-semibold text-gray-800'>{user.username}'s Offer</h3>
       </div>
-
-      <div className='bg-white z-20 flex flex-col'>
-        <div className='flex-grow overflow-y-auto'>
-          {/* Progress header */}
-          <div className='flex justify-between p-4 bg-gray-100'>
-            {dealStages.map((stage, index) => (
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+        {assets.map((asset) => (
+          <div
+            key={asset.id}
+            className='relative group bg-white rounded-xl shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105 overflow-hidden'
+          >
+            <img src={asset.image} alt={asset.name} className='w-full h-32 object-cover' />
+            <div className='p-3'>
+              <p className='text-sm font-medium text-gray-800 truncate'>{asset.name}</p>
               <button
-                key={stage.key}
-                onClick={() => setCurrentStage(stage.key)}
-                className={`flex flex-col items-center space-y-2 ${
-                  currentStage === stage.key ? 'text-blue-600' : 'text-gray-500'
-                }`}
-                disabled={index > dealStages.findIndex((s) => s.key === currentStage)}
+                onClick={() => handleUpload(asset.id)}
+                disabled={asset.uploaded || uploading === asset.id}
+                className={`mt-2 w-full px-3 py-1 rounded-full text-white font-semibold text-sm ${
+                  asset.uploaded
+                    ? 'bg-green-500'
+                    : uploading === asset.id
+                      ? 'bg-yellow-500'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                } transition-colors`}
               >
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    index <= dealStages.findIndex((s) => s.key === currentStage)
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-300 text-gray-600'
-                  }`}
-                >
-                  {index < dealStages.findIndex((s) => s.key === currentStage) ? (
-                    <Checkmark className='w-5 h-5' />
-                  ) : (
-                    index + 1
-                  )}
-                </div>
-                <span className='text-xs text-center'>{stage.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Stage details */}
-          <div className='p-6'>
-            <h4 className='text-xl font-semibold mb-4'>
-              {dealStages.find((s) => s.key === currentStage)?.label}
-            </h4>
-            <p className='mb-6'>
-              {dealStages.find((s) => s.key === currentStage)?.description}
-            </p>
-
-            {/* Render stage-specific content */}
-            {currentStage === 'deposit' && (
-              <div className='bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded'>
-                <p className='font-bold'>Action Required:</p>
-                <p>Please deposit your assets to the smart contract address: 0x1234...5678</p>
-                {/* Add deposit form or integration with wallet here */}
-              </div>
-            )}
-
-            {currentStage === 'confirmation' && (
-              <div className='bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded'>
-                <p className='font-bold'>Verification:</p>
-                <p>Please verify that the following assets have been deposited:</p>
-                {/* Add list of deposited assets here */}
-              </div>
-            )}
-
-            {currentStage === 'execution' && (
-              <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
-                <p className='font-bold'>In Progress:</p>
-                <p>
-                  The smart contract is currently executing the asset swap. This process is
-                  automatic and may take a few minutes.
-                </p>
-                {/* Add progress indicator or transaction hash here */}
-              </div>
-            )}
-
-            {currentStage === 'completed' && (
-              <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded'>
-                <p className='font-bold'>Success:</p>
-                <p>
-                  The trade has been successfully completed. You should now see the new assets
-                  in your wallet.
-                </p>
-                {/* Add transaction details or link to block explorer here */}
-              </div>
-            )}
-
-            {/* Navigation buttons */}
-            <div className='mt-8 flex justify-between'>
-              <button
-                onClick={() => {
-                  const currentIndex = dealStages.findIndex((s) => s.key === currentStage)
-                  if (currentIndex > 0) {
-                    setCurrentStage(dealStages[currentIndex - 1].key)
-                  }
-                }}
-                disabled={currentStage === 'accepted'}
-                className='bg-gray-300 text-gray-700 px-4 py-2 rounded disabled:opacity-50'
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => {
-                  const currentIndex = dealStages.findIndex((s) => s.key === currentStage)
-                  if (currentIndex < dealStages.length - 1) {
-                    setCurrentStage(dealStages[currentIndex + 1].key)
-                  } else {
-                    setShowAcceptanceOverlay(false)
-                    // Handle deal completion here
-                  }
-                }}
-                className='bg-blue-600 text-white px-4 py-2 rounded'
-              >
-                {currentStage === 'completed' ? 'Finish' : 'Next'}
+                {asset.uploaded
+                  ? 'Deposited'
+                  : uploading === asset.id
+                    ? 'Depositing...'
+                    : 'Deposit'}
               </button>
             </div>
+            <div
+              className={`absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center ${asset.uploaded ? 'bg-green-500' : 'bg-gray-300'}`}
+            >
+              <Checkmark className='w-4 h-4 text-white' />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+      <div className='bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-2xl overflow-hidden max-w-4xl w-full max-h-[90vh] overflow-y-auto'>
+        <div className='bg-gradient-to-r from-blue-600 to-cyan-600 p-6 relative'>
+          <h1 className='text-3xl font-bold text-white mb-2'>NFT Swap in Progress</h1>
+          <p className='text-blue-100'>
+            Verify details and complete deposits to finalize the trade
+          </p>
+          <button
+            onClick={closeModal}
+            className='absolute top-4 right-4 text-white hover:text-blue-200'
+          >
+            <Close className='w-6 h-6' />
+          </button>
+        </div>
+
+        <div className='p-6 space-y-8'>
+          <div className='bg-blue-100 border-l-4 border-blue-500 p-4 rounded-r-lg'>
+            <div
+              className='flex justify-between items-center cursor-pointer'
+              onClick={() => setIsMessageExpanded(!isMessageExpanded)}
+            >
+              <p className='text-blue-700 font-semibold'>
+                Please verify all details in the block explorer before depositing.
+              </p>
+              {isMessageExpanded ? (
+                <ChevronUp className='w-5 h-5 text-blue-500' />
+              ) : (
+                <ChevronDown className='w-5 h-5 text-blue-500' />
+              )}
+            </div>
+            {isMessageExpanded && (
+              <p className='mt-2 text-blue-600'>
+                Once each asset is deposited, the contract will automatically send it to the
+                counterparty. You can cancel the trade at any time before all assets are
+                deposited, and all assets will be returned to their original owners.
+              </p>
+            )}
+          </div>
+
+          <div className='flex items-center justify-center space-x-4 bg-white py-3 rounded-lg shadow-md'>
+            <ChainLogo chainId={1} className='w-8 h-8' />
+            <Link
+              href='#'
+              className='text-blue-600 hover:text-blue-800 transition-colors font-semibold'
+            >
+              Verify on Block Explorer
+            </Link>
+          </div>
+
+          <div className='space-y-8'>
+            {renderAssetGrid(info.offer.user, info.user)}
+            {renderAssetGrid(info.offer.userCounter, info.counter_user)}
+          </div>
+
+          <div className='text-center'>
+            {allUploaded ? (
+              <div className='text-2xl font-bold text-green-600 animate-pulse bg-green-100 py-4 rounded-lg'>
+                🎉 All assets deposited! Swap completed successfully. 🎉
+              </div>
+            ) : (
+              <div className='text-lg text-gray-600 bg-blue-100 py-4 rounded-lg'>
+                Deposit all assets to complete the swap. Progress:{' '}
+                {info.offer.user.filter((a) => a.uploaded).length +
+                  info.offer.userCounter.filter((a) => a.uploaded).length}{' '}
+                / {info.offer.user.length + info.offer.userCounter.length}
+              </div>
+            )}
+          </div>
+
+          <div className='flex justify-between'>
+            <button
+              onClick={onBackToChat}
+              className='px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors font-semibold'
+            >
+              Back to Chat
+            </button>
+            <button
+              onClick={onCancelTrade}
+              className='px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors font-semibold'
+            >
+              Cancel Trade
+            </button>
           </div>
         </div>
       </div>

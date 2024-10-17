@@ -66,7 +66,7 @@ const FeedItem: React.FC<{
   return (
     <div
       key={activity.id}
-      className={`border-b border-gray-100 p-4 ${
+      className={`border-b border-gray-200 p-4 ${
         isClickable
           ? 'cursor-pointer hover:bg-gray-100 transition-colors duration-200 group'
           : ''

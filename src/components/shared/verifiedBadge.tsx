@@ -72,7 +72,7 @@ const VerifiedBadge: React.FC<NFTInfoDropdownProps> = ({
         whileTap={{ scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 400, damping: 17 }}
       >
-        <Verified isVerified={isVerified} className='w-10 h-10' />
+        <Verified isVerified={isVerified} className='w-9 h-9' />
       </motion.button>
 
       <AnimatePresence>

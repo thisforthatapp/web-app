@@ -19,7 +19,7 @@ export default function Verified({
       viewBox='0 0 120 120'
       width='32'
       height='32'
-      style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.3))' }}
+      // style={{ filter: 'drop-shadow(0px 2px 3px rgba(0, 0, 0, 0.3))' }}
       {...props}
     >
       <g>

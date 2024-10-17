@@ -69,6 +69,35 @@
   },
   {
     "type": "function",
+    "name": "getTradeAssets",
+    "inputs": [{ "name": "_tradeId", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [
+      { "name": "participants", "type": "address[]", "internalType": "address[]" },
+      {
+        "name": "assets",
+        "type": "tuple[][]",
+        "internalType": "struct TFTV1Escrow.Asset[][]",
+        "components": [
+          { "name": "token", "type": "address", "internalType": "address" },
+          { "name": "tokenId", "type": "uint256", "internalType": "uint256" },
+          { "name": "amount", "type": "uint256", "internalType": "uint256" },
+          {
+            "name": "assetType",
+            "type": "uint8",
+            "internalType": "enum TFTV1Escrow.AssetType"
+          },
+          { "name": "recipient", "type": "address", "internalType": "address" },
+          { "name": "isDeposited", "type": "bool", "internalType": "bool" }
+        ]
+      },
+      { "name": "isActive", "type": "bool", "internalType": "bool" },
+      { "name": "depositedAssetCount", "type": "uint256", "internalType": "uint256" },
+      { "name": "totalAssetCount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getTradeStatus",
     "inputs": [{ "name": "_tradeId", "type": "uint256", "internalType": "uint256" }],
     "outputs": [
@@ -273,5 +302,6 @@
     "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
   },
   { "type": "error", "name": "TradeNotActive", "inputs": [] },
+  { "type": "error", "name": "TradeNotFound", "inputs": [] },
   { "type": "error", "name": "UnsupportedAssetType", "inputs": [] }
 ]

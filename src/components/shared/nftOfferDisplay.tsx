@@ -1,10 +1,12 @@
-import React from 'react'
-import { NFTImage } from '@/components/shared'
+import React, { useState } from 'react'
 import Link from 'next/link'
+
+import { NFTImage } from '@/components/shared'
 
 interface NFT {
   id: string
   image: string
+  name: string
 }
 
 interface NFTOfferDisplayProps {
@@ -13,28 +15,25 @@ interface NFTOfferDisplayProps {
   size?: 'small' | 'medium' | 'large'
 }
 
-const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large' }> = ({ nft, size }) => {
-  const imageSizeClasses = {
-    small: 'w-8 h-8',
-    medium: 'w-10 h-10',
-    large: 'w-12 h-12',
-  }
-  const textSizeClasses = {
-    small: 'text-xs',
-    medium: 'text-sm',
-    large: 'text-base',
+const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large'; isOpen: boolean }> = ({
+  nft,
+  size,
+  isOpen,
+}) => {
+  const sizeClasses = {
+    small: 'w-6 h-6',
+    medium: 'w-8 h-8',
+    large: 'w-10 h-10',
   }
 
   return (
     <Link
       href={`/nft/${nft.id}`}
       target='_blank'
-      className='flex items-center space-x-2 p-2 bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-200'
+      className={`flex items-center space-x-2 p-1 rounded-md overflow-hidden transition-all duration-200 ${isOpen ? 'bg-white bg-opacity-50 hover:bg-opacity-75' : ''}`}
       onClick={(e) => e.stopPropagation()}
     >
-      <div
-        className={`${imageSizeClasses[size]} relative rounded-md overflow-hidden flex-shrink-0`}
-      >
+      <div className={`${sizeClasses[size]} relative rounded-md overflow-hidden flex-shrink-0`}>
         <NFTImage
           src={nft.image}
           alt={nft.name}
@@ -43,11 +42,9 @@ const NFTItem: React.FC<{ nft: NFT; size: 'small' | 'medium' | 'large' }> = ({ n
           fallback={nft.name}
         />
       </div>
-      <span
-        className={`${textSizeClasses[size]} font-medium text-gray-800 break-words flex-grow`}
-      >
-        {nft.name}
-      </span>
+      {isOpen && (
+        <span className='text-xs font-medium text-gray-800 truncate flex-grow'>{nft.name}</span>
+      )}
     </Link>
   )
 }
@@ -57,6 +54,8 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
   userBOffers,
   size = 'small',
 }) => {
+  const [isOpen, setIsOpen] = useState(false)
+
   const containerPadding = {
     small: 'p-2',
     medium: 'p-3',
@@ -65,12 +64,44 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
 
   return (
     <div
-      className={`w-full bg-[#05a3ff] ${containerPadding[size]} rounded-xl shadow-md overflow-x-auto hide-scrollbar overflow-y-hidden`}
+      className={`w-full bg-gradient-to-r from-blue-100 to-purple-100 ${containerPadding[size]} rounded-xl shadow-md overflow-hidden relative`}
     >
-      <div className='flex gap-x-3'>
-        <OfferColumn offers={userAOffers} size={size} />
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsOpen(!isOpen)
+        }}
+        className='absolute top-2 right-2 bg-white bg-opacity-50 hover:bg-opacity-75 rounded-full p-1 transition-colors duration-200 z-10'
+      >
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          className='h-4 w-4 text-gray-600'
+          fill='none'
+          viewBox='0 0 24 24'
+          stroke='currentColor'
+        >
+          {isOpen ? (
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M19 9l-7 7-7-7'
+            />
+          ) : (
+            <path
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              strokeWidth={2}
+              d='M9 5l7 7-7 7'
+            />
+          )}
+        </svg>
+      </button>
+      <div className='flex items-center'>
+        <OfferColumn offers={userAOffers} size={size} isOpen={isOpen} />
         <SwapDivider size={size} />
-        <OfferColumn offers={userBOffers} size={size} />
+        <OfferColumn offers={userBOffers} size={size} isOpen={isOpen} />
       </div>
     </div>
   )
@@ -79,14 +110,13 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
 const OfferColumn: React.FC<{
   offers: NFT[]
   size: 'small' | 'medium' | 'large'
-}> = ({ offers, size }) => {
+  isOpen: boolean
+}> = ({ offers, size, isOpen }) => {
   return (
-    <div className='w-full'>
-      <div className='space-y-2'>
-        {offers.map((nft) => (
-          <NFTItem key={nft.id} nft={nft} size={size} />
-        ))}
-      </div>
+    <div className={`flex-1 ${isOpen ? 'space-y-1' : 'flex space-x-1'}`}>
+      {offers.map((nft) => (
+        <NFTItem key={nft.id} nft={nft} size={size} isOpen={isOpen} />
+      ))}
     </div>
   )
 }
@@ -99,12 +129,12 @@ const SwapDivider: React.FC<{ size: 'small' | 'medium' | 'large' }> = ({ size })
   }
 
   return (
-    <div className='flex items-center justify-center py-1'>
+    <div className='flex items-center justify-center px-2'>
       <div
-        className={`${sizeClasses[size]} rounded-full bg-gray-800 flex items-center justify-center shadow-md`}
+        className={`${sizeClasses[size]} rounded-full bg-white bg-opacity-50 flex items-center justify-center`}
       >
         <svg
-          className={`w-${size === 'small' ? '4' : '5'} h-${size === 'small' ? '4' : '5'} text-white`}
+          className={`w-${size === 'small' ? '4' : '5'} h-${size === 'small' ? '4' : '5'} text-gray-600`}
           fill='none'
           stroke='currentColor'
           viewBox='0 0 24 24'

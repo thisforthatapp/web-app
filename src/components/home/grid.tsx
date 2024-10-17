@@ -17,7 +17,7 @@ const OfferGrid: React.FC<{
   userId: string
   viewOffer: (item: OfferFeedItemType) => void
 }> = ({ items, userId, viewOffer }) => (
-  <div className='p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-6'>
+  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-6'>
     {items.map((item) => (
       <NFTOfferItem key={item.id} item={item} viewOffer={viewOffer} userId={userId} />
     ))}
@@ -29,7 +29,7 @@ const NFTGrid: React.FC<{
   makeOffer: (item: NFTFeedItemType) => void
   pinItem: (item: NFTFeedItemType) => void
 }> = ({ items, makeOffer, pinItem }) => (
-  <div className='p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6'>
+  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-6'>
     {items.map((item) => (
       <NFTFeedItem key={item.nft_id} item={item} makeOffer={makeOffer} pinItem={pinItem} />
     ))}

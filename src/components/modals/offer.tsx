@@ -11,7 +11,14 @@ import {
   useWriteContract,
 } from 'wagmi'
 
-import { Main, Select, Transaction, TransactionFeedback } from '@/components/offer'
+import {
+  Main,
+  Select,
+  Transaction,
+  TransactionCompletion,
+  TransactionFeedback,
+  TransactionTransition,
+} from '@/components/offer'
 import ABI from '@/contracts/abi.json'
 import { useIsMobile } from '@/hooks'
 import { useAuth } from '@/providers/authProvider'
@@ -115,8 +122,14 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
     }
   }, [hash, isConfirmed, txReceipt])
 
-  const [view, setView] = useState<'main' | 'select' | 'create_trade' | null>(
-    type === 'make_offer' ? 'select' : type === 'view_offer' ? 'main' : 'create_trade',
+  const [view, setView] = useState<'main' | 'select' | 'transaction' | null>(
+    type === 'make_offer'
+      ? 'select'
+      : type === 'view_offer'
+        ? 'main'
+        : type === 'transaction'
+          ? 'transaction'
+          : 'main',
   )
   const [offerInfo, setOfferInfo] = useState<any | null>(null)
 
@@ -208,7 +221,6 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             closeModal={closeModal}
           />
         )}
-        {/* {view === 'create_trade' && <TransactionFeedback status={transactionStatus} />} */}
         {view === 'select' && (
           <Select
             type={type === 'make_offer' ? 'initial_offer' : 'counter_offer'}
@@ -259,7 +271,28 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             onClose={closeModal}
           />
         )}
-        {/* {view === 'transaction' && <Transaction info={offerInfo} closeModal={closeModal} />} */}
+        {view === 'transaction' && offerInfo && (
+          <Transaction info={offerInfo} closeModal={closeModal} />
+        )}
+        {/* {view === 'transaction' && offerInfo && (
+          <TransactionTransition
+            user={offerInfo.user}
+            counterUser={offerInfo.counter_user}
+            userAssets={offerInfo.offer.user}
+            counterUserAssets={offerInfo.offer.userCounter}
+            // closeModal={closeModal}
+          />
+        )} */}
+        {/* {view === 'transaction' && offerInfo && (
+          <TransactionCompletion
+            user={offerInfo.user}
+            counterUser={offerInfo.counter_user}
+            userAssets={offerInfo.offer.user}
+            counterUserAssets={offerInfo.offer.userCounter}
+            transactionHash='0x1234567890'
+            onClose={closeModal}
+          />
+        )} */}
         <TransactionFeedback status={transactionStatus} />
       </Modal>
     </div>

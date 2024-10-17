@@ -27,7 +27,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           collectionName={item.nft_collection_name}
           tokenId={item.nft_token_id}
           isVerified={item.nft_is_verified}
-          className='inline-block absolute right-0 top-2 z-10 w-12 h-12'
+          className='inline-block absolute right-0 bottom-[-3px] z-10 w-12 h-12'
           chainId={item.nft_chain_id.toString()}
           collectionContract={item.nft_collection_contract}
         />
@@ -48,26 +48,16 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             <span className='text-lg ml-2 text-gray-700 font-semibold'>
               {item?.nft_user_id_username}
             </span>
-            <Tag
+            {/* <Tag
               className={`mr-1.5 w-5 h-5 ml-auto ${item.nft_for_swap ? 'text-green-700' : 'text-gray-300'}`}
-            />
+            /> */}
           </div>
         </div>
       </div>
       <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-1 overflow-hidden'>
         <div className='flex w-full gap-x-2'>
           <button
-            className={`w-full flex justify-center items-center bg-red-50 px-3 py-1 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md`}
-            onClick={(e) => {
-              e.preventDefault()
-              pinItem(item)
-            }}
-          >
-            <span className='flex items-center mr-2 text-lg'>📌</span>
-            <span className='font-semibold'>Pin</span>
-          </button>
-          <button
-            className='w-full flex justify-center items-center bg-yellow-50 px-3 py-1 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'
+            className='mb-1 w-full flex justify-center items-center bg-yellow-50 px-3 py-1 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'
             onClick={(e) => {
               e.preventDefault()
               makeOffer(item)
@@ -75,6 +65,15 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           >
             <span className='flex items-center mr-2 text-2xl'>🤝</span>
             <span className='text-gray-800 font-semibold'>Offer</span>
+          </button>
+          <button
+            className={`mb-1 flex justify-center items-center bg-red-50 px-3 py-1 rounded-md hover:bg-red-100 transition-colors duration-200 shadow-md`}
+            onClick={(e) => {
+              e.preventDefault()
+              pinItem(item)
+            }}
+          >
+            <span className='flex items-center text-lg'>📌</span>
           </button>
         </div>
       </div>
