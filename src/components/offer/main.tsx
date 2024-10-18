@@ -240,7 +240,7 @@ const Main: FC<{
                   </motion.button>
                 </div>
                 <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
-                  Accepting creates an on-chain swap.{' '}
+                  Accepting creates an onchain swap.{' '}
                   <a href='#' className='ml-0.5 text-gray-500 font-semibold underline'>
                     Learn more
                   </a>

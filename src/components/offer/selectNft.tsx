@@ -127,7 +127,7 @@ const SelectNFT: FC<Props> = ({ chainId, user, selectedNFTs, onSelect, onClose }
           <div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4'>
             <p className='font-bold'>Note:</p>
             <p>
-              Currently we only allow swaps on the same chain. Cross-chain swaps are coming
+              Currently you can only swap assets on the same chain. Cross-chain swaps are coming
               soon.
             </p>
           </div>
@@ -187,7 +187,7 @@ const NFTItem: FC<{
     <motion.div
       whileHover={{ scale: isDisabled ? 1 : 1.05 }}
       whileTap={{ scale: isDisabled ? 1 : 0.95 }}
-      className={`p-4 border-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-all duration-200 ${
+      className={`p-2 border-4 rounded-lg shadow cursor-pointer hover:shadow-md transition-all duration-200 ${
         isSelected ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200'
       } ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       onClick={() => !isDisabled && onSelect(item)}
@@ -195,7 +195,7 @@ const NFTItem: FC<{
       <div className='relative'>
         <NFTImage src={item.nfts.image} alt={item.nfts.name} fallback={item.nfts.name} />
         <div className='absolute top-2 right-2'>
-          <ChainLogo chainId={item.nfts.chain_id} />
+          <ChainLogo chainId={item.nfts.chain_id} className='w-6 h-6' />
         </div>
       </div>
       <p className='text-sm mt-2 text-center font-semibold text-gray-800 truncate'>

@@ -104,7 +104,7 @@ const Navbar: FC = () => {
 
   const renderButtons = (isMobileMenu = false) => (
     <>
-      {(user || loading) && (
+      {user && (
         <>
           {isMobileMenu ? (
             <>
@@ -175,7 +175,7 @@ const Navbar: FC = () => {
           )}
         </>
       )}
-      {!user && !loading && (
+      {!user && (
         <button
           className={`flex items-center ${
             isMobileMenu
@@ -322,6 +322,8 @@ const Navbar: FC = () => {
           <button onClick={toggleMenu} className='p-2'>
             <Hamburger className='w-8' />
           </button>
+        ) : loading ? (
+          <div className='flex gap-x-2 h-[44px] relative mr-2 w-[150px]' />
         ) : (
           <div className='flex gap-x-2 h-[44px] relative mr-2'>{renderButtons()}</div>
         )}

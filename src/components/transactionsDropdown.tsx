@@ -124,7 +124,7 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({
                 <Chain className='w-12 h-12' />
                 <h3 className='text-lg font-semibold my-2'>No Swaps</h3>
                 <p className='text-sm text-gray-500 px-6'>
-                  This is where you&apos;ll see all your on-chain activity. When you agree to a
+                  This is where you&apos;ll see all your onchain activity. When you agree to a
                   swap, it will show up here.
                 </p>
               </div>

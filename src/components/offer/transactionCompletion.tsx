@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { ChainLogo, Checkmark } from '@/icons'
+import { ChainLogo, Checkmark, Close } from '@/icons'
 
 interface Asset {
   id: string
@@ -19,6 +18,8 @@ interface CompletionScreenProps {
   userAssets: Asset[]
   counterUserAssets: Asset[]
   transactionHash: string
+  chainId: number
+  chainName: string
   onClose: () => void
 }
 
@@ -28,81 +29,81 @@ const TransactionCompletion: React.FC<CompletionScreenProps> = ({
   userAssets,
   counterUserAssets,
   transactionHash,
+  chainId,
+  chainName,
   onClose,
 }) => {
-  return (
-    <div className='fixed inset-0 bg-blue-50 flex items-center justify-center p-4 z-50'>
-      <div className='bg-white rounded-3xl shadow-2xl overflow-hidden max-w-4xl w-full p-8'>
-        <div className='text-center mb-8'>
-          <div className='inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-4'>
-            <Checkmark className='w-12 h-12 text-green-600' />
-          </div>
-          {/* <h1 className='text-3xl font-bold text-blue-800 mb-2'>Swap Completed!</h1> */}
-          <p className='text-lg text-gray-600'>
-            All assets have been successfully transferred.
-          </p>
+  const renderAssetOwnership = (owner: User, assets: Asset[]) => (
+    <div className='bg-white rounded-lg shadow-md p-4 mb-4'>
+      <div className='flex items-center space-x-3 mb-2'>
+        <img
+          src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + owner.profile_pic_url}
+          alt={owner.username}
+          className='w-10 h-10 rounded-full'
+        />
+        <div>
+          <h3 className='font-semibold text-gray-800'>{owner.username}</h3>
+          <p className='text-sm text-green-600'>Received {assets.length} asset(s)</p>
         </div>
+      </div>
+      <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2'>
+        {assets.map((asset) => (
+          <div key={asset.id} className='bg-gray-100 rounded p-2 text-center'>
+            <img
+              src={asset.image}
+              alt={asset.name}
+              className='w-full h-20 object-cover rounded mb-1'
+            />
+            <span className='text-xs font-medium text-gray-800 truncate'>{asset.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
 
-        <div className='grid grid-cols-2 gap-8 mb-8'>
-          {[
-            { user: user, assets: counterUserAssets, direction: 'Received' },
-            { user: counterUser, assets: userAssets, direction: 'Received' },
-          ].map((party, index) => (
-            <div key={index} className='space-y-4'>
-              <div className='flex items-center space-x-4 mb-4'>
-                <img
-                  src={party.user.profile_pic_url}
-                  alt={party.user.username}
-                  className='w-12 h-12 rounded-full border-2 border-blue-500'
-                />
-                <div>
-                  <span className='text-lg font-semibold text-gray-800'>
-                    {party.user.username}
-                  </span>
-                  <p className='text-sm text-green-600'>
-                    {party.direction} {party.assets.length} asset(s)
-                  </p>
-                </div>
-              </div>
-              <div className='grid grid-cols-2 gap-4'>
-                {party.assets.map((asset) => (
-                  <div
-                    key={asset.id}
-                    className='bg-blue-100 rounded-lg p-2 flex items-center space-x-2'
-                  >
-                    <img src={asset.image} alt={asset.name} className='w-10 h-10 rounded' />
-                    <span className='text-sm font-medium text-gray-800 truncate'>
-                      {asset.name}
-                    </span>
-                  </div>
-                ))}
+  return (
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
+      <div className='bg-gradient-to-br from-blue-50 to-purple-100 rounded-3xl shadow-2xl max-w-4xl w-full overflow-hidden'>
+        <div className='bg-gradient-to-r from-blue-600 to-purple-600 p-6 relative'>
+          <div className='flex items-center justify-between'>
+            <div className='flex items-center space-x-3'>
+              <ChainLogo chainId={1} className='w-8 h-8 text-white' />
+              <div>
+                <h1 className='text-2xl font-bold text-white'>Swap Completed!</h1>
+                <p className='text-sm text-blue-200'>{chainName}</p>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className='flex flex-col items-center space-y-4 mb-8'>
-          <div className='flex items-center space-x-2'>
-            <ChainLogo chainId={1} className='w-6 h-6' />
-            <span className='text-blue-600 font-semibold'>Transaction Confirmed</span>
+            <button
+              onClick={onClose}
+              className='text-white hover:text-blue-200 transition-colors'
+            >
+              <Close className='w-6 h-6' />
+            </button>
           </div>
-          <a
-            href={`https://etherscan.io/tx/${transactionHash}`}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-blue-500 hover:text-blue-700 transition-colors'
-          >
-            View on Etherscan
-          </a>
         </div>
 
-        <div className='text-center'>
-          <button
-            onClick={onClose}
-            className='px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold'
-          >
-            Close
-          </button>
+        <div className='p-6 space-y-6 max-h-[80vh] overflow-y-auto'>
+          {renderAssetOwnership(counterUser, counterUserAssets)}
+          {renderAssetOwnership(user, userAssets)}
+
+          <div className='bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg'>
+            <p className='text-sm text-green-700'>
+              Assets have been transferred. New owners need to verify in their profile to
+              receive a blue checkmark.
+            </p>
+          </div>
+
+          <div className='flex justify-center'>
+            <a
+              href={`https://etherscan.io/tx/${transactionHash}`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-md text-blue-600 hover:text-blue-800 transition-colors'
+            >
+              <ChainLogo chainId={1} className='w-5 h-5' />
+              <span>View Transaction on Etherscan</span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
