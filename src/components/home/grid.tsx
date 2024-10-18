@@ -29,7 +29,7 @@ const NFTGrid: React.FC<{
   makeOffer: (item: NFTFeedItemType) => void
   pinItem: (item: NFTFeedItemType) => void
 }> = ({ items, makeOffer, pinItem }) => (
-  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-6'>
+  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 md:gap-6 mb-16'>
     {items.map((item) => (
       <NFTFeedItem key={item.nft_id} item={item} makeOffer={makeOffer} pinItem={pinItem} />
     ))}

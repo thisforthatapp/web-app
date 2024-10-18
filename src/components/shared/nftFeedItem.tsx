@@ -24,7 +24,7 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
           src={item.nft_image}
           alt={item.nft_name}
           fallback={item.nft_name}
-          hoverOn={true}
+          hoverOn={false}
         />
         <div className='flex justify-between px-3 py-1.5'>
           <div className='flex items-center w-full'>
@@ -47,13 +47,13 @@ const NFTFeedItem: FC<NFTItemProps> = ({ item, makeOffer, pinItem }) => {
             collectionName={item.nft_collection_name}
             tokenId={item.nft_token_id}
             isVerified={item.nft_is_verified}
-            className='z-10 w-10 h-10 flex items-center justify-center'
+            className='w-10 h-10 flex items-center justify-center'
             chainId={item.nft_chain_id.toString()}
             collectionContract={item.nft_collection_contract}
           />
         </div>
       </div>
-      <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-1 overflow-hidden'>
+      <div className='mt-2 flex gap-x-2 gap-y-2 w-full p-0.5 overflow-hidden'>
         <div className='flex w-full gap-x-2'>
           <button
             className='mb-1 w-full flex justify-center items-center bg-yellow-50 px-3 py-1 rounded-md hover:bg-yellow-100 transition-colors duration-200 shadow-md'

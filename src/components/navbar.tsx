@@ -253,7 +253,7 @@ const Navbar: FC = () => {
               <Search />
             </div>
             {showResults && (
-              <div className='absolute mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10'>
+              <div className='absolute min-h-[50px] mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10'>
                 {isSearching ? (
                   <div className='p-4 text-center'>
                     <div className='animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mx-auto'></div>

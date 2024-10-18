@@ -196,24 +196,12 @@ const NFTSidebar: FC<{
 }> = ({ nft, makeOffer, pinItem }) => (
   <div className='w-full lg:w-[360px] flex flex-col lg:sticky lg:top-8 lg:overflow-y-auto hide-scrollbar'>
     <div className='bg-white rounded-lg shadow-md mb-4 mx-4 lg:mx-0 max-w-[260px] self-center lg:self-auto lg:max-w-none'>
-      <div className='relative'>
-        <VerifiedBadge
-          id={nft.id}
-          chainName={CHAIN_IDS_TO_CHAINS[nft.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
-          collectionName={nft.collection_name}
-          tokenId={nft.token_id}
-          isVerified={true}
-          className='inline-block absolute right-0 top-2 z-10 w-12 h-12'
-          chainId={nft.chain_id.toString()}
-          collectionContract={nft.collection_contract}
-        />
-        <NFTImage src={nft?.image} alt={nft?.name} fallback={nft?.name} />
-      </div>
-      <div className='py-4 flex items-center justify-center'>
+      <NFTImage src={nft?.image} alt={nft?.name} fallback={nft?.name} />
+      <div className='p-4 flex items-center justify-between'>
         <Link
           href={`/${nft.user_profile.username}`}
           target='_blank'
-          className='flex items-center w-full px-4'
+          className='flex items-center'
         >
           <img
             src={
@@ -224,6 +212,17 @@ const NFTSidebar: FC<{
           />
           <div className='text-xl font-bold ml-2'>{nft.user_profile.username}</div>
         </Link>
+        <VerifiedBadge
+          id={nft.id}
+          name={nft.name}
+          chainName={CHAIN_IDS_TO_CHAINS[nft.chain_id as keyof typeof CHAIN_IDS_TO_CHAINS]}
+          collectionName={nft.collection_name}
+          tokenId={nft.token_id}
+          isVerified={nft.is_verified}
+          className='w-10 h-10 flex items-center justify-center'
+          chainId={nft.chain_id.toString()}
+          collectionContract={nft.collection_contract}
+        />
       </div>
     </div>
     <ActionButtons className='hidden lg:flex' makeOffer={makeOffer} pinItem={pinItem} />
@@ -235,12 +234,12 @@ const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
   offerCount,
   hasMore,
 }) => (
-  <div className='w-full bg-white p-6 mb-4 rounded-lg shadow-md'>
+  <div className='w-full bg-white p-3 md:p-6 mb-4 rounded-lg shadow-md'>
     <div className='flex items-center justify-between'>
       <div className='flex items-center'>
-        <ChainLogo chainId={nft.chain_id} className='w-10 h-10 mr-4' />
+        <ChainLogo chainId={nft.chain_id} className='w-6 h-6 mr-1 md:w-10 md:h-10 md:mr-2' />
         <div>
-          <h2 className='text-2xl font-bold text-gray-800'>{nft.name}</h2>
+          <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-gray-800'>{nft.name}</h2>
           <p className='text-sm text-gray-500'>{nft.collection_name}</p>
         </div>
       </div>
@@ -274,19 +273,20 @@ const ActionButtons: FC<{
   makeOffer: () => void
   pinItem: () => void
 }> = ({ className, makeOffer, pinItem }) => (
-  <div className={`flex gap-4 ${className} lg:mb-2`}>
-    <ActionButton
-      emoji='📌'
-      text='Pin'
-      onClick={pinItem}
-      className='bg-red-50 hover:bg-red-100'
-    />
-    <ActionButton
-      emoji='🤝'
-      text='Offer'
+  <div className={`flex gap-x-2 p-0.5 ${className} lg:mb-2`}>
+    <button
       onClick={makeOffer}
-      className='bg-yellow-50 hover:bg-yellow-100'
-    />
+      className={`flex-1 py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center bg-yellow-50 hover:bg-yellow-100`}
+    >
+      <span className='text-2xl mr-2'>🤝</span>
+      <span className='text-gray-800 text-lg font-semibold'>Offer</span>
+    </button>
+    <button
+      onClick={pinItem}
+      className={`py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center bg-red-50 hover:bg-red-100`}
+    >
+      <span className='text-2xl'>📌</span>
+    </button>
   </div>
 )
 
@@ -294,24 +294,21 @@ const MobileActionButtons: FC<{ makeOffer: () => void; pinItem: () => void }> = 
   makeOffer,
   pinItem,
 }) => (
-  <div className='fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg lg:hidden'>
-    <ActionButtons makeOffer={makeOffer} pinItem={pinItem} />
+  <div className='flex gap-x-2 fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg lg:hidden'>
+    <button
+      onClick={makeOffer}
+      className={`flex-1 py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center bg-yellow-50 hover:bg-yellow-100`}
+    >
+      <span className='text-2xl mr-2'>🤝</span>
+      <span className='text-gray-800 text-lg font-semibold'>Offer</span>
+    </button>
+    <button
+      onClick={pinItem}
+      className={`py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center bg-red-50 hover:bg-red-100`}
+    >
+      <span className='text-2xl'>📌</span>
+    </button>
   </div>
-)
-
-const ActionButton: FC<{
-  emoji: string
-  text: string
-  onClick: () => void
-  className: string
-}> = ({ emoji, text, onClick, className }) => (
-  <button
-    onClick={onClick}
-    className={`flex-1 py-3 px-4 rounded-md transition-colors duration-200 shadow-md flex items-center justify-center ${className}`}
-  >
-    <span className='text-2xl mr-2'>{emoji}</span>
-    <span className='text-gray-800 text-lg font-semibold'>{text}</span>
-  </button>
 )
 
 export default NFTPage

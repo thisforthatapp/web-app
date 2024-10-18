@@ -68,7 +68,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
 
   return (
     <div
-      className={`cursor-pointer w-full bg-gradient-to-r from-blue-100 to-purple-100 ${containerPadding[size]} rounded-xl shadow-md overflow-hidden relative`}
+      className={`cursor-pointer w-full bg-gradient-to-r from-blue-100 to-purple-100 ${containerPadding[size]} rounded-xl shadow-md relative`}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -102,7 +102,9 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
           )}
         </svg>
       </div>
-      <div className={`flex items-center w-full ${isOpen ? 'justify-between' : ''}`}>
+      <div
+        className={`flex items-center w-full overflow-y-hidden overflow-x-auto hide-scrollbar ${isOpen ? 'justify-between' : ''}`}
+      >
         <OfferColumn offers={userAOffers} size={size} isOpen={isOpen} />
         <SwapDivider size={size} isOpen={isOpen} />
         <OfferColumn offers={userBOffers} size={size} isOpen={isOpen} />

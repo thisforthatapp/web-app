@@ -64,7 +64,7 @@ const NFTGrid: React.FC<{ nfts: NFTOfferMetadata[] }> = ({ nfts }) => {
                 hoverOn={false}
               />
             ) : (
-              <div className='w-full h-full bg-gray-100 rounded-lg' />
+              <div className='w-full h-full' />
             )}
           </div>
         ))}
@@ -78,7 +78,7 @@ const NFTOfferItem: React.FC<NFTOfferItemProps> = ({ item, userId, viewOffer }) 
 
   return (
     <div
-      className='w-full bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-md overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg'
+      className='w-full bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl shadow-md overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg'
       onClick={() => viewOffer(item)}
     >
       <div className='flex p-4 space-x-4'>

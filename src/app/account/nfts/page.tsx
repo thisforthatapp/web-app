@@ -6,10 +6,10 @@ import { motion } from 'framer-motion'
 
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
-import { Add, Checkmark } from '@/icons'
+import { Add, VerifyIcon } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
-import { UserNFT } from '@/types/supabase'
+import { Profile, UserNFT } from '@/types/supabase'
 import { GRID_ITEMS_PER_PAGE } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
@@ -60,43 +60,58 @@ const useNFTs = () => {
   return { userNfts, hasMore, fetchUserNfts, loadMore }
 }
 
-const Header: React.FC<{ setModal: (modal: 'add' | 'verify' | null) => void }> = ({
-  setModal,
-}) => (
-  <div className='flex justify-between items-center px-4 py-6'>
-    <div className='ml-2 text-2xl font-semibold'>My NFTs</div>
-    <div className='flex text-lg space-x-4'>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setModal('add')}
-        className='flex items-center px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
-      >
-        <Add className='w-8 h-8 mr-1.5' />
-        Add NFTs
-      </motion.button>
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setModal('verify')}
-        className='flex items-center px-4 py-2 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50'
-      >
-        <Checkmark className='w-8 h-8 mr-1.5' />
-        Verify NFTs
-      </motion.button>
-    </div>
-  </div>
+interface HeaderProps {
+  setModal: (modal: 'add' | 'verify' | null) => void
+}
+
+const Header: React.FC<HeaderProps> = ({ setModal }) => {
+  return (
+    <header className='border-b border-gray-200'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex justify-between items-center py-4'>
+          <h1 className='text-2xl font-semibold text-gray-800'>My NFTs</h1>
+          <div className='flex space-x-3'>
+            <HeaderButton onClick={() => setModal('add')} icon={<Add />}>
+              Add NFTs
+            </HeaderButton>
+            <HeaderButton onClick={() => setModal('verify')} icon={<VerifyIcon />}>
+              Verify NFTs
+            </HeaderButton>
+          </div>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+interface HeaderButtonProps {
+  onClick: () => void
+  icon: React.ReactNode
+  children: React.ReactNode
+}
+
+const HeaderButton: React.FC<HeaderButtonProps> = ({ onClick, icon, children }) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className='flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-500 rounded-md shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-150'
+  >
+    <span className='mr-1.5'>{icon}</span>
+    <span>{children}</span>
+  </motion.button>
 )
 
 const NFTGrid: React.FC<{
   userNfts: UserNFT[]
+  profile: Profile
   hasMore: boolean
   loadMore: () => void
-}> = ({ userNfts, hasMore, loadMore }) => (
-  <div className='flex-grow overflow-y-auto p-5 pt-2 hide-scrollbar'>
-    <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
+}> = ({ userNfts, profile, hasMore, loadMore }) => (
+  <div className='flex-grow overflow-y-auto hide-scrollbar'>
+    <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6'>
       {userNfts.map((userNft) => (
-        <NFTAccountItem key={userNft.id} item={userNft} />
+        <NFTAccountItem key={userNft.id} item={userNft} profile={profile} />
       ))}
     </div>
     {userNfts.length > 0 && hasMore && (
@@ -114,7 +129,7 @@ const NFTGrid: React.FC<{
 
 const AccountNFTSPage: React.FC = () => {
   const router = useRouter()
-  const { user, loading } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [modal, setModal] = useState<'add' | 'verify' | null>(null)
   const { userNfts, hasMore, fetchUserNfts, loadMore } = useNFTs()
 
@@ -132,9 +147,10 @@ const AccountNFTSPage: React.FC = () => {
     <>
       <div className='absolute top-[75px] bottom-0 w-full flex flex-col'>
         <Header setModal={setModal} />
-        <div className='flex flex-col flex-grow overflow-hidden'>
+        <div className='max-w-7xl mx-auto p-8 flex flex-col flex-grow overflow-hidden'>
           <NFTGrid
             userNfts={userNfts}
+            profile={profile!}
             hasMore={hasMore}
             loadMore={() => user?.id && loadMore(user.id)}
           />
