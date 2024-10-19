@@ -106,7 +106,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
       <div
         className={`flex items-center w-full overflow-y-hidden overflow-x-auto hide-scrollbar ${isOpen ? 'justify-between' : ''}`}
       >
-        <ChainLogo chainId={8453} className='shrink-0 w-5 h-5 mr-2' />
+        {isOpen && <ChainLogo chainId={8453} className='shrink-0 w-5 h-5 mr-2' />}
         <OfferColumn offers={userAOffers} size={size} isOpen={isOpen} />
         <SwapDivider size={size} isOpen={isOpen} />
         <OfferColumn offers={userBOffers} size={size} isOpen={isOpen} />
