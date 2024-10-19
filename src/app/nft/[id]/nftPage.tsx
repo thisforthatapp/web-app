@@ -256,7 +256,7 @@ const OffersGrid: FC<{
   viewOffer: (offer: OfferFeedItemType) => void
   userId: string | null
 }> = ({ items, viewOffer, userId }) => (
-  <div className='grid grid-cols-2 lg:grid-cols-2 gap-4 mb-2'>
+  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 mb-2'>
     {items.map((item) => (
       <NFTOfferItem
         key={item.id}
