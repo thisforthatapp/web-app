@@ -268,6 +268,9 @@ const BasicInformation: FC<BasicInformationProps> = ({ profile, setProfile, erro
         />
         {errors.wallet && <p className='mt-1 text-sm text-red-600'>{errors.wallet}</p>}
       </div>
+      <div className='text-sm text-gray-600'>
+        Your wallet used in trades. This is where NFTs will get sent to you.
+      </div>
     </div>
   </div>
 )

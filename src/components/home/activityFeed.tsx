@@ -103,7 +103,7 @@ const FeedItem: React.FC<{
         </Link>
         <div className='flex-grow flex items-start justify-between'>
           <div className='flex-grow'>
-            <div className='flex items-center gap-x-1 mt-0.5'>
+            <div className='flex items-center gap-x-1'>
               <div className='text-sm font-semibold text-gray-800'>{activity.username}</div>
               <span className='text-gray-500'>·</span>
               <div className='text-xs text-gray-700'>
@@ -111,12 +111,12 @@ const FeedItem: React.FC<{
               </div>
             </div>
             {activity.activity_type === 'message' && (
-              <div>{renderMessageText(activity.content || '')}</div>
+              <div className='text-sm'>{renderMessageText(activity.content || '')}</div>
             )}
             {(activity.activity_type === 'offer_start' ||
               activity.activity_type === 'offer_accepted' ||
               activity.activity_type === 'offer_counter') && (
-              <div>
+              <div className='text-sm'>
                 {activity.activity_type === 'offer_start'
                   ? 'made an offer'
                   : activity.activity_type === 'offer_counter'

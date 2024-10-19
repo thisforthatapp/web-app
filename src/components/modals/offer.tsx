@@ -15,7 +15,6 @@ import {
   Main,
   Select,
   Transaction,
-  TransactionCompletion,
   TransactionFeedback,
   TransactionTransition,
 } from '@/components/offer'
@@ -271,9 +270,9 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             onClose={closeModal}
           />
         )}
-        {/* {view === 'transaction' && offerInfo && (
+        {view === 'transaction' && offerInfo && (
           <Transaction info={offerInfo} closeModal={closeModal} />
-        )} */}
+        )}
         {/* {view === 'transaction' && offerInfo && (
           <TransactionTransition
             user={offerInfo.user}
@@ -283,16 +282,6 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
             // closeModal={closeModal}
           />
         )} */}
-        {view === 'transaction' && offerInfo && (
-          <TransactionCompletion
-            user={offerInfo.user}
-            counterUser={offerInfo.counter_user}
-            userAssets={offerInfo.offer.user}
-            counterUserAssets={offerInfo.offer.userCounter}
-            transactionHash='0x1234567890'
-            onClose={closeModal}
-          />
-        )}
         <TransactionFeedback status={transactionStatus} />
       </Modal>
     </div>

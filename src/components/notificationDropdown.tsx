@@ -80,7 +80,7 @@ const FeedItem: React.FC<NotificationProps> = ({ notification }) => {
                 {timeAgoShort(new Date(notification.updated_at))}
               </div>
             </div>
-            <div>{getMessage()}</div>
+            <div className='text-sm'>{getMessage()}</div>
           </div>
           {isClickable && (
             <div className='flex items-center text-gray-500 ml-2'>

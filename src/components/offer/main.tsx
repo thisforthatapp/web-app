@@ -31,18 +31,18 @@ const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
             />
           </Link>
           <div className='flex-grow'>
-            <div className='flex items-center gap-x-1 mt-0.5'>
+            <div className='flex items-center gap-x-1'>
               <div className='text-sm font-semibold text-gray-800'>{user?.username}</div>
               <span className='text-gray-500'>·</span>
               <div className='text-xs text-gray-700'>
                 {timeAgoShort(new Date(item.created_at))}
               </div>
             </div>
-            {item.item_type === 'message' && <div>{item.content}</div>}
+            {item.item_type === 'message' && <div className='text-sm'>{item.content}</div>}
             {(item.item_type === 'offer' ||
               item.item_type === 'counter_offer' ||
               item.item_type === 'accept') && (
-              <div>
+              <div className='text-sm'>
                 {item.item_type === 'offer'
                   ? 'made an offer'
                   : item.item_type === 'counter_offer'

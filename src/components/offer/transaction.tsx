@@ -74,6 +74,57 @@ const Transaction: React.FC<Props> = ({
     (asset) => asset.uploaded,
   )
 
+  const renderAssetItem = (asset: Asset, isCurrentUser: boolean) => (
+    <div
+      key={asset.id}
+      className='flex items-center justify-between p-2 bg-white rounded-lg shadow-sm mb-2'
+    >
+      <div className='flex items-center space-x-3'>
+        <img src={asset.image} alt={asset.name} className='w-12 h-12 object-cover rounded-md' />
+        <span className='text-sm font-medium text-gray-800 truncate'>{asset.name}</span>
+      </div>
+      {isCurrentUser ? (
+        <button
+          onClick={() => handleUpload(asset.id)}
+          disabled={asset.uploaded || uploading === asset.id}
+          className={`px-3 py-1 rounded-lg text-white font-semibold text-xs transition-colors ${
+            asset.uploaded
+              ? 'bg-green-500'
+              : uploading === asset.id
+                ? 'bg-yellow-500'
+                : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {asset.uploaded ? (
+            <span className='flex items-center'>
+              <Checkmark className='w-3 h-3 mr-1' /> Deposited
+            </span>
+          ) : uploading === asset.id ? (
+            'Depositing...'
+          ) : (
+            <span className='flex items-center'>
+              <Upload className='w-3 h-3 mr-1' /> Deposit
+            </span>
+          )}
+        </button>
+      ) : (
+        <div
+          className={`px-3 py-1 rounded-lg text-white font-semibold text-xs ${
+            asset.uploaded ? 'bg-green-500' : 'bg-gray-400'
+          }`}
+        >
+          {asset.uploaded ? (
+            <span className='flex items-center'>
+              <Checkmark className='w-3 h-3 mr-1' /> Deposited
+            </span>
+          ) : (
+            'Pending'
+          )}
+        </div>
+      )}
+    </div>
+  )
+
   const renderAssetGrid = (assets: Asset[], user: User, isCurrentUser: boolean) => {
     const depositedAssets = assets.filter((asset) => asset.uploaded)
     const pendingAssets = assets.filter((asset) => !asset.uploaded)
@@ -86,25 +137,18 @@ const Transaction: React.FC<Props> = ({
     const isExpanded = expandedGrids[gridKey]
 
     return (
-      <div className='bg-white rounded-lg shadow-md p-4'>
+      <div className='bg-gray-50 rounded-lg shadow-md p-4'>
         <div
-          className={`flex items-center justify-between ${isExpanded ? 'mb-4' : ''} cursor-pointer`}
+          className='flex items-center justify-between cursor-pointer'
           onClick={() => toggleGrid(gridKey)}
         >
           <div className='flex items-center space-x-2'>
             <img
               src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + user.profile_pic_url}
               alt={user.username}
-              className='w-10 h-10 rounded-full'
+              className='w-8 h-8 rounded-full'
             />
-            <div>
-              <div className='text-lg font-semibold text-gray-800'>{user.username}'s Offer</div>
-              <div className='text-sm text-gray-500'>
-                {isCurrentUser
-                  ? `Your deposits (${depositedCount}/${totalCount})`
-                  : `Counterparty deposits (${depositedCount}/${totalCount})`}
-              </div>
-            </div>
+            <div className='font-semibold text-gray-800'>{user.username}'s offer</div>
           </div>
           {isExpanded ? (
             <ChevronUp className='w-5 h-5 text-gray-500' />
@@ -113,70 +157,8 @@ const Transaction: React.FC<Props> = ({
           )}
         </div>
         {isExpanded && (
-          <div className='overflow-x-auto hide-scrollbar'>
-            <div className='flex space-x-4' style={{ minWidth: 'min-content' }}>
-              {sortedAssets.map((asset) => (
-                <div
-                  key={asset.id}
-                  className='flex-shrink-0 w-36 bg-gray-50 rounded-xl shadow-sm transition-all duration-300 hover:shadow-md overflow-hidden'
-                >
-                  <img
-                    src={asset.image}
-                    alt={asset.name}
-                    className='w-full h-28 object-cover'
-                  />
-                  <div className='p-3'>
-                    <p className='text-xs font-medium text-gray-800 truncate mb-2'>
-                      {asset.name}
-                    </p>
-                    {isCurrentUser ? (
-                      <button
-                        onClick={() => handleUpload(asset.id)}
-                        disabled={asset.uploaded || uploading === asset.id}
-                        className={`w-full px-2 py-1 rounded-lg text-white font-semibold text-xs transition-colors ${
-                          asset.uploaded
-                            ? 'bg-green-500'
-                            : uploading === asset.id
-                              ? 'bg-yellow-500'
-                              : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
-                        }`}
-                      >
-                        {asset.uploaded ? (
-                          <span className='flex items-center justify-center'>
-                            <Checkmark className='w-3 h-3 mr-1' /> Deposited
-                          </span>
-                        ) : uploading === asset.id ? (
-                          'Depositing...'
-                        ) : (
-                          <span className='flex items-center justify-center'>
-                            <Upload className='w-3 h-3 mr-1' /> Deposit
-                          </span>
-                        )}
-                      </button>
-                    ) : (
-                      <div
-                        className={`w-full px-2 py-1 rounded-lg text-white font-semibold text-xs flex items-center justify-center ${
-                          asset.uploaded ? 'bg-green-500' : 'bg-gray-400'
-                        }`}
-                      >
-                        {asset.uploaded ? (
-                          <span className='flex items-center justify-center'>
-                            <Checkmark className='w-3 h-3 mr-1' /> Deposited
-                          </span>
-                        ) : (
-                          'Pending'
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {asset.uploaded && (
-                    <div className='absolute top-2 right-2 bg-green-500 text-white rounded-full p-1'>
-                      <Checkmark className='w-3 h-3' />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className='mt-4 space-y-2'>
+            {sortedAssets.map((asset) => renderAssetItem(asset, isCurrentUser))}
           </div>
         )}
       </div>
@@ -185,22 +167,12 @@ const Transaction: React.FC<Props> = ({
 
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50'>
-      <div className='bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl shadow-2xl max-w-4xl w-full h-[90vh] flex flex-col overflow-hidden'>
+      <div className='bg-gray-100 rounded-3xl shadow-2xl max-w-4xl w-full h-[90vh] flex flex-col overflow-hidden'>
         <div className='bg-white p-6 relative shadow-md'>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-3'>
               <ChainLogo chainId={1} className='w-10 h-10' />
-              <div>
-                <h2 className='text-2xl font-bold text-gray-800'>Swap</h2>
-                <Link
-                  href='https://www.google.com'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='text-sm text-blue-600 hover:text-blue-800 transition-colors'
-                >
-                  Verify on Etherscan
-                </Link>
-              </div>
+              <h2 className='text-2xl font-bold text-gray-800'>Swap</h2>
             </div>
             <button
               onClick={closeModal}
@@ -212,62 +184,64 @@ const Transaction: React.FC<Props> = ({
           </div>
         </div>
 
-        <div className='flex-1 overflow-y-auto hide-scrollbar p-6 space-y-6'>
+        <div className='flex-1 overflow-y-auto hide-scrollbar p-4 space-y-4'>
           <div className='bg-yellow-100 border-l-4 border-yellow-500 p-4 rounded-r-lg'>
-            <div
-              className='flex justify-between items-center cursor-pointer'
-              onClick={() => setIsMessageExpanded(!isMessageExpanded)}
-            >
-              <p className='text-yellow-700 font-semibold'>
-                Verify all NFTs before depositing.
-              </p>
-              {isMessageExpanded ? (
-                <ChevronUp className='w-5 h-5 text-yellow-500' />
-              ) : (
-                <ChevronDown className='w-5 h-5 text-yellow-500' />
-              )}
+            <div className='flex justify-between items-center'>
+              <div>
+                <p className='text-yellow-700 font-semibold'>
+                  Verify all NFTs before depositing.
+                </p>
+                <Link
+                  href='https://www.google.com'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='text-blue-600 hover:text-blue-800 transition-colors text-sm'
+                >
+                  Verify on Etherscan
+                </Link>
+              </div>
+              <button
+                onClick={() => setIsMessageExpanded(!isMessageExpanded)}
+                className='text-yellow-500 hover:text-yellow-600'
+              >
+                {isMessageExpanded ? (
+                  <ChevronUp className='w-5 h-5' />
+                ) : (
+                  <ChevronDown className='w-5 h-5' />
+                )}
+              </button>
             </div>
             {isMessageExpanded && (
-              <p className='mt-2 text-yellow-600'>
-                Once all NFTs are deposited, the contract automatically sends it to the
-                counterparty. Cancelling the trade before all NFTs are deposited will return
-                NFTs to their original owners.
-              </p>
+              <div className='mt-2'>
+                <p className='text-yellow-600'>
+                  Once all NFTs are deposited, the contract automatically sends it to the
+                  counterparty. Cancelling the trade before all NFTs are deposited will return
+                  NFTs to their original owners.
+                </p>
+              </div>
             )}
           </div>
 
-          <div className='space-y-8'>
+          <div className='space-y-4'>
             {renderAssetGrid(info.offer.user, info.user, true)}
             {renderAssetGrid(info.offer.userCounter, info.counter_user, false)}
           </div>
         </div>
 
         <div className='bg-white p-6 border-t border-gray-200'>
-          <div className='mb-4'>
-            {allUploaded ? (
-              <div className='text-2xl font-bold text-green-600 bg-green-100 p-4 rounded-lg flex items-center justify-center space-x-2'>
-                <span className='animate-bounce'>🎉</span>
-                <span>All NFTs deposited! Swap completed successfully.</span>
-                <span className='animate-bounce'>🎉</span>
-              </div>
-            ) : (
-              <div className='space-y-2'>
-                <div className='flex justify-between items-center text-sm font-medium text-gray-600'>
-                  <span>Deposit Progress</span>
-                  <span>
-                    {uploadedAssets} / {totalAssets} NFTs
-                  </span>
-                </div>
-                <div className='relative pt-1'>
-                  <div className='overflow-hidden h-4 text-xs flex rounded-full bg-blue-200'>
-                    <div
-                      style={{ width: `${progress}%` }}
-                      className='shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-500 ease-in-out'
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
+          <div className='mb-6'>
+            <div className='flex justify-between items-center mb-2'>
+              <span className='text-sm font-medium text-gray-700'>5/10 deposited</span>
+              <span className='text-sm font-medium text-gray-700'>
+                {Number(50).toFixed(0)}%
+              </span>
+            </div>
+            <div className='w-full bg-gray-200 rounded-full h-2.5'>
+              <div
+                className='bg-blue-600 h-2.5 rounded-full transition-all duration-500 ease-in-out'
+                style={{ width: `50%` }}
+              ></div>
+            </div>
           </div>
 
           <div className='flex justify-between'>

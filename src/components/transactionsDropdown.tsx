@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { formatDistanceToNow } from 'date-fns'
 
 import { NFTOfferDisplay } from '@/components/shared'
 import { Chain } from '@/icons'
@@ -38,100 +37,73 @@ interface TransactionProps {
   onOpen: () => void
 }
 
-const ProgressBar: React.FC<{ progress: number; color: string }> = ({ progress, color }) => (
-  <div className='w-full bg-gray-200 rounded-full h-2'>
-    <div
-      className={`${color} h-2 rounded-full transition-all duration-500 ease-in-out`}
-      style={{ width: `${progress}%` }}
-    ></div>
-  </div>
-)
-
-const FeedItem: React.FC<TransactionProps> = ({ transaction, userId, selectOffer }) => {
-  const isCurrentUser = transaction.user_id === userId
-  const counterParty = isCurrentUser ? transaction.counter_user : transaction.user
-  const currentUser = isCurrentUser ? transaction.user : transaction.counter_user
-
-  // Placeholder progress values
-  const placeholderProgress = {
-    user: { deposited: 2, total: 3 },
-    counter_user: { deposited: 1, total: 2 },
+const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'in_progress':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'completed':
+        return 'bg-green-100 text-green-800'
+      case 'cancelled':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
   }
 
-  const progress = placeholderProgress
-  const userProgress = isCurrentUser ? progress.user : progress.counter_user
-  const counterUserProgress = isCurrentUser ? progress.counter_user : progress.user
+  return (
+    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}>
+      {status.replace('_', ' ')}
+    </span>
+  )
+}
 
-  const userProgressPercentage = (userProgress.deposited / userProgress.total) * 100
-  const counterUserProgressPercentage =
-    (counterUserProgress.deposited / counterUserProgress.total) * 100
+const ProgressBar: React.FC<{ progress: number; status: string }> = ({ progress, status }) => {
+  const getBarColor = (status: string) => {
+    switch (status) {
+      case 'in_progress':
+        return 'bg-yellow-500'
+      case 'completed':
+        return 'bg-green-500'
+      case 'cancelled':
+        return 'bg-red-500'
+      default:
+        return 'bg-blue-500'
+    }
+  }
+
+  return (
+    <div className='w-full bg-gray-200 rounded-full h-2'>
+      <div
+        className={`${getBarColor(status)} h-2 rounded-full transition-all duration-500 ease-in-out`}
+        style={{ width: `${progress}%` }}
+      ></div>
+    </div>
+  )
+}
+
+const FeedItem: React.FC<TransactionProps> = ({ transaction, selectOffer }) => {
+  const totalDeposited = 5
+  const totalRequired = 14
+  const overallProgress = (totalDeposited / totalRequired) * 100
 
   return (
     <div
-      className='p-4 cursor-pointer hover:bg-gray-100 transition-colors duration-200 group w-full'
+      className='p-4 cursor-pointer hover:bg-gray-50 transition-colors duration-200 border-b border-gray-100 last:border-b-0'
       onClick={() => selectOffer(transaction.id)}
     >
-      <div className='flex items-center justify-between w-full mb-4'>
-        <div className='flex items-center space-x-3'>
-          <Link
-            href={`/${counterParty.username}`}
-            target='_blank'
-            onClick={(e) => e.stopPropagation()}
-            className='shrink-0'
-          >
-            <img
-              src={process.env.NEXT_PUBLIC_CLOUDFLARE_PUBLIC_URL + counterParty.profile_pic_url}
-              alt={counterParty.username}
-              className='w-10 h-10 rounded-full'
-            />
-          </Link>
-          <div>
-            <div className='text-sm font-semibold'>Swap with {counterParty.username}</div>
-            <div className='text-xs text-gray-500'>
-              {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
-            </div>
-          </div>
-        </div>
-        <div className='text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-800'>
-          {CHAIN_IDS_TO_CHAINS[transaction.chain_id] || 'Unknown Chain'}
-        </div>
+      <div className='flex items-center justify-between mb-4'>
+        <div className='text-sm font-medium'>Ethereum</div>
+        <StatusBadge status={transaction.status} />
       </div>
 
-      <div className='space-y-2 mb-4'>
-        <div className='flex justify-between items-center'>
-          <span className='text-sm font-medium'>{currentUser.username}</span>
-          <span className='text-sm'>
-            {userProgress.deposited}/{userProgress.total} deposited
-          </span>
-        </div>
-        <ProgressBar progress={userProgressPercentage} color='bg-blue-500' />
+      <ProgressBar progress={overallProgress} status={transaction.status} />
 
-        <div className='flex justify-between items-center'>
-          <span className='text-sm font-medium'>{counterParty.username}</span>
-          <span className='text-sm'>
-            {counterUserProgress.deposited}/{counterUserProgress.total} deposited
-          </span>
-        </div>
-        <ProgressBar progress={counterUserProgressPercentage} color='bg-purple-500' />
-      </div>
-
-      <div className='flex justify-between items-center text-sm mb-4'>
-        <span className='font-medium'>
-          Status:{' '}
-          <span
-            className={transaction.status === 'completed' ? 'text-green-500' : 'text-blue-500'}
-          >
-            {transaction.status === 'completed' ? 'Completed' : 'In Progress'}
-          </span>
-        </span>
-        <span className='text-blue-500 group-hover:underline'>View Details</span>
-      </div>
-
-      <div className='w-full'>
+      <div className='mt-4'>
         <NFTOfferDisplay
           userAOffers={transaction.offer.user}
           userBOffers={transaction.offer.userCounter}
-          size='medium'
+          size='small'
         />
       </div>
     </div>
