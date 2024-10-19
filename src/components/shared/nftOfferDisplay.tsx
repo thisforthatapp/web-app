@@ -68,7 +68,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
 
   return (
     <div
-      className={`cursor-pointer w-full bg-gradient-to-r from-blue-100 to-purple-100 ${containerPadding[size]} rounded-xl shadow-md relative`}
+      className={`cursor-pointer w-full bg-gradient-to-r from-blue-100 to-sky-200 ${containerPadding[size]} rounded-xl shadow-md relative`}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
