@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 
 import { NFTImage } from '@/components/shared'
+import { ChainLogo } from '@/icons'
 
 interface NFT {
   id: string
@@ -68,7 +69,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
 
   return (
     <div
-      className={`cursor-pointer w-full bg-gradient-to-r from-blue-100 to-sky-200 ${containerPadding[size]} rounded-xl shadow-md relative ${!isOpen ? 'pr-10' : ''}`}
+      className={`cursor-pointer w-full bg-gradient-to-r from-blue-50 to-sky-100 ${containerPadding[size]} rounded-xl shadow-md relative ${!isOpen ? 'pr-10' : ''}`}
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -105,6 +106,7 @@ const NFTOfferDisplay: React.FC<NFTOfferDisplayProps> = ({
       <div
         className={`flex items-center w-full overflow-y-hidden overflow-x-auto hide-scrollbar ${isOpen ? 'justify-between' : ''}`}
       >
+        <ChainLogo chainId={8453} className='shrink-0 w-5 h-5 mr-2' />
         <OfferColumn offers={userAOffers} size={size} isOpen={isOpen} />
         <SwapDivider size={size} isOpen={isOpen} />
         <OfferColumn offers={userBOffers} size={size} isOpen={isOpen} />
