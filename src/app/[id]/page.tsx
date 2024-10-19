@@ -352,7 +352,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
   return (
     <div className='absolute top-[75px] bottom-0 w-full flex justify-center'>
       <div className='w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar'>
-        <div className='px-8 md:container md:mx-auto'>
+        <div className='px-3 md:px-6 md:container md:mx-auto'>
           <div className='mt-12 mb-4 flex justify-center'>
             <div className='flex flex-col items-center'>
               <ProfilePicture profilePicUrl={userPageProfile?.profile_pic_url || null} />
@@ -368,7 +368,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
             <OfferGrid
               items={items as OfferFeedItemType[]}
               viewOffer={viewOffer}
-              userId={user.id}
+              userId={user?.id}
             />
           ) : (
             <NFTGrid

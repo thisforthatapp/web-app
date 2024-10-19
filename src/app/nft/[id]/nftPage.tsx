@@ -229,23 +229,35 @@ const NFTSidebar: FC<{
   </div>
 )
 
-const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
-  nft,
-  offerCount,
-  hasMore,
-}) => (
+const NFTTitle: FC<{ nft: NFT }> = ({ nft }) => (
   <div className='w-full bg-white p-3 md:p-6 mb-4 rounded-lg shadow-md'>
     <div className='flex items-center justify-between px-1'>
       <div className='flex items-center'>
-        <ChainLogo chainId={nft.chain_id} className='w-6 h-6 mr-2 md:w-10 md:h-10' />
+        <ChainLogo chainId={nft.chain_id} className='w-6 h-6 mr-2 md:w-8 md:h-8' />
         <div>
-          <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-gray-800'>{nft.name}</h2>
+          <h2 className='md:text-lg lg:text-xl font-bold text-gray-800'>{nft.name}</h2>
           <p className='text-sm text-gray-500'>{nft.collection_name}</p>
         </div>
       </div>
-      <div className='text-right'>
-        <p className='text-lg font-semibold text-gray-700'>Offers</p>
-        <p className='text-sm text-gray-500'>{`${offerCount.toString()}${hasMore ? '+' : ''}`}</p>
+      <div className='flex space-x-2'>
+        <a
+          href='https://www.google.com'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='group flex items-center justify-center w-10 h-10 bg-blue-50 rounded-full transition-all duration-300 hover:bg-blue-100 hover:shadow-md'
+          title='View on OpenSea'
+        >
+          <Opensea className='w-8 h-8 text-blue-500 group-hover:scale-110 transition-transform duration-300' />
+        </a>
+        <a
+          href='https://www.google.com'
+          target='_blank'
+          rel='noopener noreferrer'
+          className='group flex items-center justify-center w-10 h-10 bg-gray-50 rounded-full transition-all duration-300 hover:bg-gray-100 hover:shadow-md'
+          title={`View on Etherscan`}
+        >
+          <Etherscan className='w-8 h-8 text-gray-500 group-hover:scale-110 transition-transform duration-300' />
+        </a>
       </div>
     </div>
   </div>

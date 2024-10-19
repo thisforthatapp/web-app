@@ -20,6 +20,7 @@ interface AuthState {
   error: AuthError | null
   hasProfile: boolean | null
   profile: Profile | null
+  updateLastSeen: (type: 'notif' | 'tx') => Promise<void>
 }
 
 interface AuthProviderProps {
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     error: null,
     hasProfile: null,
     profile: null,
+    updateLastSeen: async () => {},
   })
   const lastUserIdRef = useRef<string | null>(null)
 
@@ -75,6 +77,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [])
 
+  const updateLastSeen = useCallback(
+    async (type: 'notif' | 'tx') => {
+      if (!state.user || !state.profile) return
+
+      const column = type === 'notif' ? 'notif_last_seen' : 'tx_last_seen'
+      const { data, error } = await supabase
+        .from('user_profile')
+        .update({ [column]: new Date().toISOString() })
+        .eq('id', state.user.id)
+        .select()
+
+      if (error) {
+        console.error(`Error updating ${type}_last_seen:`, error)
+      } else if (data) {
+        setState((prev) => ({
+          ...prev,
+          profile: data[0] as Profile,
+        }))
+      }
+    },
+    [state.user, state.profile],
+  )
+
   useEffect(() => {
     const {
       data: { subscription },
@@ -110,7 +135,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [checkUserProfile])
 
-  return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
+  const contextValue = {
+    ...state,
+    updateLastSeen,
+  }
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 }
 
 export const useAuth = () => {

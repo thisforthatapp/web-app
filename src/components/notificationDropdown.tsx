@@ -121,11 +121,15 @@ const FeedItem: React.FC<NotificationProps> = ({ notification }) => {
 interface NotificationDropdownProps {
   notifications: Notification[]
   selectOffer: (offerId: string) => void
+  newCount: number
+  onOpen: () => void
 }
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
   notifications,
   selectOffer,
+  newCount,
+  onOpen,
 }) => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
@@ -144,7 +148,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
     }
   }, [])
 
-  const toggleDropdown = () => setIsOpen(!isOpen)
+  const toggleDropdown = () => {
+    if (!isOpen && newCount > 0) {
+      onOpen()
+    }
+    setIsOpen(!isOpen)
+  }
 
   const handleNotificationClick = (notification: any) => {
     if (notification.notification_type !== 'follow') {
@@ -162,9 +171,9 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
         className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors'
       >
         <Notifications className='w-[22px] h-[22px]' />
-        {notifications.length > 0 && (
+        {newCount > 0 && (
           <span className='z-10 absolute top-[4px] right-[4px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
-            {notifications.length}
+            {newCount > 9 ? '9+' : newCount}
           </span>
         )}
       </button>

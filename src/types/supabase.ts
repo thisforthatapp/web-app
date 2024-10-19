@@ -9,6 +9,8 @@ export interface Profile {
   updated_at: string
   wallet: string
   banned: boolean
+  notif_last_seen: string | null
+  tx_last_seen: string | null
 }
 
 export interface ProfileMinimal {

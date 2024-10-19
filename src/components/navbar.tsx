@@ -16,11 +16,13 @@ import { useAuth } from '@/providers/authProvider'
 import { supabase } from '@/utils/supabaseClient'
 
 const Navbar: FC = () => {
-  const { user, loading, profile, hasProfile } = useAuth()
+  const { user, loading, profile, hasProfile, updateLastSeen } = useAuth()
   const isMobile = useIsMobile()
 
   const [notifications, setNotifications] = useState<any[]>([])
   const [transactions, setTransactions] = useState<any[]>([])
+  const [newNotificationsCount, setNewNotificationsCount] = useState(0)
+  const [newTransactionsCount, setNewTransactionsCount] = useState(0)
 
   const [modal, setModal] = useState<boolean | 'login' | 'onboard' | 'offer'>(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -158,6 +160,12 @@ const Navbar: FC = () => {
               <TransactionsDropdown
                 transactions={transactions}
                 userId={user?.id}
+                newCount={newTransactionsCount}
+                onOpen={() => {
+                  if (newTransactionsCount > 0) {
+                    updateLastSeen('tx')
+                  }
+                }}
                 selectOffer={(offerId) => {
                   setOfferModalInfo({ type: 'transaction', id: offerId })
                   setModal('offer')
@@ -165,6 +173,12 @@ const Navbar: FC = () => {
               />
               <NotificationDropdown
                 notifications={notifications}
+                newCount={newNotificationsCount}
+                onOpen={() => {
+                  if (newNotificationsCount > 0) {
+                    updateLastSeen('notif')
+                  }
+                }}
                 selectOffer={(offerId) => {
                   setOfferModalInfo({ type: 'view_offer', id: offerId })
                   setModal('offer')
@@ -201,6 +215,7 @@ const Navbar: FC = () => {
       .select('*')
       .eq('user_id', user?.id)
       .order('created_at', { ascending: false })
+      .limit(10)
 
     if (error) {
       console.error('Error fetching notifications:', error)
@@ -208,6 +223,10 @@ const Navbar: FC = () => {
     }
 
     setNotifications(data)
+    const newCount = data.filter(
+      (notif) => new Date(notif.created_at) > new Date(profile?.notif_last_seen || 0),
+    ).length
+    setNewNotificationsCount(newCount)
   }
 
   const getLatestTransactions = async () => {
@@ -219,6 +238,7 @@ const Navbar: FC = () => {
       .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
       .neq('status', 'pending')
       .order('created_at', { ascending: false })
+      .limit(10)
 
     if (error) {
       console.error('Error fetching transactions:', error)
@@ -226,14 +246,19 @@ const Navbar: FC = () => {
     }
 
     setTransactions(data)
+
+    const newCount = data.filter(
+      (tx) => new Date(tx.created_at) > new Date(profile?.tx_last_seen || 0),
+    ).length
+    setNewTransactionsCount(newCount)
   }
 
   useEffect(() => {
-    if (user) {
+    if (profile) {
       getLatestNotifications()
       getLatestTransactions()
     }
-  }, [user])
+  }, [profile])
 
   return (
     <>

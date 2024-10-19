@@ -34,6 +34,8 @@ interface TransactionProps {
   }
   userId: string
   selectOffer: (id: string) => void
+  newCount: number
+  onOpen: () => void
 }
 
 const ProgressBar: React.FC<{ progress: number; color: string }> = ({ progress, color }) => (
@@ -140,6 +142,8 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({
   transactions,
   userId,
   selectOffer,
+  newCount,
+  onOpen,
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -157,7 +161,12 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({
     }
   }, [])
 
-  const toggleDropdown = () => setIsOpen(!isOpen)
+  const toggleDropdown = () => {
+    if (!isOpen && newCount > 0) {
+      onOpen()
+    }
+    setIsOpen(!isOpen)
+  }
 
   return (
     <div className='relative' ref={dropdownRef}>
@@ -166,9 +175,9 @@ const TransactionsDropdown: React.FC<TransactionsProps> = ({
         className='h-full w-[45px] rounded-md bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors'
       >
         <Chain className='w-[40px] h-[40px]' />
-        {transactions.length > 0 && (
+        {newCount > 0 && (
           <span className='z-10 absolute top-[4px] right-[4px] inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full'>
-            {transactions.length}
+            {newCount > 9 ? '9+' : newCount}
           </span>
         )}
       </button>

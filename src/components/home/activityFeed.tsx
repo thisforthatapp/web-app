@@ -430,25 +430,20 @@ const ActivityFeed: FC<{
     >
       {showCollapsibleTab && (
         <div
-          className={`bg-white cursor-pointer flex items-center justify-between ${feedCollapsed ? 'h-full flex-col' : 'border-b border-gray-100'}`}
+          className={`bg-white cursor-pointer flex items-center ${
+            feedCollapsed ? 'flex-col h-full' : 'justify-between'
+          } border-b border-gray-100`}
           onClick={toggleFeed}
         >
-          {feedCollapsed ? (
-            <div className='w-full h-full flex flex-col items-center justify-between p-4'>
-              <div className='writing-vertical-lr transform rotate-180 text-lg font-semibold flex-grow flex items-center'>
-                Latest Activity
-              </div>
-              <CollapsibleIcon className='mt-2' collapsed={false} />
-            </div>
-          ) : (
-            <>
-              <div className='flex items-center p-4 bg-white'>
-                <CollapsibleIcon collapsed={feedCollapsed} />
-                <span className='ml-2 font-semibold'>Latest Activity</span>
-              </div>
-              <ActivityFeedToggle filter={filter} setFilter={setFilter} />
-            </>
-          )}
+          <div className={`flex items-center p-4 ${feedCollapsed ? 'flex-col' : ''}`}>
+            <CollapsibleIcon collapsed={feedCollapsed} />
+            <span
+              className={`${feedCollapsed ? 'mt-2 writing-vertical-lr transform rotate-180' : 'ml-2'} font-semibold`}
+            >
+              Latest Activity
+            </span>
+          </div>
+          {!feedCollapsed && <ActivityFeedToggle filter={filter} setFilter={setFilter} />}
         </div>
       )}
       {!feedCollapsed && (
