@@ -9,7 +9,7 @@ import { useToast } from '@/providers/toastProvider'
 import { Activity } from '@/types/supabase'
 import { SimplifiedOfferItem } from '@/types/supabase'
 import { FEED_ITEMS_PER_PAGE } from '@/utils/constants'
-import { formatDate } from '@/utils/helpers'
+import { timeAgoShort } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
 function renderMessageText(text: string) {
@@ -103,29 +103,30 @@ const FeedItem: React.FC<{
         </Link>
         <div className='flex-grow flex items-start justify-between'>
           <div className='flex-grow'>
-            <div className='flex items-center gap-x-2'>
-              <div className='text-sm font-semibold'>{activity.username}</div>
-              <div className='text-xs text-gray-400'>
-                {formatDate(new Date(activity.created_at))}
+            <div className='flex items-center gap-x-1 mt-0.5'>
+              <div className='text-sm font-semibold text-gray-800'>{activity.username}</div>
+              <span className='text-gray-500'>·</span>
+              <div className='text-xs text-gray-700'>
+                {timeAgoShort(new Date(activity.created_at))}
               </div>
             </div>
             {activity.activity_type === 'message' && (
-              <div className='mt-1 text-sm'>{renderMessageText(activity.content || '')}</div>
+              <div>{renderMessageText(activity.content || '')}</div>
             )}
             {(activity.activity_type === 'offer_start' ||
               activity.activity_type === 'offer_accepted' ||
               activity.activity_type === 'offer_counter') && (
-              <div className='text-sm mt-1'>
+              <div>
                 {activity.activity_type === 'offer_start'
-                  ? '🤝 made an offer'
+                  ? 'made an offer'
                   : activity.activity_type === 'offer_counter'
-                    ? '🤝 made a counter offer'
-                    : '✅ accepted an offer'}
+                    ? 'made a counter offer'
+                    : 'accepted an offer'}
               </div>
             )}
           </div>
           {isClickable && (
-            <div className='flex items-center text-blue-500 ml-2'>
+            <div className='flex items-center text-gray-500 ml-2'>
               <span className='text-xs mr-1'>Expand</span>
               <svg
                 fill='none'
@@ -147,7 +148,7 @@ const FeedItem: React.FC<{
       {(activity.activity_type === 'offer_start' ||
         activity.activity_type === 'offer_accepted' ||
         activity.activity_type === 'offer_counter') && (
-        <div className='mt-4 w-full'>
+        <div className='mt-2 w-full'>
           <NFTOfferDisplay
             userAOffers={(activity.metadata as { offer: { user: never } }).offer.user}
             userBOffers={

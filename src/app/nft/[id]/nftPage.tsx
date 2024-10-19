@@ -235,9 +235,9 @@ const NFTTitle: FC<{ nft: NFT; offerCount: number; hasMore: boolean }> = ({
   hasMore,
 }) => (
   <div className='w-full bg-white p-3 md:p-6 mb-4 rounded-lg shadow-md'>
-    <div className='flex items-center justify-between'>
+    <div className='flex items-center justify-between px-1'>
       <div className='flex items-center'>
-        <ChainLogo chainId={nft.chain_id} className='w-6 h-6 mr-1 md:w-10 md:h-10 md:mr-2' />
+        <ChainLogo chainId={nft.chain_id} className='w-6 h-6 mr-2 md:w-10 md:h-10' />
         <div>
           <h2 className='text-lg md:text-xl lg:text-2xl font-bold text-gray-800'>{nft.name}</h2>
           <p className='text-sm text-gray-500'>{nft.collection_name}</p>
@@ -256,7 +256,7 @@ const OffersGrid: FC<{
   viewOffer: (offer: OfferFeedItemType) => void
   userId: string | null
 }> = ({ items, viewOffer, userId }) => (
-  <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mb-2'>
+  <div className='grid grid-cols-2 lg:grid-cols-2 gap-4 mb-2'>
     {items.map((item) => (
       <NFTOfferItem
         key={item.id}

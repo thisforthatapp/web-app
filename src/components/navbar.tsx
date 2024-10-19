@@ -213,7 +213,9 @@ const Navbar: FC = () => {
   const getLatestTransactions = async () => {
     const { data, error } = await supabase
       .from('user_offers')
-      .select('*')
+      .select(
+        '*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)',
+      )
       .or(`user_id.eq.${user?.id},user_id_counter.eq.${user?.id}`)
       .neq('status', 'pending')
       .order('created_at', { ascending: false })

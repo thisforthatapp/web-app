@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { ChainLogo, Checkmark, Close } from '@/icons'
 
 interface Asset {
@@ -83,16 +84,11 @@ const TransactionCompletion: React.FC<CompletionScreenProps> = ({
         </div>
 
         <div className='p-6 space-y-6 max-h-[80vh] overflow-y-auto'>
+          <div className='bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg'>
+            <p className='text-sm text-green-700'>Assets successfully transferred.</p>
+          </div>
           {renderAssetOwnership(counterUser, counterUserAssets)}
           {renderAssetOwnership(user, userAssets)}
-
-          <div className='bg-green-100 border-l-4 border-green-500 p-4 rounded-r-lg'>
-            <p className='text-sm text-green-700'>
-              Assets have been transferred. New owners need to verify in their profile to
-              receive a blue checkmark.
-            </p>
-          </div>
-
           <div className='flex justify-center'>
             <a
               href={`https://etherscan.io/tx/${transactionHash}`}

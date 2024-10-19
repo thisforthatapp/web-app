@@ -17,9 +17,15 @@ const OfferGrid: React.FC<{
   userId: string
   viewOffer: (item: OfferFeedItemType) => void
 }> = ({ items, userId, viewOffer }) => (
-  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-6'>
+  <div className='p-3 md:p-6 grid grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-3 md:gap-6 mb-12'>
     {items.map((item) => (
-      <NFTOfferItem key={item.id} item={item} viewOffer={viewOffer} userId={userId} />
+      <NFTOfferItem
+        key={item.id}
+        item={item}
+        viewOffer={viewOffer}
+        userId={userId}
+        statusDetailed={true}
+      />
     ))}
   </div>
 )

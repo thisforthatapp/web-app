@@ -7,6 +7,7 @@ export const BLOCKED_USERNAMES = [
   'nft',
   'offer',
   'notifications',
+  'search',
 ]
 
 export const SUPPORTED_CHAINS = [
