@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 import { NFTOfferDisplay } from '@/components/shared'
-import { Close, Share } from '@/icons'
+import { ChainLogo, ChevronDown, ChevronUp, Close, Share } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { formatDate, timeAgoShort } from '@/utils/helpers'
@@ -68,6 +68,13 @@ const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
   )
 }
 
+const ChainInfo: FC<{ chainName: string; chainLogo: string }> = ({ chainName, chainLogo }) => (
+  <div className='flex items-center space-x-2 bg-gray-100 rounded-full px-3 py-1'>
+    <ChainLogo chainId={1} className='w-4 h-4' />
+    <span className='text-sm font-medium text-gray-700'>{chainName}</span>
+  </div>
+)
+
 const Main: FC<{
   offerId: string
   info: any
@@ -79,6 +86,7 @@ const Main: FC<{
   const { user, profile, hasProfile } = useAuth()
   const [newMessage, setNewMessage] = useState<string>('')
   const [offerActivityItems, setOfferActivityItems] = useState<any[]>([])
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false)
 
   const fetchOfferActivity = async () => {
     try {
@@ -159,21 +167,26 @@ const Main: FC<{
   const isCounterUser = user?.id === info?.user_id_counter
   const isLatestOfferUser = user?.id === info?.offer_user_id
 
-  const isParticipant = isInitialOfferUser || isCounterUser
+  const isParticipant = (isInitialOfferUser || isCounterUser) && user
   const userToAct = info?.offer_user_id === info?.user_id ? info?.counter_user : info?.user
 
   return (
     <div className='flex flex-col h-full bg-white rounded-lg shadow-lg overflow-hidden'>
       <div className='flex items-center justify-between py-4 px-6 bg-white border-b border-gray-100'>
-        <div className='text-xl font-bold text-gray-800'>🤝 Swap Offer</div>
-        <div className='flex gap-x-4 items-center'>
-          <div
-            className='flex items-center px-3 py-1.5 bg-gray-100 cursor-pointer hover:bg-gray-200 rounded-md'
+        <div className='flex items-center space-x-4'>
+          <div className='text-xl font-bold text-gray-800'>🤝 Swap Offer</div>
+          <ChainInfo chainName={'ethereum'} chainLogo={'1'} />
+        </div>
+        <div className='flex items-center space-x-4'>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={copyOfferLink}
+            className='flex items-center text-gray-600 hover:text-gray-800'
           >
-            <Share className='w-4 h-4' />
-            <div className='text-sm font-semibold ml-1'>Share</div>
-          </div>
+            <Share className='w-4 h-4 mr-1' />
+            <span className='text-sm'>Share</span>
+          </motion.button>
           <motion.div
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -185,7 +198,7 @@ const Main: FC<{
         </div>
       </div>
 
-      <div className='flex-grow overflow-y-auto bg-gray-50'>
+      <div className='flex-grow overflow-y-auto'>
         {info &&
           offerActivityItems.map((item: any, index: number) => (
             <ActivityItem
@@ -198,8 +211,51 @@ const Main: FC<{
       </div>
 
       {isParticipant && (
-        <>
-          <div className='p-4 border-t border-gray-100'>
+        <div className='bg-white border-t border-gray-200'>
+          {info.status === 'pending' && (
+            <div className='p-4 bg-gray-50 border-b border-gray-200'>
+              <div className='flex flex-col space-y-3'>
+                <div className='flex justify-between items-center'>
+                  {!isLatestOfferUser ? (
+                    <div className='flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-100 text-blue-800'>
+                      <div className='w-2 h-2 rounded-full bg-blue-500 animate-pulse' />
+                      <span className='text-sm font-medium'>Your turn</span>
+                    </div>
+                  ) : (
+                    <div className='flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-200 text-gray-700'>
+                      <div className='w-2 h-2 rounded-full bg-gray-500' />
+                      <span className='text-sm font-medium'>
+                        Waiting for {userToAct?.username}
+                      </span>
+                    </div>
+                  )}
+                  {!isLatestOfferUser ? (
+                    <div className='flex space-x-2'>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className='bg-yellow-400 text-gray-800 py-2 px-4 rounded-full shadow-sm font-semibold text-sm transition-all duration-200'
+                        onClick={counterOffer}
+                      >
+                        Counter
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className='bg-green-400 text-gray-800 py-2 px-4 rounded-full shadow-sm font-semibold text-sm transition-all duration-200'
+                        onClick={acceptOffer}
+                      >
+                        Accept
+                      </motion.button>
+                    </div>
+                  ) : (
+                    <div className='flex ml-auto' />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          <div className='p-4'>
             <form onSubmit={submitMessage} className='flex gap-x-2'>
               <input
                 type='text'
@@ -219,50 +275,7 @@ const Main: FC<{
               </motion.button>
             </form>
           </div>
-          {info.status === 'pending' && (
-            <div className='flex items-center justify-between p-4 pt-0'>
-              {!isParticipant || isLatestOfferUser ? (
-                <div className='w-full flex justify-center'>
-                  <div
-                    className={`flex items-center space-x-2 px-3 py-1 rounded-full bg-gray-100 text-gray-800`}
-                  >
-                    <div className={`w-2 h-2 rounded-full bg-gray-400`} />
-                    <span className='text-sm font-medium'>
-                      {!isLatestOfferUser ? 'Your turn' : `${userToAct?.username}'s turn`}
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className='flex flex-col w-full'>
-                  <div className='flex w-full gap-x-4'>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className='w-full bg-yellow-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-                      onClick={counterOffer}
-                    >
-                      Counter
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className='w-full bg-green-400 text-gray-800 py-3 px-6 rounded-full shadow-sm cursor-pointer font-semibold text-lg transition-all duration-200'
-                      onClick={acceptOffer}
-                    >
-                      Accept
-                    </motion.button>
-                  </div>
-                  <div className='mt-4 text-gray-500 text-sm text-center mx-8'>
-                    Accepting creates an onchain swap.{' '}
-                    <a href='#' className='ml-0.5 text-gray-500 font-semibold underline'>
-                      Learn more
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </>
+        </div>
       )}
     </div>
   )
