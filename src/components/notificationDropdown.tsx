@@ -41,7 +41,7 @@ const FeedItem: React.FC<NotificationProps> = ({ notification }) => {
       case 'offer_update':
         return <>made a counter offer</>
       case 'offer_accepted':
-        return <>accepted your offer</>
+        return <>✅ accepted your offer</>
       default:
         return 'Unknown notification'
     }

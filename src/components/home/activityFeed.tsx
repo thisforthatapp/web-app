@@ -121,7 +121,7 @@ const FeedItem: React.FC<{
                   ? 'made an offer'
                   : activity.activity_type === 'offer_counter'
                     ? 'made a counter offer'
-                    : 'accepted an offer'}
+                    : '✅ accepted an offer'}
               </div>
             )}
           </div>

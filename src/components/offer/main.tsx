@@ -47,7 +47,7 @@ const ActivityItem: FC<{ item: any; user: any; isLastItem: boolean }> = ({
                   ? 'made an offer'
                   : item.item_type === 'counter_offer'
                     ? 'made a counter offer'
-                    : 'accepted the offer'}
+                    : '✅ accepted the offer'}
               </div>
             )}
           </div>
