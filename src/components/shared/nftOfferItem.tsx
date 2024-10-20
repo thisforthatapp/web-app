@@ -111,7 +111,7 @@ const NFTOfferItem: React.FC<NFTOfferItemProps> = ({
 
   return (
     <div
-      className={`w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-xl flex flex-col`}
+      className={`bg-white w-full h-full rounded-xl shadow-md overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg flex flex-col`}
       onClick={() => viewOffer(item)}
     >
       <div className='p-4 space-y-4'>

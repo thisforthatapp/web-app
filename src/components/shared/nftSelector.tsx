@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import React, { FC, useCallback, useState } from 'react'
 import { isAddress } from 'viem'
 import { useEnsAddress } from 'wagmi'
 
@@ -8,10 +8,12 @@ import { getCryptoPunksforWallet, getNFTsForWallet } from '@/utils/apis'
 import { CHAIN_LABELS, SUPPORTED_CHAINS } from '@/utils/constants'
 import { supabase } from '@/utils/supabaseClient'
 
-const NftSelector: FC<{
+interface NftSelectorProps {
   displaySkipOption?: boolean
   onComplete: () => void
-}> = ({ displaySkipOption = true, onComplete }) => {
+}
+
+const NftSelector: FC<NftSelectorProps> = ({ displaySkipOption = true, onComplete }) => {
   const [currentWallet, setCurrentWallet] = useState<string>('')
   const [currentChain, setCurrentChain] = useState<string>('ethereum')
   const [nfts, setNfts] = useState<NFT[]>([])
@@ -28,53 +30,50 @@ const NftSelector: FC<{
     },
   })
 
-  const resolveAddress = (): string => {
-    if (isAddress(currentWallet)) {
-      return currentWallet
-    }
-    if (ensAddress) {
-      return ensAddress
-    }
+  const resolveAddress = useCallback((): string => {
+    if (isAddress(currentWallet)) return currentWallet
+    if (ensAddress) return ensAddress
     throw new Error('Invalid address or unresolved ENS name')
-  }
+  }, [currentWallet, ensAddress])
 
-  const handleFetch = async (isInitialSearch: boolean = false) => {
-    setIsLoading(true)
-    setHasSearched(true)
-    try {
-      const walletAddress = resolveAddress()
+  const handleFetch = useCallback(
+    async (isInitialSearch: boolean = false) => {
+      setIsLoading(true)
+      setHasSearched(true)
+      try {
+        const walletAddress = resolveAddress()
 
-      if (isInitialSearch) {
-        setNfts([])
-        setNextPageKey(null)
+        if (isInitialSearch) {
+          setNfts([])
+          setNextPageKey(null)
+        }
+
+        let newNfts: NFT[] = []
+        if (nextPageKey === null && currentChain === 'ethereum') {
+          const [punks, results] = await Promise.all([
+            getCryptoPunksforWallet(currentChain, walletAddress),
+            getNFTsForWallet(currentChain, walletAddress, nextPageKey),
+          ])
+          newNfts = [...punks, ...results.nfts]
+          setNextPageKey(results.pageKey)
+        } else {
+          const results = await getNFTsForWallet(currentChain, walletAddress, nextPageKey)
+          newNfts = results.nfts
+          setNextPageKey(results.pageKey)
+        }
+
+        setNfts((prev) => (isInitialSearch ? newNfts : [...prev, ...newNfts]))
+      } catch (error) {
+        console.error('Error fetching NFTs:', error)
+      } finally {
+        setIsLoading(false)
       }
+    },
+    [currentChain, nextPageKey, resolveAddress],
+  )
 
-      if (nextPageKey === null && currentChain === 'ethereum') {
-        const [punks, results] = await Promise.all([
-          getCryptoPunksforWallet(currentChain, walletAddress),
-          getNFTsForWallet(currentChain, walletAddress, nextPageKey),
-        ])
-        setNfts([...punks, ...results.nfts])
-        setNextPageKey(results.pageKey)
-      } else {
-        const results = await getNFTsForWallet(currentChain, walletAddress, nextPageKey)
-        setNfts((prev) => [...prev, ...results.nfts])
-        setNextPageKey(results.pageKey)
-      }
-    } catch (error) {
-      console.error('Error fetching NFTs:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleSearch = () => {
-    handleFetch(true)
-  }
-
-  const handleLoadMore = () => {
-    handleFetch(false)
-  }
+  const handleSearch = () => handleFetch(true)
+  const handleLoadMore = () => handleFetch(false)
 
   const toggleNftSelection = (nft: NFT) => {
     setSelectedNfts((prev) =>
@@ -84,20 +83,17 @@ const NftSelector: FC<{
     )
   }
 
-  async function uploadNFTs() {
+  const uploadNFTs = async () => {
     try {
       setIsUploadingNfts(true)
 
       const userId = (await supabase.auth.getSession()).data.session?.user.id
       if (!userId) throw new Error('User session not found')
 
-      const nftsToUpload = selectedNfts.map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ({ id, possible_spam, ...rest }) => ({
-          ...rest,
-          user_id: userId,
-        }),
-      )
+      const nftsToUpload = selectedNfts.map(({ id, possible_spam, ...rest }) => ({
+        ...rest,
+        user_id: userId,
+      }))
 
       const { data: upsertedNfts, error: nftError } = await supabase
         .from('nfts')
@@ -109,7 +105,7 @@ const NftSelector: FC<{
 
       if (nftError) throw nftError
 
-      const userNftUpsertData = upsertedNfts.map((nft) => ({
+      const userNftUpsertData = upsertedNfts!.map((nft) => ({
         user_id: userId,
         nft_id: nft.id,
       }))
@@ -122,9 +118,10 @@ const NftSelector: FC<{
         })
 
       if (userNftError) throw userNftError
+
+      onComplete()
     } catch (error) {
       console.error('Error uploading NFTs:', error)
-      throw error
     } finally {
       setIsUploadingNfts(false)
     }
@@ -196,7 +193,7 @@ const NftSelector: FC<{
           </div>
         ) : nfts.length > 0 ? (
           <div className='space-y-4'>
-            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
+            <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-4'>
               {nfts.map((nft) => (
                 <div
                   key={nft.id}
@@ -208,7 +205,7 @@ const NftSelector: FC<{
                   onClick={() => toggleNftSelection(nft)}
                 >
                   <div className='relative'>
-                    <img src={nft.image} alt={nft.name} className='w-full h-32 object-cover' />
+                    <img src={nft.image} alt={nft.name} className='w-full h-26 object-cover' />
                   </div>
                   <div className='p-2'>
                     <h3 className='text-sm font-medium text-gray-900 truncate'>{nft.name}</h3>
@@ -257,10 +254,7 @@ const NftSelector: FC<{
         <button
           className='w-full sm:w-auto px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
           disabled={selectedNfts.length === 0 || uploadingNfts}
-          onClick={async () => {
-            await uploadNFTs()
-            onComplete()
-          }}
+          onClick={uploadNFTs}
         >
           {uploadingNfts ? (
             <span className='flex items-center justify-center'>

@@ -19,7 +19,7 @@ import {
   TransactionTransition,
 } from '@/components/offer'
 import ABI from '@/contracts/abi.json'
-import { useIsMobile } from '@/hooks'
+import { useCreateTrade, useIsMobile } from '@/hooks'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { getModalStyles } from '@/styles'
@@ -56,27 +56,53 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
   const { user, profile } = useAuth()
   const isMobile = useIsMobile()
   const customStyles = getModalStyles(isMobile)
-  const { showToast } = useToast()
-
   const { setOpen } = useModal()
-  const { address, isConnected } = useAccount()
-  const publicClient = usePublicClient()
+  const { isConnected } = useAccount()
 
-  const {
-    writeContract,
-    data: hash,
-    status: transactionStatus,
-    error: writeError,
-  } = useWriteContract()
+  const [offerInfo, setOfferInfo] = useState<any | null>(null)
 
-  const {
-    data: txReceipt,
-    isLoading: isConfirming,
-    isSuccess: isConfirmed,
-    error: confirmError,
-  } = useWaitForTransactionReceipt({ hash })
+  const [view, setView] = useState<'main' | 'select' | 'transaction' | null>(
+    type === 'make_offer'
+      ? 'select'
+      : type === 'view_offer'
+        ? 'main'
+        : type === 'transaction'
+          ? 'transaction'
+          : 'main',
+  )
 
-  // Effect to handle successful transaction confirmation
+  const fetchOfferInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_offers')
+        .select(
+          '*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)',
+        )
+        .eq('id', offerId)
+        .single()
+
+      if (error) {
+        throw error
+      }
+
+      if (data) {
+        setOfferInfo(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch offer info', error)
+    }
+  }
+
+  useEffect(() => {
+    if (offerId) {
+      fetchOfferInfo()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offerId])
+
+  const { createTradeOnChain, hash, transactionStatus, txReceipt, isConfirmed } =
+    useCreateTrade(offerInfo)
+
   useEffect(() => {
     const updateOffer = async (hash: string, tradeId: bigint) => {
       try {
@@ -119,79 +145,12 @@ const Offer: FC<Props> = ({ type, offerId = null, initialNFT = null, closeModal 
       // Update Supabase
       updateOffer(hash!, tradeId)
     }
-  }, [hash, isConfirmed, txReceipt])
-
-  const [view, setView] = useState<'main' | 'select' | 'transaction' | null>(
-    type === 'make_offer'
-      ? 'select'
-      : type === 'view_offer'
-        ? 'main'
-        : type === 'transaction'
-          ? 'transaction'
-          : 'main',
-  )
-  const [offerInfo, setOfferInfo] = useState<any | null>(null)
-
-  const fetchOfferInfo = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_offers')
-        .select(
-          '*, user:user_profile!user_offers_user_id_fkey(*), counter_user:user_profile!user_offers_user_id_counter_fkey(*)',
-        )
-        .eq('id', offerId)
-        .single()
-
-      if (error) {
-        throw error
-      }
-
-      if (data) {
-        setOfferInfo(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch offer info', error)
-    }
-  }
-
-  useEffect(() => {
-    if (offerId) {
-      fetchOfferInfo()
-    }
-  }, [offerId])
-
-  const createTradeOnChain = useCallback(async () => {
-    if (!address || !publicClient) return
-
-    try {
-      const { request } = await publicClient.simulateContract({
-        address: CONTRACT_ADDRESSES[31337],
-        abi: ABI,
-        functionName: 'createTrade',
-        args: [
-          [offerInfo.user.wallet as Address, offerInfo.counter_user.wallet as Address],
-          prepareAllAssets(offerInfo),
-        ],
-        account: address,
-      })
-      writeContract(request)
-    } catch (err) {
-      console.log('err', err)
-      if (err instanceof ContractFunctionExecutionError) {
-        const errorMessage = err.message.toLowerCase()
-        showToast('⚠️ ' + errorMessage, 2500)
-      } else {
-        showToast('⚠️ Transaction failed. Please try again', 2500)
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address, offerInfo, publicClient])
+  }, [hash, isConfirmed, txReceipt, offerId, user?.id])
 
   const acceptOffer = async () => {
     if (!isConnected) {
       setOpen(true)
     } else {
-      // setView('create_trade')
       createTradeOnChain()
     }
   }
