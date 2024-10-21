@@ -4,8 +4,10 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 
+import { Footer } from '@/components'
 import { AddNft, VerifyNft } from '@/components/modals'
 import { NFTAccountItem } from '@/components/shared'
+import { useIsMobile } from '@/hooks'
 import { Add, VerifyIcon } from '@/icons'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
@@ -128,6 +130,7 @@ const NFTGrid: React.FC<{
 )
 
 const AccountNFTSPage: React.FC = () => {
+  const isMobile = useIsMobile()
   const router = useRouter()
   const { user, profile, loading } = useAuth()
   const [modal, setModal] = useState<'add' | 'verify' | null>(null)
@@ -145,16 +148,21 @@ const AccountNFTSPage: React.FC = () => {
 
   return (
     <>
-      <div className='absolute top-[75px] bottom-0 w-full flex flex-col'>
-        <Header setModal={setModal} />
-        <div className='max-w-7xl mx-auto p-3 md:p-6 flex flex-col flex-grow overflow-hidden'>
-          <NFTGrid
-            userNfts={userNfts}
-            profile={profile!}
-            hasMore={hasMore}
-            loadMore={() => user?.id && loadMore(user.id)}
-          />
+      <div className='absolute top-[75px] bottom-0 w-full flex'>
+        <div
+          className={`w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar ${isMobile ? 'mb-16' : 'mb-[50px]'}`}
+        >
+          <Header setModal={setModal} />
+          <div className='max-w-7xl mx-auto p-3 md:p-6 flex flex-col flex-grow overflow-hidden'>
+            <NFTGrid
+              userNfts={userNfts}
+              profile={profile!}
+              hasMore={hasMore}
+              loadMore={() => user?.id && loadMore(user.id)}
+            />
+          </div>
         </div>
+        {!isMobile && <Footer />}
       </div>
       {modal === 'add' && <AddNft closeModal={() => setModal(null)} />}
       {modal === 'verify' && <VerifyNft closeModal={() => setModal(null)} />}

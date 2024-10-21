@@ -2,9 +2,11 @@
 
 import { FC, useEffect, useState } from 'react'
 
+import { Footer } from '@/components'
 import { Offer } from '@/components/modals'
 import { NFTFeedItem, NFTOfferItem } from '@/components/shared'
 import { UserNavigation } from '@/components/user'
+import { useIsMobile } from '@/hooks'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { UserTabOption } from '@/types/main'
@@ -100,6 +102,7 @@ const LoadMoreButton: React.FC<{ onClick: () => void }> = ({ onClick }) => (
 )
 
 const UserPage: FC<UserPageProps> = ({ params }) => {
+  const isMobile = useIsMobile()
   const { user, loading, profile } = useAuth()
   const { showToast } = useToast()
   const [makeOfferItem, setMakeOfferItem] = useState<NFTFeedItemType | null>(null)
@@ -197,6 +200,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     } else {
       fetchProfile()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, profile])
 
   useEffect(() => {
@@ -205,6 +209,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
     if (userPageProfile?.id !== profile?.id) {
       checkIfFollowing()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, userPageProfile])
 
   const fetchItems = async (tabOption: UserTabOption, page: number) => {
@@ -289,6 +294,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
       fetchItems(tabOption, 1)
       setPage(1)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabOption, userPageProfile])
 
   const makeOffer = async (nft: NFTFeedItemType) => {
@@ -350,8 +356,10 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
   }
 
   return (
-    <div className='absolute top-[75px] bottom-0 w-full flex justify-center'>
-      <div className='w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar'>
+    <div className='absolute top-[75px] bottom-0 w-full flex'>
+      <div
+        className={`w-full relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar ${!isMobile && 'mb-[50px]'}`}
+      >
         <div className='px-3 md:px-6 md:container md:mx-auto'>
           <div className='mt-12 mb-4 flex justify-center'>
             <div className='flex flex-col items-center'>
@@ -368,7 +376,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
             <OfferGrid
               items={items as OfferFeedItemType[]}
               viewOffer={viewOffer}
-              userId={user?.id}
+              userId={null}
             />
           ) : (
             <NFTGrid
@@ -380,6 +388,7 @@ const UserPage: FC<UserPageProps> = ({ params }) => {
           {items.length > 0 && hasMore && <LoadMoreButton onClick={handleLoadMore} />}
         </div>
       </div>
+      {!isMobile && <Footer />}
       {makeOfferItem && (
         <Offer
           type='make_offer'

@@ -68,3 +68,4 @@ export const NFT_VERIFY_LIMIT = 50
 export const MAX_NFTS_PER_SWAP = 9
 export const GRID_ITEMS_PER_PAGE = 25
 export const FEED_ITEMS_PER_PAGE = 10
+export const MAX_IMAGE_UPLOAD_SIZE = 3 * 1024 * 1024 // 3mb max upload size

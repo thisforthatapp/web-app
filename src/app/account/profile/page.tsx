@@ -5,16 +5,17 @@ import { useDropzone } from 'react-dropzone'
 import { useRouter } from 'next/navigation'
 import { isAddress } from 'viem'
 
+import { Footer } from '@/components'
+import { useIsMobile } from '@/hooks'
 import { useAuth } from '@/providers/authProvider'
 import { useToast } from '@/providers/toastProvider'
 import { Profile } from '@/types/supabase'
-import { BLOCKED_USERNAMES } from '@/utils/constants'
+import { BLOCKED_USERNAMES, MAX_IMAGE_UPLOAD_SIZE } from '@/utils/constants'
 import { uploadFile } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
 
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024 // 2mb max upload size
-
 const AccountProfilePage: FC = () => {
+  const isMobile = useIsMobile()
   const router = useRouter()
   const { user, loading: loadingUser, profile: initialProfile } = useAuth()
   const { showToast } = useToast()
@@ -85,8 +86,8 @@ const AccountProfilePage: FC = () => {
   const onDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
 
-    if (file.size > MAX_IMAGE_SIZE) {
-      alert('File size exceeds 2MB.')
+    if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
+      alert('File size exceeds 3MB.')
       return
     }
 
@@ -132,28 +133,35 @@ const AccountProfilePage: FC = () => {
   }
 
   return (
-    <div className='p-6 mt-[75px] overflow-y-auto w-full'>
-      <div className='max-w-screen-lg mx-auto flex flex-col'>
-        <h1 className='text-3xl font-bold mb-8 text-gray-800'>Edit Profile</h1>
-        <div className='space-y-6'>
-          <ProfilePicture
-            profile={profile}
-            getRootProps={getRootProps}
-            getInputProps={getInputProps}
-            open={open}
-            loadingFileUpload={loadingFileUpload}
-          />
-          <BasicInformation profile={profile} setProfile={setProfile} errors={errors} />
-          <SaveButton handleSaveProfile={handleSaveProfile} loading={loading} />
+    <div className='absolute top-[75px] bottom-0 w-full flex'>
+      <div
+        className={`w-full py-16 px-4 relative bg-[#f9f9f9] flex flex-col overflow-y-auto hide-scrollbar ${!isMobile && 'mb-[50px]'}`}
+      >
+        <div className='max-w-screen-md mx-auto'>
+          <div className='text-2xl font-bold mb-8 text-gray-800'>Edit Profile</div>
+          <div className='space-y-6'>
+            <ProfilePicture
+              profile={profile}
+              getRootProps={getRootProps}
+              getInputProps={getInputProps}
+              open={open}
+              loadingFileUpload={loadingFileUpload}
+            />
+            <BasicInformation profile={profile} setProfile={setProfile} errors={errors} />
+            <SaveButton handleSaveProfile={handleSaveProfile} loading={loading} />
+          </div>
         </div>
       </div>
+      {!isMobile && <Footer />}
     </div>
   )
 }
 
 interface ProfilePictureProps {
   profile: Profile
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getRootProps: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getInputProps: any
   open: () => void
   loadingFileUpload: boolean

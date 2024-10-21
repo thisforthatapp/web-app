@@ -8,11 +8,9 @@ import { useIsMobile } from '@/hooks'
 import { User } from '@/icons'
 import { useToast } from '@/providers/toastProvider'
 import { getModalStyles } from '@/styles'
-import { BLOCKED_USERNAMES } from '@/utils/constants'
+import { BLOCKED_USERNAMES, MAX_IMAGE_UPLOAD_SIZE } from '@/utils/constants'
 import { uploadFile } from '@/utils/helpers'
 import { supabase } from '@/utils/supabaseClient'
-
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024 // 2mb max upload size
 
 interface Props {
   closeModal: () => void
@@ -101,8 +99,8 @@ const Onboard: FC<Props> = ({ closeModal }) => {
   const onDrop = async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
 
-    if (file.size > MAX_IMAGE_SIZE) {
-      setFormErrors({ file: 'File size exceeds 2MB.' })
+    if (file.size > MAX_IMAGE_UPLOAD_SIZE) {
+      setFormErrors({ file: 'File size exceeds 3MB.' })
       return
     }
 

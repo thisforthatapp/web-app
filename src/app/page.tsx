@@ -87,13 +87,13 @@ interface MobileFooterProps {
 
 const MobileFooter: React.FC<MobileFooterProps> = ({ activeTab, setActiveTab }) => (
   <div className='fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16'>
-    <FooterTab
+    <MobileFooterTab
       isActive={activeTab === 'grid'}
       onClick={() => setActiveTab('grid')}
       icon={<ImageIcon className='w-5 h-5' />}
       label='Browse NFTs'
     />
-    <FooterTab
+    <MobileFooterTab
       isActive={activeTab === 'feed'}
       onClick={() => setActiveTab('feed')}
       icon={<Activity className='w-5 h-5' />}
@@ -102,14 +102,19 @@ const MobileFooter: React.FC<MobileFooterProps> = ({ activeTab, setActiveTab }) 
   </div>
 )
 
-interface FooterTabProps {
+interface MobileFooterTabProps {
   isActive: boolean
   onClick: () => void
   icon: React.ReactNode
   label: string
 }
 
-const FooterTab: React.FC<FooterTabProps> = ({ isActive, onClick, icon, label }) => (
+const MobileFooterTab: React.FC<MobileFooterTabProps> = ({
+  isActive,
+  onClick,
+  icon,
+  label,
+}) => (
   <button
     className={`flex-1 h-full flex flex-col items-center justify-center space-y-1 ${
       isActive ? 'bg-gray-100 font-semibold' : 'bg-white font-medium'
