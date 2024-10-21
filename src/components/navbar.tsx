@@ -369,7 +369,9 @@ const Navbar: FC = () => {
               <Link href='/about'>About</Link>
               <Link href='/legal/terms'>Terms</Link>
               <Link href='/legal/privacy'>Privacy</Link>
-              <Link href='/discord'>Discord</Link>
+              <Link href='https://www.discord.com' target='_blank'>
+                Discord
+              </Link>
             </div>
           </div>
         </div>

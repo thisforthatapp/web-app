@@ -12,7 +12,9 @@ const Footer: FC = () => {
         <span className='mx-2 text-gray-400'>·</span>
         <Link href='/legal/privacy'>Privacy</Link>
         <span className='mx-2 text-gray-400'>·</span>
-        <Link href='/discord'>Discord</Link>
+        <Link href='https://www.discord.com' target='_blank'>
+          Discord
+        </Link>
       </nav>
     </footer>
   )
